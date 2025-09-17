@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # 벡터 DB용 PostgreSQL (pgvector 포함)
+  postgres-vector:
+    image: pgvector/pgvector:pg17
+    container_name: ai_agent_pgvector
+    environment:
+      POSTGRES_DB: vector
+      POSTGRES_USER: user01
+      POSTGRES_PASSWORD: user01234
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5433:5432"
+    volumes:
+      - vector_data:/var/lib/postgresql/data
+      - ./DB/init-vector.sql:/docker-entrypoint-initdb.d/init-vector.sql
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vector_user -d vectordb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 업무용 PostgreSQL
+  postgres-main:
+    image: postgres:17-alpine
+    container_name: ai_agent_postgres
+    environment:
+      POSTGRES_DB: business
+      POSTGRES_USER: user01
+      POSTGRES_PASSWORD: user01234
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"  # 기본 포트 5432로 외부 접근
+    volumes:
+      - main_data:/var/lib/postgresql/data
+      - ./DB/init-main.sql:/docker-entrypoint-initdb.d/init-main.sql
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U main_user -d maindb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  vector_data:
+  main_data:
+
+networks:
+  app-network:
+    driver: bridge
