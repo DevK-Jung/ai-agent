@@ -35,7 +35,7 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(
     title="AI Interface API",
-    description="FastAPI 기반 AI 인터페이스 - 모든 버전 통합",
+    description="FastAPI 기반 AI 인터페이스",
     version="1.0.0",
     # 전체 API docs 설정
     docs_url="/docs" if settings.debug else None,
@@ -49,7 +49,7 @@ app = FastAPI(
 # =============================================================================
 
 app.add_middleware(
-    CORSMiddleware, # type: ignore
+    CORSMiddleware,  # type: ignore
     allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
@@ -57,7 +57,7 @@ app.add_middleware(
 )
 
 app.add_middleware(
-    GZipMiddleware, # type: ignore
+    GZipMiddleware,  # type: ignore
     minimum_size=1000
 )
 

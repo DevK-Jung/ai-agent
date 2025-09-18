@@ -35,10 +35,10 @@ api_router = APIRouter()
 # )
 
 # 헬스체크 엔드포인트 (인증 불필요)
-# api_router.include_router(
-#     endpoints.health_router,
-#     tags=["Health V1"]
-# )
+api_router.include_router(
+    endpoints.health_router,
+    tags=["Health V1"]
+)
 
 
 # =============================================================================

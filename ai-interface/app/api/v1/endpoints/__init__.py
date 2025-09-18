@@ -6,4 +6,5 @@ health_router = health.router
 
 __all__ = [
     "health",
+    "health_router",
 ]
