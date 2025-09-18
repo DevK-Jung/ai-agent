@@ -10,6 +10,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from app.api import v1_router
 from app.core.config.settings import get_settings
+from app.core.exception.global_exception_handler import register_global_exception_handlers
 from app.core.utils import setup_logging
 
 # 로깅 설정
@@ -108,39 +109,7 @@ async def root():
 # 전역 에러 핸들러
 # =============================================================================
 
-from fastapi import Request
-from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
-
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    """요청 검증 에러 핸들러"""
-    return JSONResponse(
-        status_code=422,
-        content={
-            "error": {
-                "type": "validation_error",
-                "message": "요청 데이터가 올바르지 않습니다",
-                "details": exc.errors()
-            }
-        }
-    )
-
-
-@app.exception_handler(500)
-async def internal_server_error_handler(request: Request, exc: Exception):
-    """서버 내부 에러 핸들러"""
-    return JSONResponse(
-        status_code=500,
-        content={
-            "error": {
-                "type": "internal_server_error",
-                "message": "서버 내부 오류가 발생했습니다"
-            }
-        }
-    )
-
+register_global_exception_handlers(app)
 
 # =============================================================================
 # 개발용 실행 함수 - 여기가 main 실행 함수!
