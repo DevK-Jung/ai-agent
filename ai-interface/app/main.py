@@ -13,9 +13,6 @@ from app.core.config.settings import get_settings
 from app.core.exception.global_exception_handler import register_global_exception_handlers
 from app.core.utils import setup_logging
 
-# 로깅 설정
-# setup_logging()
-
 settings = get_settings()
 
 # 애플리케이션 시작/종료 시 실행될 코드

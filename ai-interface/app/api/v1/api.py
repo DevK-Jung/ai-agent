@@ -27,17 +27,18 @@ api_router = APIRouter()
 #     dependencies=[Depends(rate_limit_dependency)]
 # )
 
-# # AI 모델 관리 엔드포인트
-# api_router.include_router(
-#     prefix="/models",
-#     endpoints.models_router,
-#     tags=["AI Models"]
-# )
-
 # 헬스체크 엔드포인트 (인증 불필요)
 api_router.include_router(
     endpoints.health_router,
+    prefix="/health",
     tags=["Health V1"]
+)
+
+# 벡터 관리 엔드포인트
+api_router.include_router(
+    endpoints.vector_router,
+    prefix="/vector",
+    tags=["Vector V1"]
 )
 
 
