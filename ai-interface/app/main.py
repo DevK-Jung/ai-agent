@@ -1,7 +1,7 @@
 """
 FastAPI AI 인터페이스 메인 애플리케이션
 """
-
+import multiprocessing
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -120,8 +120,10 @@ def run_server():
     import uvicorn
 
     # 환경별 설정 자동 적용
-    reload = settings.debug  # debug 모드일 때만 reload
-    workers = 1 if reload else 4  # reload 시에는 workers=1
+    if settings.reload:
+        workers = 1
+    else:
+        workers = multiprocessing.cpu_count()  # CPU 물리/논리 코어 수 반환
 
     print(f">> AI Interface 서버 시작")
     print(f">> Environment: {settings.environment.value}")
@@ -129,7 +131,7 @@ def run_server():
     print(f">> Port: {settings.port}")
     print(f">> Log Level: {settings.log_level}")
     print(f">> Debug: {settings.debug}")
-    print(f">> Reload: {reload}")
+    print(f">> Reload: {settings.reload}")
     print(f">> Workers: {workers}")
     print("-" * 50)
 
@@ -137,7 +139,7 @@ def run_server():
         "app.main:app",
         host=settings.host,
         port=settings.port,
-        reload=reload,
+        reload=settings.reload,
         workers=workers,
         log_level=settings.log_level.lower()
     )
