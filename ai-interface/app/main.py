@@ -50,7 +50,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware, # type: ignore
-    allow_origins=settings.allowed_origins,
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
@@ -112,41 +112,37 @@ async def root():
 register_global_exception_handlers(app)
 
 # =============================================================================
-# 개발용 실행 함수 - 여기가 main 실행 함수!
+# 서버 실행 함수
 # =============================================================================
 
-def run_dev():
-    """개발 모드로 서버 실행"""
+def run_server():
+    """환경에 따라 동적으로 서버 실행"""
     import uvicorn
+
+    # 환경별 설정 자동 적용
+    reload = settings.debug  # debug 모드일 때만 reload
+    workers = 1 if reload else 4  # reload 시에는 workers=1
+
+    print(f">> AI Interface 서버 시작")
+    print(f">> Environment: {settings.environment.value}")
+    print(f">> Host: {settings.host}")
+    print(f">> Port: {settings.port}")
+    print(f">> Log Level: {settings.log_level}")
+    print(f">> Debug: {settings.debug}")
+    print(f">> Reload: {reload}")
+    print(f">> Workers: {workers}")
+    print("-" * 50)
+
     uvicorn.run(
         "app.main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        log_level="info"
-    )
-
-
-def run_prod():
-    """프로덕션 모드로 서버 실행"""
-    import uvicorn
-    uvicorn.run(
-        "app.main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=False,
-        log_level="warning",
-        workers=4
+        host=settings.host,
+        port=settings.port,
+        reload=reload,
+        workers=workers,
+        log_level=settings.log_level.lower()
     )
 
 
 # Python 스크립트로 직접 실행할 때
 if __name__ == "__main__":
-    import sys
-
-    if len(sys.argv) > 1 and sys.argv[1] == "prod":
-        print("프로덕션 모드로 시작")
-        run_prod()
-    else:
-        print("개발 모드로 시작")
-        run_dev()
+    run_server()

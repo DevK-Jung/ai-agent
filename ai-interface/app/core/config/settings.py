@@ -1,13 +1,51 @@
-from typing import Optional
 import os
+from functools import lru_cache
+from typing import Optional
 
 from pydantic_settings import BaseSettings
+
+from app.core.config.environment import Environment
+
+
+def get_environment() -> Environment:
+    """현재 환경 반환"""
+    env_str = os.getenv("ENVIRONMENT", "development").lower()
+
+    # 별칭 처리
+    env_aliases = {
+        "dev": Environment.DEVELOPMENT,
+        "prod": Environment.PRODUCTION,
+        "test": Environment.TESTING
+    }
+
+    if env_str in env_aliases:
+        return env_aliases[env_str]
+
+    try:
+        return Environment(env_str)
+    except ValueError:
+        return Environment.DEVELOPMENT
+
+
+def get_env_file() -> str:
+    """환경에 따라 적절한 .env 파일 경로 반환"""
+    environment = get_environment()
+    env_file = environment.env_file
+
+    # 파일이 존재하지 않으면 기본 .env 사용
+    if not os.path.exists(env_file):
+        return ".env"
+
+    return env_file
 
 
 class Settings(BaseSettings):
     # 기본 애플리케이션 설정
     app_name: str = "FastAPI Application"
     version: str = "1.0.0"
+
+    # 환경 설정
+    environment: Environment = Environment.DEVELOPMENT
     debug: bool = False
 
     # 서버 설정
@@ -23,8 +61,14 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
-    # CORS 설정
-    allowed_origins: list = ["http://localhost:3000", "http://localhost:8080"]
+    # CORS 설정 (콤마로 구분된 문자열을 리스트로 변환)
+    allowed_origins: str = "http://localhost:3000,http://localhost:8080"
+
+    @property
+    def cors_origins(self) -> list[str]:
+        """CORS 허용 오리진 리스트"""
+        origins_str = os.getenv("ALLOWED_ORIGINS", self.allowed_origins)
+        return [origin.strip() for origin in origins_str.split(",") if origin.strip()]
 
     # Redis 설정 (캐싱용)
     redis_url: Optional[str] = None
@@ -40,12 +84,9 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     log_file: str = "app.log"
 
-    # 환경 구분
-    environment: str = "development"
-
     class Config:
-        # .env 파일에서 환경변수 읽기
-        env_file = ".env"
+        # 환경에 따라 동적으로 .env 파일 선택
+        env_file = get_env_file()
         env_file_encoding = "utf-8"
         # 환경변수 이름 변환 (SNAKE_CASE)
         case_sensitive = False
@@ -54,34 +95,19 @@ class Settings(BaseSettings):
 # 전역 설정 인스턴스
 settings = Settings()
 
-
-# 환경별 설정 클래스들
-class DevelopmentSettings(Settings):
-    debug: bool = True
-    database_url: str = "sqlite:///./dev.db"
-    log_level: str = "DEBUG"
-
-
-class ProductionSettings(Settings):
-    debug: bool = False
-    database_url: str  # 환경변수에서 반드시 설정되어야 함
-    secret_key: str  # 환경변수에서 반드시 설정되어야 함
-    log_level: str = "WARNING"
-
-
-class TestingSettings(Settings):
-    debug: bool = True
-    database_url: str = "sqlite:///./test.db"
-    log_level: str = "DEBUG"
-
-
+@lru_cache
 def get_settings() -> Settings:
-    """환경에 따라 적절한 설정을 반환"""
-    environment = os.getenv("ENVIRONMENT", "development")
+    """환경변수 기반 설정 반환 (캐시됨)"""
+    # 환경 설정 먼저 로드
+    env = get_environment()
 
-    if environment == "production":
-        return ProductionSettings()
-    elif environment == "testing":
-        return TestingSettings()
-    else:
-        return DevelopmentSettings()
+    # 환경별 기본값 설정
+    defaults = {
+        "environment": env,
+        "debug": env.is_debug,
+        "host": env.default_host,
+        "log_level": env.default_log_level
+    }
+
+    # 환경변수로 오버라이드된 값들과 병합
+    return Settings(**defaults)
