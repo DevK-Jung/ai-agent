@@ -1,4 +1,4 @@
-# app/api/v1/endpoints/vector.py (재구성된 라우터)
+# app/api/v1/endpoints/vector.py
 import logging
 from typing import Optional, List, Dict, Any
 

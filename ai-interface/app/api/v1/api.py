@@ -41,6 +41,13 @@ api_router.include_router(
     tags=["Vector V1"]
 )
 
+# 벡터 관리 엔드포인트
+api_router.include_router(
+    endpoints.code_router,
+    prefix="/code",
+    tags=["code V1"]
+)
+
 
 # =============================================================================
 # API v1 공통 엔드포인트들

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Code Generator & Executor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        textarea, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .result-section {
+            margin-top: 30px;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .result-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .code-output {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .success {
+            background: #efe;
+            border: 1px solid #cfc;
+            color: #363;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .toggle-section {
+            margin-bottom: 20px;
+        }
+
+        .toggle-button {
+            background: #6c757d;
+            color: white;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🐍 Python Code Generator</h1>
+            <p>AI를 활용한 파이썬 코드 생성 및 실행 플랫폼</p>
+        </header>
+
+        <main class="main-content">
+            <div class="input-section">
+                <div class="form-group">
+                    <label for="query">🤔 어떤 코드를 만들어 드릴까요?</label>
+                    <textarea
+                        id="query"
+                        placeholder="예: 리스트의 짝수만 필터링하여 제곱하는 함수를 만들어주세요"
+                    ></textarea>
+                </div>
+
+                <div class="toggle-section">
+                    <button type="button" class="toggle-button" onclick="toggleAdvanced()">
+                        고급 옵션 ▼
+                    </button>
+                </div>
+
+                <div id="advanced-options" class="hidden">
+                    <div class="form-group">
+                        <label for="context">📝 추가 컨텍스트 (선택사항)</label>
+                        <textarea
+                            id="context"
+                            placeholder="추가 정보나 기존 코드를 입력하세요..."
+                        ></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="modify-existing">
+                            기존 코드 수정 모드
+                        </label>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="generateCode()">
+                        🎯 코드 생성
+                    </button>
+                    <button class="btn-success" onclick="generateAndExecute()">
+                        ⚡ 생성 후 실행
+                    </button>
+                    <button class="btn-warning" onclick="executeCode()">
+                        🚀 실행만 하기
+                    </button>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>AI가 코드를 생성하고 있습니다...</p>
+            </div>
+
+            <div class="result-section" id="results"></div>
+        </main>
+    </div>
+
+    <script>
+        let generatedCode = '';
+
+        function toggleAdvanced() {
+            const options = document.getElementById('advanced-options');
+            const button = document.querySelector('.toggle-button');
+
+            if (options.classList.contains('hidden')) {
+                options.classList.remove('hidden');
+                button.textContent = '고급 옵션 ▲';
+            } else {
+                options.classList.add('hidden');
+                button.textContent = '고급 옵션 ▼';
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').innerHTML = '';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function showError(message) {
+            hideLoading();
+            document.getElementById('results').innerHTML =
+                `<div class="error">❌ 오류: ${message}</div>`;
+        }
+
+        function showResults(data) {
+            hideLoading();
+
+            let html = '';
+
+            if (data.generated_code) {
+                generatedCode = data.generated_code;
+                html += `
+                    <div class="result-box">
+                        <div class="result-title">📝 생성된 코드</div>
+                        <pre class="code-output"><code class="language-python">${escapeHtml(data.generated_code)}</code></pre>
+                    </div>
+                `;
+            }
+
+            if (data.explanation) {
+                html += `
+                    <div class="result-box">
+                        <div class="result-title">💡 설명</div>
+                        <p>${escapeHtml(data.explanation)}</p>
+                    </div>
+                `;
+            }
+
+            if (data.execution_result) {
+                const result = data.execution_result;
+                html += `
+                    <div class="result-box">
+                        <div class="result-title">🏃‍♂️ 실행 결과</div>
+                `;
+
+                if (result.success) {
+                    html += `<div class="success">✅ 실행 성공 (${result.execution_time}초)</div>`;
+
+                    if (result.output) {
+                        html += `
+                            <p><strong>출력:</strong></p>
+                            <pre class="code-output">${escapeHtml(result.output)}</pre>
+                        `;
+                    }
+
+                    if (result.variables && Object.keys(result.variables).length > 0) {
+                        html += `
+                            <p><strong>변수들:</strong></p>
+                            <pre class="code-output">${JSON.stringify(result.variables, null, 2)}</pre>
+                        `;
+                    }
+                } else {
+                    html += `<div class="error">❌ 실행 실패: ${escapeHtml(result.error)}</div>`;
+
+                    if (result.output) {
+                        html += `
+                            <p><strong>출력:</strong></p>
+                            <pre class="code-output">${escapeHtml(result.output)}</pre>
+                        `;
+                    }
+                }
+
+                html += '</div>';
+            }
+
+            document.getElementById('results').innerHTML = html;
+
+            // 코드 하이라이팅 적용
+            Prism.highlightAll();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function generateCode() {
+            const query = document.getElementById('query').value.trim();
+            if (!query) {
+                showError('질문을 입력해주세요');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const response = await fetch('/api/v1/code/generate-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        context: document.getElementById('context').value.trim() || null,
+                        modify_existing: document.getElementById('modify-existing').checked
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || '코드 생성에 실패했습니다');
+                }
+
+                showResults(data);
+
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function generateAndExecute() {
+            const query = document.getElementById('query').value.trim();
+            if (!query) {
+                showError('질문을 입력해주세요');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const response = await fetch('/api/v1/code/generate-and-execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        context: document.getElementById('context').value.trim() || null,
+                        modify_existing: document.getElementById('modify-existing').checked
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || '코드 생성 및 실행에 실패했습니다');
+                }
+
+                showResults(data);
+
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function executeCode() {
+            if (!generatedCode) {
+                showError('실행할 코드가 없습니다. 먼저 코드를 생성해주세요');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const response = await fetch('/api/v1/code/execute-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: generatedCode
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || '코드 실행에 실패했습니다');
+                }
+
+                showResults({ execution_result: data });
+
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Enter 키로 코드 생성
+        document.getElementById('query').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                generateAndExecute();
+            }
+        });
+
+        // 페이지 로드 시 서버 상태 확인
+        // window.addEventListener('load', async function() {
+        //     try {
+        //         const response = await fetch('/health');
+        //         const health = await response.json();
+        //
+        //         if (!health.ollama_connected) {
+        //             showError('Ollama 서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해주세요.');
+        //         }
+        //     } catch (error) {
+        //         showError('서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해주세요.');
+        //     }
+        // });
+    </script>
+</body>
+</html>
