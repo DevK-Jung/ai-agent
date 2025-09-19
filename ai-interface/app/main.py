@@ -2,7 +2,6 @@
 FastAPI AI 인터페이스 메인 애플리케이션
 """
 import multiprocessing
-from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.gzip import GZipMiddleware
@@ -11,20 +10,9 @@ from starlette.middleware.cors import CORSMiddleware
 from app.api import v1_router
 from app.core.config.settings import get_settings
 from app.core.exception.global_exception_handler import register_global_exception_handlers
-from app.core.utils import setup_logging
+from app.core.lifespan import lifespan
 
 settings = get_settings()
-
-# 애플리케이션 시작/종료 시 실행될 코드
-@asynccontextmanager
-async def lifespan(_: FastAPI):
-    # 시작 시
-    setup_logging()
-    print("AI Interface API 시작")
-    yield
-    # 종료 시  
-    print("AI Interface API 종료")
-
 
 # =============================================================================
 # FastAPI 앱 생성 - docs 설정 포함
@@ -76,6 +64,7 @@ app.include_router(
     tags=["API v1"]
 )
 
+
 # =============================================================================
 # 루트 엔드포인트
 # =============================================================================
@@ -102,11 +91,13 @@ async def root():
         }
     }
 
+
 # =============================================================================
 # 전역 에러 핸들러
 # =============================================================================
 
 register_global_exception_handlers(app)
+
 
 # =============================================================================
 # 서버 실행 함수
