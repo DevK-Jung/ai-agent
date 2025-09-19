@@ -17,4 +17,4 @@ def get_docker_code_executor(
 
 
 # 코드 실행 관련 의존성 타입
-DockerExecutorDep = Annotated[DockerCodeExecutor, Depends(get_docker_code_executor)]
+CodeExecutorDep = Annotated[DockerCodeExecutor, Depends(get_docker_code_executor)]
