@@ -20,10 +20,7 @@ class CodeService:
         self.settings = settings
         self.generator = CodeGenerator()
 
-    async def generate_code(
-            self,
-            request: CodeGenerationRequest
-    ) -> CodeGenerationResponse:
+    async def generate_code(self, request: CodeGenerationRequest) -> CodeGenerationResponse:
         """코드 생성"""
         try:
             # 기존 코드 생성기 사용

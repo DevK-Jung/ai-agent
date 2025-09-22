@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.core.utils import setup_logging
+from app.infra.ai.prompt.dependencies import get_prompt_manager
 from app.infra.docker.dependencies import get_docker_client
 
 
@@ -20,6 +21,13 @@ async def lifespan(_: FastAPI):
         print(">> Docker 클라이언트 초기화 완료")
     else:
         print(">> Docker 클라이언트 사용 불가능")
+
+    # 시스템 프롬프트 템플릿 load
+    try:
+        get_prompt_manager()
+        print(">> 시스템 프롬프트 초기화 완료")
+    except Exception as e:
+        print(f">> 시스템 프롬프트 초기화 실패: {e}")
 
     # 여기서 다른 초기화 작업들도 추가 가능
     # - 데이터베이스 연결
