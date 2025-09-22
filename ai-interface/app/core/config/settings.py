@@ -1,9 +1,9 @@
 # app/core/config/settings.py (통합된 설정)
 import os
 from functools import lru_cache
-from typing import List
+from typing import List, Set
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings
 
 from app.core.config.environment import Environment
@@ -41,6 +41,11 @@ def get_env_file() -> str:
     return env_file
 
 
+def parse_comma_list(value):
+    """쉼표로 구분된 문자열을 리스트로 변환하는 헬퍼 함수"""
+    return [x.strip() for x in value.split(',')] if isinstance(value, str) else value
+
+
 class Settings(BaseSettings):
     # 기본 애플리케이션 설정
     app_name: str = "FastAPI Application"
@@ -73,13 +78,47 @@ class Settings(BaseSettings):
         origins_str = os.getenv("ALLOWED_ORIGINS", self.allowed_origins)
         return [origin.strip() for origin in origins_str.split(",") if origin.strip()]
 
-    # 파일 업로드 설정
-    upload_dir: str = "uploads"
-    max_file_size: int = 10 * 1024 * 1024  # 10MB
-
     # 로깅 설정
     log_level: str = "INFO"
     log_file: str = "app.log"
+
+    # ========================================
+    # 파일 관련 설정
+    # ========================================
+
+    upload_dir: str = "uploads"
+    max_file_size: int = 10 * 1024 * 1024
+    max_concurrent_files: int = 10
+    thread_pool_workers: int = 4
+
+    # 쉼표로 구분된 문자열을 리스트로 변환
+    allowed_extensions: List[str] = [".pdf", ".docx", ".xlsx", ".xls", ".csv", ".txt", ".json"]
+    allowed_mime_types: List[str] = ["application/pdf", "text/plain", "application/json"]
+    default_text_encoding: str = "utf-8"
+    fallback_encodings: List[str] = ["utf-8", "cp949", "euc-kr", "latin1"]
+
+    @classmethod
+    @model_validator(mode='before')
+    def parse_comma_separated_fields(cls, values):
+        """쉼표로 구분된 문자열을 리스트로 변환"""
+        comma_fields = ['allowed_extensions', 'allowed_mime_types', 'fallback_encodings']
+
+        for field in comma_fields:
+            if field in values and isinstance(values[field], str):
+                values[field] = [x.strip() for x in values[field].split(',') if x.strip()]
+
+        return values
+
+    # 편의 프로퍼티들
+    @property
+    def allowed_extensions_set(self) -> Set[str]:
+        """확장자를 소문자 set으로 반환"""
+        return {ext.lower() for ext in self.allowed_extensions}
+
+    @property
+    def allowed_mime_types_set(self) -> Set[str]:
+        """MIME 타입을 set으로 반환"""
+        return set(self.allowed_mime_types)
 
     # ========================================
     # Ollama 설정

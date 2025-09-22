@@ -6,3 +6,67 @@
 2025-09-17 17:49:45 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
 2025-09-18 09:02:33 - app - INFO - __init__.py:23 - 로깅 설정 완료
 2025-09-18 09:02:33 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-19 17:57:03 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-19 17:57:03 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-19 17:57:04 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-22 10:25:54 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 10:25:54 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 10:25:54 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 10:28:42 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 10:28:42 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 10:28:42 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 10:29:27 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 질의응답_Sample.xlsx, 크기: 12080 bytes, 해시: 2662de4186e88210...
+2025-09-22 10:30:05 - app.domains.file.service - ERROR - service.py:74 - 예상치 못한 오류: FileExtractor.extract_excel_content() got an unexpected keyword argument 'encoding'
+2025-09-22 10:30:17 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 질의응답_Sample.xlsx, 크기: 12080 bytes, 해시: 2662de4186e88210...
+2025-09-22 10:30:35 - app.domains.file.service - ERROR - service.py:74 - 예상치 못한 오류: FileExtractor.extract_excel_content() got an unexpected keyword argument 'encoding'
+2025-09-22 10:30:44 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 질의응답_Sample.xlsx, 크기: 12080 bytes, 해시: 2662de4186e88210...
+2025-09-22 10:31:32 - app.domains.file.service - ERROR - service.py:74 - 예상치 못한 오류: FileExtractor.extract_excel_content() got an unexpected keyword argument 'encoding'
+2025-09-22 10:32:38 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 10:32:38 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 10:32:38 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 10:32:55 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 질의응답_Sample.xlsx, 크기: 12080 bytes, 해시: 2662de4186e88210...
+2025-09-22 10:32:57 - app.domains.file.service - ERROR - service.py:74 - 예상치 못한 오류: FileExtractor.extract_excel_content() got an unexpected keyword argument 'encoding'
+2025-09-22 10:33:04 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 질의응답_Sample.xlsx, 크기: 12080 bytes, 해시: 2662de4186e88210...
+2025-09-22 10:34:26 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 질의응답_Sample.xlsx
+2025-09-22 10:35:18 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: test.txt, 크기: 88 bytes, 해시: 7d2614aa5420e29a...
+2025-09-22 10:35:18 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: test.txt
+2025-09-22 10:35:50 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 사회적책임과거버넌스.txt, 크기: 290 bytes, 해시: 5084136a63426828...
+2025-09-22 10:35:50 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 사회적책임과거버넌스.txt
+2025-09-22 10:36:12 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 사회적책임과거버넌스.txt, 크기: 290 bytes, 해시: 5084136a63426828...
+2025-09-22 10:36:12 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: ai_service_module_작업.xlsx, 크기: 11802 bytes, 해시: 5802b60cd7809ca6...
+2025-09-22 10:36:12 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 사회적책임과거버넌스.txt
+2025-09-22 10:36:12 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: ai_service_module_작업.xlsx
+2025-09-22 10:36:12 - app.domains.file.service - ERROR - service.py:114 - 다중 파일 처리 오류: 'TextExtractionResult' object does not support item assignment
+2025-09-22 10:37:00 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 사회적책임과거버넌스.txt, 크기: 290 bytes, 해시: 5084136a63426828...
+2025-09-22 10:37:00 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: ai_service_module_작업.xlsx, 크기: 11802 bytes, 해시: 5802b60cd7809ca6...
+2025-09-22 10:37:18 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 사회적책임과거버넌스.txt
+2025-09-22 10:37:43 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: ai_service_module_작업.xlsx
+2025-09-22 10:38:17 - app.domains.file.service - ERROR - service.py:114 - 다중 파일 처리 오류: 'TextExtractionResult' object does not support item assignment
+2025-09-22 10:40:13 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 10:40:13 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 10:40:13 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 10:40:18 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 사회적책임과거버넌스.txt, 크기: 290 bytes, 해시: 5084136a63426828...
+2025-09-22 10:40:18 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: ai_service_module_작업.xlsx, 크기: 11802 bytes, 해시: 5802b60cd7809ca6...
+2025-09-22 10:40:18 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 사회적책임과거버넌스.txt
+2025-09-22 10:40:18 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: ai_service_module_작업.xlsx
+2025-09-22 10:42:37 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 10:42:37 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 10:42:37 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 10:44:39 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 10:44:39 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 10:44:39 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 10:44:50 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 사회적책임과거버넌스.txt, 크기: 290 bytes, 해시: 5084136a63426828...
+2025-09-22 10:44:50 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: ai_service_module_작업.xlsx, 크기: 11802 bytes, 해시: 5802b60cd7809ca6...
+2025-09-22 10:44:50 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 사회적책임과거버넌스.txt
+2025-09-22 10:44:51 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: ai_service_module_작업.xlsx
+2025-09-22 10:45:06 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 사회적책임과거버넌스.txt, 크기: 290 bytes, 해시: 5084136a63426828...
+2025-09-22 10:45:06 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: ai_service_module_작업.xlsx, 크기: 11802 bytes, 해시: 5802b60cd7809ca6...
+2025-09-22 10:45:06 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 사회적책임과거버넌스.txt
+2025-09-22 10:45:06 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: ai_service_module_작업.xlsx
+2025-09-22 10:45:43 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 10:45:43 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 10:45:43 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 10:45:50 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 사회적책임과거버넌스.txt, 크기: 290 bytes, 해시: 5084136a63426828...
+2025-09-22 10:45:50 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: ai_service_module_작업.xlsx, 크기: 11802 bytes, 해시: 5802b60cd7809ca6...
+2025-09-22 10:45:50 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 사회적책임과거버넌스.txt
+2025-09-22 10:45:50 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: ai_service_module_작업.xlsx

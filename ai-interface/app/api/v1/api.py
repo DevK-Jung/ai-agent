@@ -48,6 +48,14 @@ api_router.include_router(
     tags=["code V1"]
 )
 
+# 파일 관리 엔드포인트
+api_router.include_router(
+    endpoints.file_router,
+    prefix="/files",
+    tags=["file V1"]
+)
+
+
 
 # =============================================================================
 # API v1 공통 엔드포인트들

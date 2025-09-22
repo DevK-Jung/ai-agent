@@ -1,0 +1,6 @@
+2025-09-22 10:30:05 - app.domains.file.service - ERROR - service.py:74 - 예상치 못한 오류: FileExtractor.extract_excel_content() got an unexpected keyword argument 'encoding'
+2025-09-22 10:30:35 - app.domains.file.service - ERROR - service.py:74 - 예상치 못한 오류: FileExtractor.extract_excel_content() got an unexpected keyword argument 'encoding'
+2025-09-22 10:31:32 - app.domains.file.service - ERROR - service.py:74 - 예상치 못한 오류: FileExtractor.extract_excel_content() got an unexpected keyword argument 'encoding'
+2025-09-22 10:32:57 - app.domains.file.service - ERROR - service.py:74 - 예상치 못한 오류: FileExtractor.extract_excel_content() got an unexpected keyword argument 'encoding'
+2025-09-22 10:36:12 - app.domains.file.service - ERROR - service.py:114 - 다중 파일 처리 오류: 'TextExtractionResult' object does not support item assignment
+2025-09-22 10:38:17 - app.domains.file.service - ERROR - service.py:114 - 다중 파일 처리 오류: 'TextExtractionResult' object does not support item assignment
