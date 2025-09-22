@@ -34,7 +34,7 @@ class DomainInfo(BaseModel):
     description: Optional[str] = Field(default=None, description="Domain description")
 
 
-class LLMServiceResponse(BaseModel):
+class ChatResponse(BaseModel):
     success: bool = Field(..., description="Success status")
     message: str = Field(..., description="Response message")
     data: Optional[LLMResponse] = Field(default=None, description="LLM response data")

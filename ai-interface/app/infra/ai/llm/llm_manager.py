@@ -1,11 +1,14 @@
 import logging
 import time
+import uuid
+from typing import AsyncGenerator, Optional, Dict, Any
 
 from langchain.schema import BaseMessage, HumanMessage, SystemMessage, AIMessage
 from langchain_ollama import ChatOllama
 
 from app.core.config.settings import Settings
-from .schemas import LLMProvider, LLMRequest, LLMResponse, ChatMessage, ModelConfig, LLMMetadata
+from .constants import LLMProvider
+from .schemas import LLMRequest, LLMResponse, ChatMessage, ModelConfig, LLMMetadata
 from ..prompt.prompt_manager import PromptManager
 
 logger = logging.getLogger(__name__)
@@ -16,37 +19,38 @@ class LLMManager:
         self.prompt_manager = prompt_manager
         self.settings = settings
 
-    async def generate_response(self, request: LLMRequest) -> LLMResponse:
-        """LLM 응답을 생성합니다."""
+    def _create_conversation_id(self):
+        return str(uuid.uuid4())
 
-        # 시스템 프롬프트 가져오기
+    def _get_system_prompt(self, domain: str, parameters: Optional[Dict[str, Any]]):
         try:
-            system_prompt = self.prompt_manager.get_system_prompt(
-                request.domain,
-                request.parameters
+            return self.prompt_manager.get_system_prompt(
+                domain,
+                parameters
             )
         except ValueError as e:
             raise ValueError(f"Failed to get system prompt: {str(e)}")
 
+    async def generate_response(self, request: LLMRequest) -> LLMResponse:
+        """LLM 응답을 생성합니다. (blocking/완전 응답)"""
+
+        # 시스템 프롬프트 가져오기
+        system_prompt = self._get_system_prompt(request.domain, request.parameters)
+
         # 동적으로 모델 생성
-        try:
-            model = self._create_model(request.provider, request.llm_config)
-        except Exception as e:
-            raise ValueError(f"Failed to create model: {str(e)}")
+        model = self._create_model(request.provider, request.llm_config)
 
         # 메시지 변환
         messages = self._convert_to_langchain_messages(request.messages, system_prompt)
 
-        # LLM 호출
+        # LLM 호출 (blocking)
         try:
-
             start_time = time.time()
-
             response = await model.ainvoke(messages)
-
             end_time = time.time()
 
             return LLMResponse(
+                conversation_id=self._create_conversation_id(),
                 content=response.content,
                 metadata=LLMMetadata(
                     model=request.llm_config.model_name,
@@ -58,6 +62,32 @@ class LLMManager:
         except Exception as e:
             logger.error(f"Failed to generate response: {e}")
             raise RuntimeError(f"Failed to generate response: {str(e)}")
+
+    async def generate_response_stream(self, request: LLMRequest) -> AsyncGenerator[LLMResponse, None]:
+        """LLM 스트리밍 응답을 생성합니다."""
+
+        # 시스템 프롬프트 가져오기
+        system_prompt = self._get_system_prompt(request.domain, request.parameters)
+
+        # 동적으로 모델 생성
+        model = self._create_model(request.provider, request.llm_config)
+
+        # 메시지 변환
+        messages = self._convert_to_langchain_messages(request.messages, system_prompt)
+
+        conversation_id = self._create_conversation_id()
+        # LLM 스트리밍 호출
+        try:
+            async for chunk in model.astream(messages):
+                # if hasattr(chunk, 'content') and chunk.content:
+                yield LLMResponse(
+                    conversation_id=conversation_id,
+                    content=chunk.content
+                )
+
+        except Exception as e:
+            logger.error(f"Failed to generate streaming response: {e}")
+            raise RuntimeError(f"Failed to generate streaming response: {str(e)}")
 
     def _create_model(self, provider: LLMProvider, config: ModelConfig):
         """요청에 따라 동적으로 모델을 생성합니다."""

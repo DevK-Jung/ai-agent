@@ -22,11 +22,6 @@ class PromptManager:
 
         self._system_prompts: Dict[str, Dict[str, Any]] = {}
         self._last_loaded: Optional[datetime] = None
-        # self._jinja_env = Environment(
-        #     loader=FileSystemLoader(str(self.prompts_dir)),
-        #     trim_blocks=True,
-        #     lstrip_blocks=True
-        # )
 
         self._load_system_prompts()
 

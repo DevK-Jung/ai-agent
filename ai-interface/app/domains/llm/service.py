@@ -1,13 +1,14 @@
 import logging
-from typing import List
+from http import HTTPStatus
+from typing import List, AsyncGenerator
 
 from fastapi import HTTPException
 
 from app.core.config.settings import Settings
 from app.infra.ai.llm.constants import LLMProvider
 from app.infra.ai.llm.llm_manager import LLMManager
-from app.infra.ai.llm.schemas import LLMRequest, ModelConfig, ChatMessage
-from .schemas import SimpleChatRequest, ChatRequest, DomainInfo, LLMServiceResponse
+from app.infra.ai.llm.schemas import LLMRequest, ModelConfig, ChatMessage, LLMResponse
+from .schemas import SimpleChatRequest, ChatRequest, DomainInfo, ChatResponse
 from ...infra.ai.prompt.constants import PromptRole
 
 logger = logging.getLogger(__name__)
@@ -21,7 +22,7 @@ class LLMService:
         self.llm_manager = llm_manager
         self.default_model_name = settings.ollama_default_model
 
-    async def chat_simple(self, request: SimpleChatRequest) -> LLMServiceResponse:
+    async def chat_simple(self, request: SimpleChatRequest) -> ChatResponse:
         """간단한 단일 메시지 채팅"""
         try:
             # 기본 모델 설정 생성
@@ -45,7 +46,7 @@ class LLMService:
             # LLM 호출
             response = await self.llm_manager.generate_response(llm_request)
 
-            return LLMServiceResponse(
+            return ChatResponse(
                 success=True,
                 message="채팅 응답이 성공적으로 생성되었습니다.",
                 data=response
@@ -53,42 +54,23 @@ class LLMService:
 
         except ValueError as e:
             logger.error(f"채팅 요청 검증 오류: {str(e)}")
-            raise HTTPException(status_code=400, detail=str(e))
+            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
         except RuntimeError as e:
             logger.error(f"LLM 응답 생성 오류: {str(e)}")
-            raise HTTPException(status_code=500, detail="응답 생성 중 오류가 발생했습니다.")
+            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="응답 생성 중 오류가 발생했습니다.")
         except Exception as e:
             logger.error(f"예상치 못한 오류: {str(e)}")
-            raise HTTPException(status_code=500, detail="서비스 오류가 발생했습니다.")
+            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="서비스 오류가 발생했습니다.")
 
-    async def chat_multi_turn(self, request: ChatRequest) -> LLMServiceResponse:
+    async def chat_blocking(self, request: ChatRequest) -> ChatResponse:
         """다중 턴 채팅"""
         try:
-            # 모델 설정이 없으면 기본값 사용
-            if request.llm_config is None:
-                model_config = ModelConfig(
-                    model_name=self.default_model_name,
-                    temperature=0.7
-                )
-            else:
-                model_config = request.llm_config
-                # 모델명이 없으면 기본값 사용
-                if not model_config.model_name:
-                    model_config.model_name = self.default_model_name
-
-            # LLMRequest 생성
-            llm_request = LLMRequest(
-                messages=request.messages,
-                domain=request.domain,
-                parameters=request.parameters,
-                llm_config=model_config,
-                provider=request.provider
-            )
+            llm_request = await self._create_llm_request(request)
 
             # LLM 호출
             response = await self.llm_manager.generate_response(llm_request)
 
-            return LLMServiceResponse(
+            return ChatResponse(
                 success=True,
                 message="다중 턴 채팅 응답이 성공적으로 생성되었습니다.",
                 data=response
@@ -96,13 +78,43 @@ class LLMService:
 
         except ValueError as e:
             logger.error(f"다중 턴 채팅 요청 검증 오류: {str(e)}")
-            raise HTTPException(status_code=400, detail=str(e))
+            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
         except RuntimeError as e:
             logger.error(f"LLM 응답 생성 오류: {str(e)}")
-            raise HTTPException(status_code=500, detail="응답 생성 중 오류가 발생했습니다.")
+            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="응답 생성 중 오류가 발생했습니다.")
         except Exception as e:
             logger.error(f"예상치 못한 오류: {str(e)}")
-            raise HTTPException(status_code=500, detail="서비스 오류가 발생했습니다.")
+            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="서비스 오류가 발생했습니다.")
+
+    async def chat_streaming(self, request: ChatRequest) -> AsyncGenerator[str, None]:
+        """스트리밍 채팅 응답"""
+        llm_request = await self._create_llm_request(request)
+
+        async for chunk in self.llm_manager.generate_response_stream(llm_request):
+            yield chunk.model_dump_json()
+
+    async def _create_llm_request(self, request):
+        # 모델 설정이 없으면 기본값 사용
+        if request.llm_config is None:
+            model_config = ModelConfig(
+                model_name=self.default_model_name,
+                temperature=0.7
+            )
+        else:
+            model_config = request.llm_config
+            # 모델명이 없으면 기본값 사용
+            if not model_config.model_name:
+                model_config.model_name = self.default_model_name
+        # LLMRequest 생성
+        llm_request = LLMRequest(
+            messages=request.messages,
+            domain=request.domain,
+            parameters=request.parameters,
+            llm_config=model_config,
+            provider=request.provider
+        )
+
+        return llm_request
 
     def get_available_domains(self) -> List[DomainInfo]:
         """사용 가능한 도메인 목록 조회"""
@@ -117,7 +129,7 @@ class LLMService:
             ]
         except Exception as e:
             logger.error(f"도메인 목록 조회 오류: {str(e)}")
-            raise HTTPException(status_code=500, detail="도메인 목록을 가져오는 중 오류가 발생했습니다.")
+            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="도메인 목록을 가져오는 중 오류가 발생했습니다.")
 
     def reload_prompts(self) -> dict:
         """프롬프트 다시 로드"""
@@ -129,21 +141,4 @@ class LLMService:
             }
         except Exception as e:
             logger.error(f"프롬프트 리로드 오류: {str(e)}")
-            raise HTTPException(status_code=500, detail="프롬프트 리로드 중 오류가 발생했습니다.")
-
-    def get_service_status(self) -> dict:
-        """서비스 상태 조회"""
-        try:
-            domains = self.get_available_domains()
-            return {
-                "status": "healthy",
-                "default_model": self.default_model_name,
-                "available_domains": len(domains),
-                "domains": [domain.name for domain in domains]
-            }
-        except Exception as e:
-            logger.error(f"서비스 상태 조회 오류: {str(e)}")
-            return {
-                "status": "error",
-                "error": str(e)
-            }
+            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="프롬프트 리로드 중 오류가 발생했습니다.")

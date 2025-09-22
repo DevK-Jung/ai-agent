@@ -35,6 +35,6 @@ class LLMMetadata(BaseModel):
 
 
 class LLMResponse(BaseModel):
+    conversation_id: str = Field(..., description="conversation_id")
     content: str = Field(..., description="Generated response")
-    # usage: Optional[Dict[str, Any]] = Field(default=None, description="Token usage info")
     metadata: LLMMetadata = Field(default=None, description="Additional metadata")
