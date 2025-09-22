@@ -4,3 +4,6 @@
 2025-09-22 10:32:57 - app.domains.file.service - ERROR - service.py:74 - 예상치 못한 오류: FileExtractor.extract_excel_content() got an unexpected keyword argument 'encoding'
 2025-09-22 10:36:12 - app.domains.file.service - ERROR - service.py:114 - 다중 파일 처리 오류: 'TextExtractionResult' object does not support item assignment
 2025-09-22 10:38:17 - app.domains.file.service - ERROR - service.py:114 - 다중 파일 처리 오류: 'TextExtractionResult' object does not support item assignment
+2025-09-22 14:58:12 - app.domains.llm.service - ERROR - service.py:55 - 채팅 요청 검증 오류: Failed to get system prompt: Domain 'example' not found
+2025-09-22 15:04:48 - app.infra.ai.llm.llm_manager - ERROR - llm_manager.py:62 - Failed to generate response: Cannot connect to host localhost:11434 ssl:default [Multiple exceptions: [Errno 10061] Connect call failed ('::1', 11434, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 11434)]
+2025-09-22 15:04:48 - app.domains.llm.service - ERROR - service.py:58 - LLM 응답 생성 오류: Failed to generate response: Cannot connect to host localhost:11434 ssl:default [Multiple exceptions: [Errno 10061] Connect call failed ('::1', 11434, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 11434)]

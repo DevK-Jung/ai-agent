@@ -1,10 +1,8 @@
 import logging
-import os
 import time
-from typing import Dict, Any, Optional
 
 from langchain.schema import BaseMessage, HumanMessage, SystemMessage, AIMessage
-from langchain_community.chat_models import ChatOllama
+from langchain_ollama import ChatOllama
 
 from app.core.config.settings import Settings
 from .schemas import LLMProvider, LLMRequest, LLMResponse, ChatMessage, ModelConfig, LLMMetadata
@@ -14,10 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class LLMManager:
-    def __init__(self, settings: Settings, prompts_dir: Optional[str] = None):
-        self.prompt_manager = PromptManager(prompts_dir)
+    def __init__(self, settings: Settings, prompt_manager: PromptManager):
+        self.prompt_manager = prompt_manager
         self.settings = settings
-        self._default_configs = self._load_default_configs()
 
     async def generate_response(self, request: LLMRequest) -> LLMResponse:
         """LLM 응답을 생성합니다."""
@@ -62,50 +59,9 @@ class LLMManager:
             logger.error(f"Failed to generate response: {e}")
             raise RuntimeError(f"Failed to generate response: {str(e)}")
 
-    def _load_default_configs(self) -> Dict[LLMProvider, Dict[str, Any]]:
-        """기본 모델 설정을 로드합니다."""
-        return {
-            LLMProvider.OLLAMA: {
-                "model_name": os.getenv("OLLAMA_DEFAULT_MODEL", "llama3.1:8b"),
-                "temperature": 0.7,
-                "base_url": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-            }
-        }
-
     def _create_model(self, provider: LLMProvider, config: ModelConfig):
         """요청에 따라 동적으로 모델을 생성합니다."""
-        base_config = self._default_configs.get(provider, {}).copy()
-
-        # ModelConfig로 기본 설정 오버라이드
-        # model_params = {
-        #     "model": config.model_name,
-        #     "temperature": config.temperature or base_config.get("temperature", 0.7)
-        # }
-
-        # if config.max_tokens:
-        #     model_params["max_tokens"] = config.max_tokens
-        # if config.top_p:
-        #     model_params["top_p"] = config.top_p
-        # if config.stop:
-        #     model_params["stop"] = config.stop
-
         try:
-            # if provider == LLMProvider.OLLAMA:
-            #     ollama_params = {
-            #         "model": config.model_name,
-            #         "base_url": base_config.get("base_url", "http://localhost:11434"),
-            #         "temperature": config.temperature or 0.7
-            #     }
-            #
-            #     # Ollama 특화 파라미터
-            #     if config.top_k:
-            #         ollama_params["top_k"] = config.top_k
-            #     if config.repeat_penalty:
-            #         ollama_params["repeat_penalty"] = config.repeat_penalty
-            #     if config.stop:
-            #         ollama_params["stop"] = config.stop
-
-            # return ChatOllama(**ollama_params)
             return ChatOllama(
                 model=config.model_name,
                 base_url=self.settings.ollama_base_url,
@@ -115,9 +71,6 @@ class LLMManager:
                 repeat_penalty=config.repeat_penalty,
                 stop=config.stop,
             )
-
-            # else:
-            #     raise ValueError(f"Unsupported provider: {provider}")
 
         except Exception as e:
             logger.error(f"Failed to create model for {provider}: {e}")

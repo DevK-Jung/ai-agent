@@ -1,9 +1,10 @@
 # app/core/config/settings.py (통합된 설정)
 import os
 from functools import lru_cache
+from pathlib import Path
 from typing import List, Set
 
-from pydantic import Field, model_validator
+from pydantic import Field, model_validator, field_validator
 from pydantic_settings import BaseSettings
 
 from app.core.config.environment import Environment
@@ -16,6 +17,7 @@ def get_environment() -> Environment:
     # 별칭 처리
     env_aliases = {
         "dev": Environment.DEVELOPMENT,
+        "local": Environment.LOCAL,
         "prod": Environment.PRODUCTION,
         "test": Environment.TESTING
     }
@@ -29,16 +31,37 @@ def get_environment() -> Environment:
         return Environment.DEVELOPMENT
 
 
+def _find_project_root(path: str = None) -> str | None:
+    """프로젝트 루트를 찾습니다."""
+    if path is None:
+        path = os.path.dirname(__file__)
+
+    current_dir = path
+    while True:
+        if os.path.exists(os.path.join(current_dir, 'pyproject.toml')):
+            return current_dir
+        parent_dir = os.path.dirname(current_dir)
+        if parent_dir == current_dir:
+            return None
+        current_dir = parent_dir
+
 def get_env_file() -> str:
     """환경에 따라 적절한 .env 파일 경로 반환"""
     environment = get_environment()
     env_file = environment.env_file
 
-    # 파일이 존재하지 않으면 기본 .env 사용
-    if not os.path.exists(env_file):
-        return ".env"
+    # 프로젝트 루트에서 찾기
+    project_root = _find_project_root()
+    if project_root:
+        env_path = Path(project_root) / env_file
+        if env_path.exists():
+            return str(env_path)
 
-    return env_file
+    # 파일이 존재하지 않으면 기본 .env 사용
+    # if not os.path.exists(env_file):
+    #     return ".env"
+
+    return ".env"
 
 
 def parse_comma_list(value):
@@ -97,17 +120,38 @@ class Settings(BaseSettings):
     default_text_encoding: str = "utf-8"
     fallback_encodings: List[str] = ["utf-8", "cp949", "euc-kr", "latin1"]
 
+    @field_validator('allowed_extensions', mode='before')
     @classmethod
-    @model_validator(mode='before')
-    def parse_comma_separated_fields(cls, values):
-        """쉼표로 구분된 문자열을 리스트로 변환"""
-        comma_fields = ['allowed_extensions', 'allowed_mime_types', 'fallback_encodings']
+    def parse_allowed_extensions(cls, v):
+        if isinstance(v, str):
+            return [x.strip() for x in v.split(',') if x.strip()]
+        return v
 
-        for field in comma_fields:
-            if field in values and isinstance(values[field], str):
-                values[field] = [x.strip() for x in values[field].split(',') if x.strip()]
+    @field_validator('allowed_mime_types', mode='before')
+    @classmethod
+    def parse_allowed_mime_types(cls, v):
+        if isinstance(v, str):
+            return [x.strip() for x in v.split(',') if x.strip()]
+        return v
 
-        return values
+    @field_validator('fallback_encodings', mode='before')
+    @classmethod
+    def parse_fallback_encodings(cls, v):
+        if isinstance(v, str):
+            return [x.strip() for x in v.split(',') if x.strip()]
+        return v
+
+    # @classmethod
+    # @model_validator(mode='before')
+    # def parse_comma_separated_fields(cls, values):
+    #     """쉼표로 구분된 문자열을 리스트로 변환"""
+    #     comma_fields = ['allowed_extensions', 'allowed_mime_types', 'fallback_encodings']
+    #
+    #     for field in comma_fields:
+    #         if field in values and isinstance(values[field], str):
+    #             values[field] = [x.strip() for x in values[field].split(',') if x.strip()]
+    #
+    #     return values
 
     # 편의 프로퍼티들
     @property
@@ -125,8 +169,13 @@ class Settings(BaseSettings):
     # ========================================
 
     ollama_base_url: str = Field(
-        default="http://localhost:11434",
+        # default="http://localhost:11434",
+        ...,
         description="Ollama 서버 URL"
+    )
+    ollama_default_model: str = Field(
+        default="llama3.1:8b",
+        description="기본 Ollama 모델명"
     )
     ollama_embedding_model: str = Field(
         default="nomic-embed-text",

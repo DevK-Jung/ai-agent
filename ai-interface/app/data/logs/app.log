@@ -106,3 +106,66 @@
 2025-09-22 14:00:00 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
 2025-09-22 14:00:00 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
 2025-09-22 14:00:20 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:52 - Loaded 1 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 14:03:48 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 14:03:48 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 14:03:48 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 14:16:52 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:52 - Loaded 1 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 14:17:10 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 14:17:10 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 14:17:10 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 14:17:12 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:52 - Loaded 1 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 14:17:27 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 14:17:27 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 14:17:27 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 14:17:27 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:52 - Loaded 1 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 14:22:26 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 14:22:26 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 14:22:26 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 14:22:26 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:52 - Loaded 1 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 14:27:25 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 14:27:25 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 14:27:25 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 14:27:25 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:52 - Loaded 1 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 14:32:28 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 14:32:28 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 14:32:28 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 14:32:28 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:52 - Loaded 1 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 14:37:30 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 14:37:30 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 14:37:30 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 14:37:30 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:52 - Loaded 1 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 14:42:31 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 14:42:31 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 14:42:31 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 14:42:31 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:52 - Loaded 1 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 14:43:41 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 14:43:41 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 14:43:41 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 14:43:41 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:52 - Loaded 1 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 14:48:57 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 14:48:57 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 14:48:57 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 14:48:57 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:52 - Loaded 1 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 14:57:14 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 14:57:14 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 14:57:14 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 14:57:14 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:52 - Loaded 1 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 14:58:12 - app.domains.llm.service - ERROR - service.py:55 - 채팅 요청 검증 오류: Failed to get system prompt: Domain 'example' not found
+2025-09-22 15:02:46 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 15:02:46 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 15:02:46 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 15:02:46 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:52 - Loaded 2 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 15:04:48 - app.infra.ai.llm.llm_manager - ERROR - llm_manager.py:62 - Failed to generate response: Cannot connect to host localhost:11434 ssl:default [Multiple exceptions: [Errno 10061] Connect call failed ('::1', 11434, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 11434)]
+2025-09-22 15:04:48 - app.domains.llm.service - ERROR - service.py:58 - LLM 응답 생성 오류: Failed to generate response: Cannot connect to host localhost:11434 ssl:default [Multiple exceptions: [Errno 10061] Connect call failed ('::1', 11434, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 11434)]
+2025-09-22 15:29:57 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 15:29:57 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 15:29:57 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 15:29:57 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:52 - Loaded 2 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 15:31:16 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 15:31:16 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 15:31:16 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 15:31:16 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:52 - Loaded 2 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 15:35:19 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 15:35:19 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 15:35:19 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 15:35:19 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:52 - Loaded 2 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system

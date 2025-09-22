@@ -55,6 +55,13 @@ api_router.include_router(
     tags=["file V1"]
 )
 
+# LLM 관리 엔드포인트
+api_router.include_router(
+    endpoints.llm_router,
+    prefix="/llm",
+    tags=["LLM V1"]
+)
+
 
 
 # =============================================================================
