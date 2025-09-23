@@ -32,3 +32,9 @@ async def chat_page(request: Request):
 async def code_page(request: Request):
     """코딩 화면"""
     return templates.TemplateResponse("code.html", {"request": request})
+
+
+@view_router.get("/vector", response_class=HTMLResponse)
+async def vector_page(request: Request):
+    """벡터 검색 화면"""
+    return templates.TemplateResponse("vector.html", {"request": request})

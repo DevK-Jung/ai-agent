@@ -85,7 +85,7 @@
 
         .service-options {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 30px;
             margin-bottom: 40px;
         }
@@ -155,6 +155,14 @@
 
         .code-card:hover {
             border-color: #9c27b0;
+        }
+
+        .vector-card {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+        }
+
+        .vector-card:hover {
+            border-color: #4caf50;
         }
 
         .features {
@@ -236,6 +244,16 @@
                     Docker 환경에서 안전하게 실행
                 </div>
             </div>
+
+            <div class="service-card vector-card" onclick="goToVector()">
+                <span class="service-icon">🔍</span>
+                <div class="service-name">벡터 검색</div>
+                <div class="service-description">
+                    문서를 업로드하여 벡터화하고<br>
+                    의미 기반 검색으로<br>
+                    정확한 정보를 빠르게 찾기
+                </div>
+            </div>
         </div>
 
         <div class="features">
@@ -268,6 +286,10 @@
         window.location.href = '/code';
     }
 
+    function goToVector() {
+        window.location.href = '/vector';
+    }
+
     // 키보드 단축키
     document.addEventListener('keydown', function(e) {
         if (e.ctrlKey || e.metaKey) {
@@ -277,6 +299,9 @@
             } else if (e.key === '2') {
                 e.preventDefault();
                 goToCode();
+            } else if (e.key === '3') {
+                e.preventDefault();
+                goToVector();
             }
         }
     });

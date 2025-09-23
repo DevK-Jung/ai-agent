@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vector Search & Document Management</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            background: white;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-2px);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            height: calc(100vh - 80px);
+            overflow: hidden;
+        }
+
+        .left-panel {
+            width: 40%;
+            padding: 30px;
+            border-right: 1px solid #e1e8ed;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .right-panel {
+            width: 60%;
+            padding: 30px;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .panel-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4caf50;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #4caf50;
+        }
+
+        input[type="file"] {
+            padding: 8px;
+            border: 2px dashed #e1e8ed;
+            background: #f8f9fa;
+            cursor: pointer;
+        }
+
+        input[type="file"]:hover {
+            border-color: #4caf50;
+            background: #e8f5e8;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #2196f3, #1976d2);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4caf50;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .result-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .document-item {
+            background: white;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .document-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-color: #4caf50;
+        }
+
+        .document-content {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .document-metadata {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .search-result {
+            border-left: 4px solid #4caf50;
+            padding-left: 15px;
+        }
+
+        .score {
+            background: #4caf50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .success {
+            background: #efe;
+            border: 1px solid #cfc;
+            color: #363;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .status-indicator {
+            padding: 10px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .collection-selector {
+            margin-bottom: 15px;
+        }
+
+        .small-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 1024px) {
+            .main-content {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .left-panel, .right-panel {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e1e8ed;
+            }
+
+            .left-panel {
+                max-height: 50vh;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <button class="back-button" onclick="window.location.href='/'">
+            ← 홈으로
+        </button>
+        <h1>🔍 Vector Search & Document Management</h1>
+        <div style="width: 88px;"></div>
+    </header>
+
+    <main class="main-content">
+        <!-- 좌측 패널: 업로드 및 검색 -->
+        <div class="left-panel">
+            <div class="panel-title">📄 문서 관리 & 검색</div>
+
+            <!-- 상태 표시 -->
+            <div id="status-indicator" class="status-indicator">
+                <span id="vector-status">🔍 벡터 서비스 상태 확인 중...</span>
+            </div>
+
+            <!-- 컬렉션 선택 -->
+            <div class="section">
+                <div class="section-title">📚 컬렉션 관리</div>
+                <div class="form-group">
+                    <label for="collection-name">컬렉션 이름</label>
+                    <select id="collection-name">
+                        <option value="">기본 컬렉션</option>
+                    </select>
+                    <div class="small-text">문서를 그룹화할 컬렉션을 선택하거나 새로 생성하세요</div>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="new-collection" placeholder="새 컬렉션 이름">
+                    <button class="btn-secondary" onclick="createCollection()" style="margin-top: 10px;">
+                        ➕ 컬렉션 생성
+                    </button>
+                </div>
+            </div>
+
+            <!-- 문서 업로드 -->
+            <div class="section">
+                <div class="section-title">📁 문서 업로드</div>
+                <div class="form-group">
+                    <label for="upload-file">파일 선택 (PDF, TXT, MD, HTML)</label>
+                    <input type="file" id="upload-file" accept=".pdf,.txt,.md,.html,.htm">
+                    <div class="small-text">최대 10MB, PDF/TXT/MD/HTML 파일 지원</div>
+                </div>
+                <div class="form-group">
+                    <label for="chunk-size">청크 크기</label>
+                    <input type="number" id="chunk-size" value="1000" min="100" max="5000">
+                </div>
+                <div class="form-group">
+                    <label for="chunk-overlap">청크 겹침</label>
+                    <input type="number" id="chunk-overlap" value="200" min="0" max="1000">
+                </div>
+                <button class="btn-primary" onclick="uploadDocument()">
+                    📤 문서 업로드
+                </button>
+            </div>
+
+            <!-- 텍스트 직접 입력 -->
+            <div class="section">
+                <div class="section-title">✏️ 텍스트 직접 입력</div>
+                <div class="form-group">
+                    <label for="text-title">문서 제목</label>
+                    <input type="text" id="text-title" placeholder="문서 제목을 입력하세요">
+                </div>
+                <div class="form-group">
+                    <label for="text-content">내용</label>
+                    <textarea id="text-content" placeholder="텍스트 내용을 입력하세요..." rows="5"></textarea>
+                </div>
+                <button class="btn-primary" onclick="uploadTextDocument()">
+                    💾 텍스트 저장
+                </button>
+            </div>
+
+            <!-- 검색 -->
+            <div class="section">
+                <div class="section-title">🔍 문서 검색</div>
+                <div class="form-group">
+                    <label for="search-query">검색어</label>
+                    <textarea id="search-query" placeholder="찾고자 하는 내용을 입력하세요..." rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="search-limit">결과 수</label>
+                    <select id="search-limit">
+                        <option value="5">5개</option>
+                        <option value="10">10개</option>
+                        <option value="20">20개</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="score-threshold">점수 임계값 (선택사항)</label>
+                    <input type="number" id="score-threshold" placeholder="0.0 ~ 1.0" step="0.1" min="0" max="1">
+                </div>
+                <button class="btn-secondary" onclick="searchDocuments()">
+                    🔍 검색 실행
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>처리 중...</p>
+            </div>
+        </div>
+
+        <!-- 우측 패널: 결과 표시 -->
+        <div class="right-panel">
+            <div class="panel-title">📋 결과</div>
+            <div id="results"></div>
+        </div>
+    </main>
+</div>
+
+<script>
+    let collections = [];
+
+    // 페이지 로드 시 초기화
+    document.addEventListener('DOMContentLoaded', function() {
+        checkVectorStatus();
+        loadCollections();
+
+        // 파일 선택 시 피드백
+        document.getElementById('upload-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const fileInput = e.target;
+
+            if (file) {
+                fileInput.style.borderColor = '#4caf50';
+                fileInput.style.backgroundColor = '#e8f5e8';
+
+                if (file.size > 10 * 1024 * 1024) {
+                    showError('파일 크기가 10MB를 초과합니다.');
+                    fileInput.value = '';
+                    fileInput.style.borderColor = '#f44336';
+                    fileInput.style.backgroundColor = '#fdf2f2';
+                    return;
+                }
+            } else {
+                fileInput.style.borderColor = '#e1e8ed';
+                fileInput.style.backgroundColor = '#f8f9fa';
+            }
+        });
+    });
+
+    // 벡터 서비스 상태 확인
+    async function checkVectorStatus() {
+        try {
+            const response = await fetch('/api/v1/vector/status');
+            const data = await response.json();
+
+            if (response.ok) {
+                document.getElementById('vector-status').innerHTML =
+                    `✅ 벡터 서비스 활성 (컬렉션: ${data.collections || 0}개, 문서: ${data.documents || 0}개)`;
+            } else {
+                document.getElementById('vector-status').innerHTML = '❌ 벡터 서비스 연결 실패';
+            }
+        } catch (error) {
+            document.getElementById('vector-status').innerHTML = '❌ 벡터 서비스 연결 실패';
+        }
+    }
+
+    // 컬렉션 목록 로드
+    async function loadCollections() {
+        try {
+            const response = await fetch('/api/v1/vector/collections');
+            const data = await response.json();
+
+            if (response.ok) {
+                collections = data.collections;
+                updateCollectionSelector();
+            }
+        } catch (error) {
+            console.error('컬렉션 로드 실패:', error);
+        }
+    }
+
+    // 컬렉션 선택기 업데이트
+    function updateCollectionSelector() {
+        const selector = document.getElementById('collection-name');
+        selector.innerHTML = '<option value="">기본 컬렉션</option>';
+
+        collections.forEach(collection => {
+            const option = document.createElement('option');
+            option.value = collection;
+            option.textContent = collection;
+            selector.appendChild(option);
+        });
+    }
+
+    // 컬렉션 생성
+    async function createCollection() {
+        const name = document.getElementById('new-collection').value.trim();
+        if (!name) {
+            showError('컬렉션 이름을 입력하세요.');
+            return;
+        }
+
+        showLoading();
+        try {
+            const response = await fetch(`/api/v1/vector/collections/${encodeURIComponent(name)}`, {
+                method: 'POST'
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                showSuccess(data.message);
+                document.getElementById('new-collection').value = '';
+                loadCollections();
+            } else {
+                showError(data.detail || '컬렉션 생성에 실패했습니다.');
+            }
+        } catch (error) {
+            showError('컬렉션 생성 중 오류가 발생했습니다.');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // 파일 문서 업로드
+    async function uploadDocument() {
+        const fileInput = document.getElementById('upload-file');
+        const file = fileInput.files[0];
+
+        if (!file) {
+            showError('파일을 선택하세요.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const collectionName = document.getElementById('collection-name').value;
+        const chunkSize = document.getElementById('chunk-size').value;
+        const chunkOverlap = document.getElementById('chunk-overlap').value;
+
+        let url = '/api/v1/vector/documents/file';
+        const params = new URLSearchParams();
+        if (collectionName) params.append('collection_name', collectionName);
+        if (chunkSize) params.append('chunk_size', chunkSize);
+        if (chunkOverlap) params.append('chunk_overlap', chunkOverlap);
+
+        if (params.toString()) {
+            url += '?' + params.toString();
+        }
+
+        showLoading();
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                showSuccess(`문서 업로드 성공! ${data.chunks_count}개 청크로 분할되었습니다.`);
+                fileInput.value = '';
+                fileInput.style.borderColor = '#e1e8ed';
+                fileInput.style.backgroundColor = '#f8f9fa';
+                checkVectorStatus();
+            } else {
+                showError(data.detail || '문서 업로드에 실패했습니다.');
+            }
+        } catch (error) {
+            showError('문서 업로드 중 오류가 발생했습니다.');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // 텍스트 문서 업로드
+    async function uploadTextDocument() {
+        const title = document.getElementById('text-title').value.trim();
+        const content = document.getElementById('text-content').value.trim();
+
+        if (!title || !content) {
+            showError('제목과 내용을 모두 입력하세요.');
+            return;
+        }
+
+        const collectionName = document.getElementById('collection-name').value;
+
+        showLoading();
+        try {
+            let url = '/api/v1/vector/documents/text';
+            if (collectionName) {
+                url += `?collection_name=${encodeURIComponent(collectionName)}`;
+            }
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    content: content,
+                    metadata: { title: title }
+                })
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                showSuccess(`텍스트 문서 저장 성공! ${data.chunks_count}개 청크로 분할되었습니다.`);
+                document.getElementById('text-title').value = '';
+                document.getElementById('text-content').value = '';
+                checkVectorStatus();
+            } else {
+                showError(data.detail || '텍스트 저장에 실패했습니다.');
+            }
+        } catch (error) {
+            showError('텍스트 저장 중 오류가 발생했습니다.');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // 문서 검색
+    async function searchDocuments() {
+        const query = document.getElementById('search-query').value.trim();
+        if (!query) {
+            showError('검색어를 입력하세요.');
+            return;
+        }
+
+        const collectionName = document.getElementById('collection-name').value;
+        const limit = parseInt(document.getElementById('search-limit').value);
+        const scoreThreshold = parseFloat(document.getElementById('score-threshold').value) || null;
+
+        showLoading();
+        try {
+            const response = await fetch('/api/v1/vector/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    query: query,
+                    k: limit,
+                    collection_name: collectionName,
+                    score_threshold: scoreThreshold
+                })
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                console.log('검색 응답:', data); // 디버깅용 로그
+                showSearchResults(data);
+            } else {
+                console.error('검색 오류:', data); // 디버깅용 로그
+                showError(data.detail || '검색에 실패했습니다.');
+            }
+        } catch (error) {
+            showError('검색 중 오류가 발생했습니다.');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // 검색 결과 표시
+    function showSearchResults(data) {
+        const resultsDiv = document.getElementById('results');
+
+        // 응답 구조에 따라 results 또는 documents 배열 확인
+        const results = data.results || data.documents || [];
+
+        if (results.length === 0) {
+            resultsDiv.innerHTML = `
+                <div class="result-box">
+                    <div class="result-title">🔍 검색 결과</div>
+                    <p>검색 결과가 없습니다.</p>
+                    <div class="small-text">검색어: "${data.query || '알 수 없음'}"</div>
+                    ${data.execution_time_ms ? `<div class="small-text">실행 시간: ${data.execution_time_ms}ms</div>` : ''}
+                </div>
+            `;
+            return;
+        }
+
+        let html = `
+            <div class="result-box">
+                <div class="result-title">🔍 검색 결과 (${results.length}개)</div>
+                <div class="small-text" style="margin-bottom: 15px;">
+                    검색어: "${data.query || '알 수 없음'}" |
+                    실행 시간: ${data.execution_time_ms ? Math.round(data.execution_time_ms) + 'ms' : 'N/A'} |
+                    컬렉션: ${data.collection_name || '기본'}
+                </div>
+        `;
+
+        results.forEach((doc, index) => {
+            const score = doc.score ? (doc.score * 100).toFixed(1) + '%' : 'N/A';
+
+            // 메타데이터를 보기 좋게 포맷
+            let metadataHtml = '메타데이터 없음';
+            if (doc.metadata) {
+                const importantFields = ['filename', 'file_type', 'chunk_index', 'total_chunks'];
+                const otherFields = Object.keys(doc.metadata).filter(key => !importantFields.includes(key));
+
+                const importantMeta = importantFields
+                    .filter(key => doc.metadata[key] !== undefined)
+                    .map(key => `<strong>${key}:</strong> ${doc.metadata[key]}`)
+                    .join(' | ');
+
+                metadataHtml = importantMeta;
+
+                if (otherFields.length > 0) {
+                    const otherMeta = otherFields
+                        .map(key => `<strong>${key}:</strong> ${doc.metadata[key]}`)
+                        .join(' | ');
+                    metadataHtml += otherMeta ? '<br>' + otherMeta : '';
+                }
+            }
+
+            html += `
+                <div class="document-item search-result">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <strong>결과 ${index + 1}</strong>
+                        <span class="score">${score}</span>
+                    </div>
+                    <div class="document-content">${escapeHtml(doc.content)}</div>
+                    <div class="document-metadata">
+                        ${metadataHtml}
+                    </div>
+                    ${doc.document_id ? `<div class="small-text">문서 ID: ${doc.document_id}</div>` : ''}
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        resultsDiv.innerHTML = html;
+    }
+
+    // 유틸리티 함수들
+    function showLoading() {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('results').innerHTML = '';
+    }
+
+    function hideLoading() {
+        document.getElementById('loading').style.display = 'none';
+    }
+
+    function showError(message) {
+        hideLoading();
+        document.getElementById('results').innerHTML =
+            `<div class="error">❌ 오류: ${message}</div>`;
+    }
+
+    function showSuccess(message) {
+        const successDiv = document.createElement('div');
+        successDiv.className = 'success';
+        successDiv.innerHTML = `✅ ${message}`;
+        document.getElementById('results').appendChild(successDiv);
+
+        setTimeout(() => {
+            successDiv.remove();
+        }, 5000);
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Enter 키로 검색
+    document.getElementById('search-query').addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'Enter') {
+            searchDocuments();
+        }
+    });
+</script>
+</body>
+</html>

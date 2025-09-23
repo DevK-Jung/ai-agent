@@ -111,6 +111,7 @@ class VectorService:
 
         # 설정값 결정
         chunk_size = request.chunk_size or self.settings.default_chunk_size
+
         chunk_overlap = request.chunk_overlap or self.settings.default_chunk_overlap
 
         # 검증
