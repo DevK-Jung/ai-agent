@@ -20,9 +20,13 @@ class CodeService:
         self.code_generator = code_generator
         self.settings = settings
 
-    async def generate_code(self, request: CodeGenerationRequest) -> CodeGenerationResponse:
+    async def generate_code(self, request: CodeGenerationRequest, file_content: str | None) -> CodeGenerationResponse:
         """코드 생성"""
         try:
+            if file_content:
+                # 사용자 메시지 뒤에 붙여줌
+                request.query = f"사용자가 업로드한 파일 내용입니다:\n\n{file_content}"
+
             # 새로운 CodeGenerator 사용
             result = await self.code_generator.generate_code(
                 query=request.query,

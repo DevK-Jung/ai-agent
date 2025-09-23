@@ -133,6 +133,18 @@
             border-color: #3498db;
         }
 
+        input[type="file"] {
+            padding: 8px;
+            border: 2px dashed #e1e8ed;
+            background: #f8f9fa;
+            cursor: pointer;
+        }
+
+        input[type="file"]:hover {
+            border-color: #3498db;
+            background: #e3f2fd;
+        }
+
         textarea {
             resize: vertical;
             min-height: 120px;
@@ -327,6 +339,15 @@
                             id="query"
                             placeholder="예: 리스트의 짝수만 필터링하여 제곱하는 함수를 만들어주세요"
                     ></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="file">📎 파일 업로드 (선택사항)</label>
+                    <input type="file" id="file" accept=".txt,.py,.js,.json,.csv,.md"
+                           style="padding: 8px; border: 2px dashed #e1e8ed; background: #f8f9fa;">
+                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                        코드 분석이나 수정이 필요한 파일을 업로드하세요 (최대 10MB)
+                    </small>
                 </div>
 
                 <div class="toggle-section">
@@ -617,16 +638,26 @@
         showLoading();
 
         try {
+            // FormData를 사용하여 파일과 데이터를 함께 전송
+            const formData = new FormData();
+            formData.append('query', query);
+
+            const context = document.getElementById('context').value.trim();
+            if (context) {
+                formData.append('context', context);
+            }
+
+            formData.append('modify_existing', document.getElementById('modify-existing').checked);
+
+            // 파일이 선택되었으면 추가
+            const fileInput = document.getElementById('file');
+            if (fileInput.files.length > 0) {
+                formData.append('file', fileInput.files[0]);
+            }
+
             const response = await fetch('/api/v1/code/generate', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    query: query,
-                    context: document.getElementById('context').value.trim() || null,
-                    modify_existing: document.getElementById('modify-existing').checked
-                })
+                body: formData
             });
 
             const data = await response.json();
@@ -731,6 +762,33 @@
     document.getElementById('query').addEventListener('keydown', function (e) {
         if (e.ctrlKey && e.key === 'Enter') {
             generateCode();
+        }
+    });
+
+    // 파일 선택 시 피드백 표시
+    document.getElementById('file').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const fileInput = e.target;
+
+        if (file) {
+            // 파일이 선택된 경우
+            fileInput.style.borderColor = '#27ae60';
+            fileInput.style.backgroundColor = '#e8f5e8';
+
+            // 파일 크기 체크 (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showError('파일 크기가 10MB를 초과합니다.');
+                fileInput.value = '';
+                fileInput.style.borderColor = '#e74c3c';
+                fileInput.style.backgroundColor = '#fdf2f2';
+                return;
+            }
+
+            console.log(`파일 선택됨: ${file.name} (${(file.size / 1024).toFixed(1)}KB)`);
+        } else {
+            // 파일이 선택 해제된 경우
+            fileInput.style.borderColor = '#e1e8ed';
+            fileInput.style.backgroundColor = '#f8f9fa';
         }
     });
 

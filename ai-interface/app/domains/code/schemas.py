@@ -1,5 +1,6 @@
 from typing import Optional, Dict, Any
 
+from fastapi import Form
 from pydantic import BaseModel, Field
 
 from app.infra.code.constants import CodeLanguage, ExecutionEnvironment
@@ -11,6 +12,21 @@ class CodeGenerationRequest(BaseModel):
     context: Optional[str] = Field(None, description="추가 컨텍스트")
     modify_existing: bool = Field(False, description="기존 코드 수정 여부")
     language: CodeLanguage = Field(CodeLanguage.PYTHON, description="프로그래밍 언어")
+
+    @classmethod
+    def as_form(
+        cls,
+        query: str = Form(..., description="코드 생성 요청"),
+        context: Optional[str] = Form(None, description="추가 컨텍스트"),
+        modify_existing: bool = Form(False, description="기존 코드 수정 여부"),
+        language: CodeLanguage = Form(CodeLanguage.PYTHON, description="프로그래밍 언어"),
+    ) -> "CodeGenerationRequest":
+        return cls(
+            query=query,
+            context=context,
+            modify_existing=modify_existing,
+            language=language
+        )
 
 
 class CodeGenerationResponse(BaseModel):
