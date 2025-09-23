@@ -2,7 +2,7 @@ import logging
 from http import HTTPStatus
 from typing import List, AsyncGenerator
 
-from fastapi import HTTPException, UploadFile
+from fastapi import HTTPException
 
 from app.core.config.settings import Settings
 from app.infra.ai.llm.constants import LLMProvider
@@ -18,7 +18,10 @@ logger = logging.getLogger(__name__)
 class LLMService:
     """LLM 비즈니스 로직 서비스"""
 
-    def __init__(self, settings: Settings, llm_manager: LLMManager, file_service: FileService):
+    def __init__(self,
+                 settings: Settings,
+                 llm_manager: LLMManager,
+                 file_service: FileService):
         self.settings = settings
         self.llm_manager = llm_manager
         self.default_model_name = settings.ollama_default_model
@@ -97,13 +100,6 @@ class LLMService:
 
     async def _create_llm_request(self, request: ChatRequest, file_content: str | None):
 
-        if file_content:
-            # 사용자 메시지 뒤에 붙여줌
-            request.messages.append(ChatMessage(
-                role=PromptRole.USER.value,
-                content=f"사용자가 업로드한 파일 내용입니다:\n\n{file_content}"
-            ))
-
         # 모델 설정이 없으면 기본값 사용
         if request.llm_config is None:
             model_config = ModelConfig(
@@ -121,7 +117,8 @@ class LLMService:
             domain=request.domain,
             parameters=request.parameters,
             llm_config=model_config,
-            provider=request.provider
+            provider=request.provider,
+            file_content=file_content
         )
 
         return llm_request

@@ -7,10 +7,9 @@ from .schemas import (
     CodeGenerationRequest, CodeGenerationResponse,
     CodeExecutionRequest, CodeExecutionResponse
 )
-from ..llm import ChatRequest
-from ..llm.service import LLMService
 from ...infra.ai.llm.constants import LLMProvider
-from ...infra.ai.llm.schemas import ChatMessage
+from ...infra.ai.llm.llm_manager import LLMManager
+from ...infra.ai.llm.schemas import ChatMessage, LLMRequest
 from ...infra.ai.prompt.constants import PromptRole, PromptType
 from ...infra.code.executor import DockerCodeExecutor
 from ...infra.docker.constants import ExecutionStatus
@@ -22,11 +21,11 @@ class CodeService:
 
     def __init__(self,
                  code_executor: DockerCodeExecutor,
-                 llm_service: LLMService,
+                 llm_manager: LLMManager,
                  settings: Settings):
 
         self.code_executor = code_executor
-        self.llm_service = llm_service
+        self.llm_manager = llm_manager
         self.settings = settings
 
     async def generate_code(self,
@@ -35,20 +34,14 @@ class CodeService:
         """코드 생성"""
         try:
 
-            messages = [ChatMessage(role=PromptRole.USER.value, content=request.query)]
+            # LLMRequest 생성
+            llm_request = self._create_llm_request(request, file_content)
 
-            # 채팅 요청 생성
-            chat_request = ChatRequest(
-                messages=messages,
-                domain=PromptType.CODE_GENERATION.value,
-                parameters={"language": request.language.value},
-                provider=LLMProvider.OLLAMA
-            )
             # chat blocking 호출
-            response = await self.llm_service.chat_blocking(chat_request, file_content)
+            response = await self.llm_manager.generate_response(llm_request)
 
             # 응답에서 코드와 설명 추출
-            code, explanation = self._extract_code_and_explanation(response.data.content, request.language.value)
+            code, explanation = self._extract_code_and_explanation(response.content, request.language.value)
 
             return CodeGenerationResponse(
                 generated_code=code,
@@ -61,17 +54,33 @@ class CodeService:
             logger.error(f"코드 생성 실패: {e}")
             raise
 
-    def _extract_code_and_explanation(self, response: str, language: str) -> tuple[str, str]:
+    def _create_llm_request(self, request: CodeGenerationRequest, file_content: str | None) -> LLMRequest:
+
+        messages = [ChatMessage(role=PromptRole.USER.value, content=request.query)]
+
+        # LLMRequest 생성
+        llm_request = LLMRequest(
+            messages=messages,
+            domain=PromptType.CODE_GENERATION.value,
+            parameters={"language": request.language.value},
+            provider=LLMProvider.OLLAMA,
+            llm_config=None,
+            file_content=file_content,
+        )
+
+        return llm_request
+
+    def _extract_code_and_explanation(self, content: str, language: str) -> tuple[str, str]:
         """응답에서 코드와 설명을 추출"""
         # 코드 블록 추출
         code_pattern = rf'```(?:{language})?\n(.*?)```'
-        code_matches = re.findall(code_pattern, response, re.DOTALL)
+        code_matches = re.findall(code_pattern, content, re.DOTALL)
 
         if code_matches:
             code = code_matches[0].strip()
         else:
             # 코드 블록이 없으면 전체 응답을 코드로 처리
-            code = response.strip()
+            code = content.strip()
 
         # 설명 추출 (전체 설명 포함)
         explanation_patterns = [
@@ -82,14 +91,14 @@ class CodeService:
 
         explanation = ""
         for pattern in explanation_patterns:
-            match = re.search(pattern, response, re.DOTALL | re.IGNORECASE)
+            match = re.search(pattern, content, re.DOTALL | re.IGNORECASE)
             if match:
                 explanation = match.group(1).strip()
                 break
 
         if not explanation:
             # 패턴으로 찾지 못하면 코드 이후 텍스트를 설명으로 사용
-            parts = response.split('```')
+            parts = content.split('```')
             if len(parts) > 2:
                 explanation = parts[-1].strip()
             else:

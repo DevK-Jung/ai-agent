@@ -24,8 +24,9 @@ class LLMRequest(BaseModel):
     messages: List[ChatMessage] = Field(..., description="Chat messages")
     domain: str = Field(..., description="Domain for system prompt")
     parameters: Optional[Dict[str, Any]] = Field(default={}, description="Template parameters")
-    llm_config: ModelConfig = Field(..., description="Model configuration")
+    llm_config: Optional[ModelConfig] = Field(None, description="Model configuration")
     provider: LLMProvider = Field(default=LLMProvider.OLLAMA, description="LLM provider")
+    file_content: Optional[Any] = Field(default=None, description="File content")
 
 
 class LLMMetadata(BaseModel):

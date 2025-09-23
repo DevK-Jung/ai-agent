@@ -173,6 +173,9 @@ class Settings(BaseSettings):
         ...,
         description="Ollama 서버 URL"
     )
+    default_temperature: float = Field(
+        default=0.7
+    )
     ollama_default_model: str = Field(
         default="llama3.1:8b",
         description="기본 Ollama 모델명"

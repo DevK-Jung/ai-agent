@@ -45,3 +45,24 @@ language
 2025-09-23 14:45:21 - app.infra.ai.llm.llm_manager - ERROR - llm_manager.py:63 - Failed to generate response: model 'llama3.1:8b' not found (status code: 404)
 2025-09-23 14:45:21 - app.domains.llm.service - ERROR - service.py:85 - LLM 응답 생성 오류: Failed to generate response: model 'llama3.1:8b' not found (status code: 404)
 2025-09-23 14:45:23 - app.domains.code.service - ERROR - service.py:61 - 코드 생성 실패: 500: 응답 생성 중 오류가 발생했습니다.
+2025-09-23 16:21:07 - app.domains.code.service - ERROR - service.py:54 - 코드 생성 실패: 1 validation error for LLMRequest
+file_content
+  Input should be a valid string [type=string_type, input_value={'Sheet1': ExcelSheetInfo...상)'], shape=(12, 12))}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/string_type
+2025-09-23 16:21:35 - app.domains.code.service - ERROR - service.py:54 - 코드 생성 실패: 1 validation error for LLMRequest
+file_content
+  Input should be a valid string [type=string_type, input_value={'Sheet1': ExcelSheetInfo...상)'], shape=(12, 12))}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/string_type
+2025-09-23 16:21:50 - app.domains.code.service - ERROR - service.py:54 - 코드 생성 실패: 1 validation error for LLMRequest
+file_content
+  Input should be a valid string [type=string_type, input_value={'Sheet1': ExcelSheetInfo...상)'], shape=(12, 12))}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/string_type
+2025-09-23 16:23:41 - app.infra.ai.llm.llm_manager - ERROR - llm_manager.py:64 - Failed to generate response: 'NoneType' object has no attribute 'model_name'
+2025-09-23 16:23:41 - app.domains.code.service - ERROR - service.py:54 - 코드 생성 실패: Failed to generate response: 'NoneType' object has no attribute 'model_name'
+2025-09-23 16:25:12 - app.domains.code.service - ERROR - service.py:54 - 코드 생성 실패: 'LLMResponse' object has no attribute 'data'
+2025-09-23 16:29:44 - app.domains.code.service - ERROR - service.py:54 - 코드 생성 실패: 'LLMResponse' object has no attribute 'data'
+2025-09-23 16:33:02 - app.domains.code.service - ERROR - service.py:54 - 코드 생성 실패: 1 validation error for LLMRequest
+file_content
+  Input should be a valid string [type=string_type, input_value={'Sheet1': ExcelSheetInfo...상)'], shape=(12, 12))}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/string_type
+2025-09-23 16:35:42 - app.domains.code.service - ERROR - service.py:54 - 코드 생성 실패: 'LLMResponse' object has no attribute 'data'

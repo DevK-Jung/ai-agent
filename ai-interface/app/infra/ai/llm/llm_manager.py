@@ -9,6 +9,7 @@ from langchain_ollama import ChatOllama
 from app.core.config.settings import Settings
 from .constants import LLMProvider
 from .schemas import LLMRequest, LLMResponse, ChatMessage, ModelConfig, LLMMetadata
+from ..prompt.constants import PromptRole
 from ..prompt.prompt_manager import PromptManager
 
 logger = logging.getLogger(__name__)
@@ -40,6 +41,8 @@ class LLMManager:
         # 동적으로 모델 생성
         model = self._create_model(request.provider, request.llm_config)
 
+        self._append_file_content(request)
+
         # 메시지 변환
         messages = self._convert_to_langchain_messages(request.messages, system_prompt)
 
@@ -53,7 +56,7 @@ class LLMManager:
                 conversation_id=self._create_conversation_id(),
                 content=response.content,
                 metadata=LLMMetadata(
-                    model=request.llm_config.model_name,
+                    model=model.model,
                     domain=request.domain,
                     response_time=round(end_time - start_time, 2)
                 )
@@ -65,6 +68,7 @@ class LLMManager:
 
     async def generate_response_stream(self, request: LLMRequest) -> AsyncGenerator[LLMResponse, None]:
         """LLM 스트리밍 응답을 생성합니다."""
+        self._append_file_content(request)
 
         # 시스템 프롬프트 가져오기
         system_prompt = self._get_system_prompt(request.domain, request.parameters)
@@ -89,11 +93,26 @@ class LLMManager:
             logger.error(f"Failed to generate streaming response: {e}")
             raise RuntimeError(f"Failed to generate streaming response: {str(e)}")
 
+    def _append_file_content(self, request: LLMRequest):
+        if request.file_content:
+            # 사용자 메시지 뒤에 붙여줌
+            request.messages.append(ChatMessage(
+                role=PromptRole.USER.value,
+                content=f"사용자가 업로드한 파일 내용입니다:\n\n{request.file_content}"
+            ))
+
     def _create_model(self, provider: LLMProvider, config: ModelConfig):
         """요청에 따라 동적으로 모델을 생성합니다."""
+
+        if not config:
+            config = ModelConfig(
+                model_name=self.settings.ollama_default_model,
+                temperature=self.settings.default_temperature,
+            )
+
         try:
             return ChatOllama(
-                model=config.model_name,
+                model=config.model_name if config.model_name else self.settings.base_model,
                 base_url=self.settings.ollama_base_url,
                 temperature=config.temperature,
                 top_k=config.top_k,
