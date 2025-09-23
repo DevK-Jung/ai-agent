@@ -1,4 +1,5 @@
 import logging
+import re
 import time
 
 from app.core.config.settings import Settings
@@ -6,7 +7,11 @@ from .schemas import (
     CodeGenerationRequest, CodeGenerationResponse,
     CodeExecutionRequest, CodeExecutionResponse
 )
-from ...infra.ai.code.code_generator import CodeGenerator
+from ..llm import ChatRequest
+from ..llm.service import LLMService
+from ...infra.ai.llm.constants import LLMProvider
+from ...infra.ai.llm.schemas import ChatMessage
+from ...infra.ai.prompt.constants import PromptRole, PromptType
 from ...infra.code.executor import DockerCodeExecutor
 from ...infra.docker.constants import ExecutionStatus
 
@@ -15,29 +20,39 @@ logger = logging.getLogger(__name__)
 
 class CodeService:
 
-    def __init__(self, code_executor: DockerCodeExecutor, code_generator: CodeGenerator, settings: Settings):
+    def __init__(self,
+                 code_executor: DockerCodeExecutor,
+                 llm_service: LLMService,
+                 settings: Settings):
+
         self.code_executor = code_executor
-        self.code_generator = code_generator
+        self.llm_service = llm_service
         self.settings = settings
 
-    async def generate_code(self, request: CodeGenerationRequest, file_content: str | None) -> CodeGenerationResponse:
+    async def generate_code(self,
+                            request: CodeGenerationRequest,
+                            file_content: str | None) -> CodeGenerationResponse:
         """코드 생성"""
         try:
-            if file_content:
-                # 사용자 메시지 뒤에 붙여줌
-                request.query = f"사용자가 업로드한 파일 내용입니다:\n\n{file_content}"
 
-            # 새로운 CodeGenerator 사용
-            result = await self.code_generator.generate_code(
-                query=request.query,
-                context=request.context,
-                modify_existing=request.modify_existing,
-                language=request.language.value.lower()
+            messages = [ChatMessage(role=PromptRole.USER.value, content=request.query)]
+
+            # 채팅 요청 생성
+            chat_request = ChatRequest(
+                messages=messages,
+                domain=PromptType.CODE_GENERATION.value,
+                parameters={"language": request.language.value},
+                provider=LLMProvider.OLLAMA
             )
+            # chat blocking 호출
+            response = await self.llm_service.chat_blocking(chat_request, file_content)
+
+            # 응답에서 코드와 설명 추출
+            code, explanation = self._extract_code_and_explanation(response.data.content, request.language.value)
 
             return CodeGenerationResponse(
-                generated_code=result["generated_code"],
-                explanation=result["explanation"],
+                generated_code=code,
+                explanation=explanation,
                 language=request.language.value,
                 execution_ready=True
             )
@@ -45,6 +60,42 @@ class CodeService:
         except Exception as e:
             logger.error(f"코드 생성 실패: {e}")
             raise
+
+    def _extract_code_and_explanation(self, response: str, language: str) -> tuple[str, str]:
+        """응답에서 코드와 설명을 추출"""
+        # 코드 블록 추출
+        code_pattern = rf'```(?:{language})?\n(.*?)```'
+        code_matches = re.findall(code_pattern, response, re.DOTALL)
+
+        if code_matches:
+            code = code_matches[0].strip()
+        else:
+            # 코드 블록이 없으면 전체 응답을 코드로 처리
+            code = response.strip()
+
+        # 설명 추출 (전체 설명 포함)
+        explanation_patterns = [
+            r'\*\*설명:\*\*(.*)',  # **설명:** 이후 모든 내용
+            r'\*\*변경사항 설명:\*\*(.*)',  # **변경사항 설명:** 이후 모든 내용
+            r'설명:(.*?)(?:\n\n|$)',  # 기존 패턴 유지
+        ]
+
+        explanation = ""
+        for pattern in explanation_patterns:
+            match = re.search(pattern, response, re.DOTALL | re.IGNORECASE)
+            if match:
+                explanation = match.group(1).strip()
+                break
+
+        if not explanation:
+            # 패턴으로 찾지 못하면 코드 이후 텍스트를 설명으로 사용
+            parts = response.split('```')
+            if len(parts) > 2:
+                explanation = parts[-1].strip()
+            else:
+                explanation = f"{language.title()} 코드가 생성되었습니다."
+
+        return code, explanation
 
     async def execute_code(
             self,

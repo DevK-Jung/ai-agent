@@ -39,3 +39,9 @@ language
 language
   Field required [type=missing, input_value={'execution_id': '1835eac...nment.DOCKER: 'docker'>}, input_type=dict]
     For further information visit https://errors.pydantic.dev/2.11/v/missing
+2025-09-23 14:41:55 - app.domains.code.service - ERROR - service.py:64 - 코드 생성 실패: 'Settings' object has no attribute 'default_model_name'
+2025-09-23 14:42:20 - app.domains.code.service - ERROR - service.py:64 - 코드 생성 실패: 'Settings' object has no attribute 'default_model_name'
+2025-09-23 14:42:36 - app.domains.code.service - ERROR - service.py:64 - 코드 생성 실패: 'Settings' object has no attribute 'default_model_name'
+2025-09-23 14:45:21 - app.infra.ai.llm.llm_manager - ERROR - llm_manager.py:63 - Failed to generate response: model 'llama3.1:8b' not found (status code: 404)
+2025-09-23 14:45:21 - app.domains.llm.service - ERROR - service.py:85 - LLM 응답 생성 오류: Failed to generate response: model 'llama3.1:8b' not found (status code: 404)
+2025-09-23 14:45:23 - app.domains.code.service - ERROR - service.py:61 - 코드 생성 실패: 500: 응답 생성 중 오류가 발생했습니다.
