@@ -321,3 +321,82 @@
 2025-09-23 10:20:35 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 일자별_대출_조회_현황_통계정보.xlsx
 2025-09-23 10:21:44 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 일자별_대출_조회_현황_통계정보.xlsx, 크기: 10554 bytes, 해시: 0cc9e746feb4d5e9...
 2025-09-23 10:21:44 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 일자별_대출_조회_현황_통계정보.xlsx
+2025-09-23 10:23:31 - app.domains.code.service - ERROR - service.py:41 - 코드 생성 실패: 코드 생성 실패: 'NoneType' object has no attribute 'ainvoke'
+2025-09-23 10:23:31 - app.api.v1.endpoints.code - ERROR - code.py:22 - 코드 생성 실패: 코드 생성 실패: 'NoneType' object has no attribute 'ainvoke'
+2025-09-23 10:23:34 - app.domains.code.service - ERROR - service.py:41 - 코드 생성 실패: 코드 생성 실패: 'NoneType' object has no attribute 'ainvoke'
+2025-09-23 10:23:34 - app.api.v1.endpoints.code - ERROR - code.py:22 - 코드 생성 실패: 코드 생성 실패: 'NoneType' object has no attribute 'ainvoke'
+2025-09-23 10:23:55 - app.domains.code.service - ERROR - service.py:41 - 코드 생성 실패: 코드 생성 실패: 'NoneType' object has no attribute 'ainvoke'
+2025-09-23 10:23:55 - app.api.v1.endpoints.code - ERROR - code.py:22 - 코드 생성 실패: 코드 생성 실패: 'NoneType' object has no attribute 'ainvoke'
+2025-09-23 10:26:25 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 일자별_대출_조회_현황_통계정보.xlsx, 크기: 10554 bytes, 해시: 0cc9e746feb4d5e9...
+2025-09-23 10:26:25 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 일자별_대출_조회_현황_통계정보.xlsx
+2025-09-23 10:28:16 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 지역화폐_BC카드_소비_결합_데이터.xlsx, 크기: 12793 bytes, 해시: 41c5090427d8511b...
+2025-09-23 10:28:16 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 지역화폐_BC카드_소비_결합_데이터.xlsx
+2025-09-23 10:28:21 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 10:28:21 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 10:28:21 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-23 10:28:21 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 10:28:33 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 수도권의_대중교통(버스지하철등)_대한_승_하차_이용내역_데이터.xlsx, 크기: 11031 bytes, 해시: 7cc4cbb400bdffb7...
+2025-09-23 10:28:34 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 수도권의_대중교통(버스지하철등)_대한_승_하차_이용내역_데이터.xlsx
+2025-09-23 10:28:44 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 10:28:44 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 10:28:44 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-23 10:28:44 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 4 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 10:28:54 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 일자별_대출_조회_현황_통계정보.xlsx, 크기: 10554 bytes, 해시: 0cc9e746feb4d5e9...
+2025-09-23 10:28:54 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 일자별_대출_조회_현황_통계정보.xlsx
+2025-09-23 10:33:44 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 10:33:44 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 10:33:44 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-23 10:33:44 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 10:37:29 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 10:37:29 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 10:37:29 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-23 10:37:29 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 10:39:22 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 10:39:22 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 10:39:22 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-23 10:39:22 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 10:40:05 - app.infra.ai.code.code_generator - ERROR - code_generator.py:119 - 코드 생성 실패: 'LLMMetadata' object has no attribute 'model_name'
+2025-09-23 10:40:05 - app.domains.code.service - ERROR - service.py:42 - 코드 생성 실패: 코드 생성 실패: 'LLMMetadata' object has no attribute 'model_name'
+2025-09-23 10:40:05 - app.api.v1.endpoints.code - ERROR - code.py:22 - 코드 생성 실패: 코드 생성 실패: 'LLMMetadata' object has no attribute 'model_name'
+2025-09-23 10:45:00 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 10:45:00 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 10:45:01 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-23 10:45:01 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 10:45:36 - app.infra.docker.client - INFO - client.py:45 - 이미지 존재 확인: jupyter/scipy-notebook:latest
+2025-09-23 10:45:40 - app.domains.code.service - ERROR - service.py:65 - 코드 실행 실패: 1 validation error for CodeExecutionResponse
+language
+  Field required [type=missing, input_value={'execution_id': '2a493d6...nment.DOCKER: 'docker'>}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+2025-09-23 10:47:26 - app.infra.docker.client - INFO - client.py:45 - 이미지 존재 확인: jupyter/scipy-notebook:latest
+2025-09-23 10:47:28 - app.domains.code.service - ERROR - service.py:65 - 코드 실행 실패: 1 validation error for CodeExecutionResponse
+language
+  Field required [type=missing, input_value={'execution_id': '7210879...nment.DOCKER: 'docker'>}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+2025-09-23 10:47:42 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 10:47:42 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 10:47:42 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-23 10:47:42 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 10:48:04 - app.infra.docker.client - INFO - client.py:45 - 이미지 존재 확인: jupyter/scipy-notebook:latest
+2025-09-23 10:48:07 - app.domains.code.service - ERROR - service.py:65 - 코드 실행 실패: 1 validation error for CodeExecutionResponse
+language
+  Field required [type=missing, input_value={'execution_id': '1835eac...nment.DOCKER: 'docker'>}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+2025-09-23 10:50:43 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 10:50:43 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 10:50:43 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-23 10:50:43 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 10:51:30 - app.infra.docker.client - INFO - client.py:45 - 이미지 존재 확인: jupyter/scipy-notebook:latest
+2025-09-23 10:51:58 - app.infra.docker.client - INFO - client.py:45 - 이미지 존재 확인: jupyter/scipy-notebook:latest
+2025-09-23 10:53:21 - app.infra.docker.client - INFO - client.py:45 - 이미지 존재 확인: jupyter/scipy-notebook:latest
+2025-09-23 10:57:39 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 10:57:39 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 10:57:39 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-23 10:57:39 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 10:58:31 - app.infra.docker.client - INFO - client.py:45 - 이미지 존재 확인: jupyter/scipy-notebook:latest
+2025-09-23 11:00:52 - app.infra.docker.client - INFO - client.py:45 - 이미지 존재 확인: jupyter/scipy-notebook:latest
+2025-09-23 11:10:05 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 11:10:05 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 11:10:05 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-23 11:10:05 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 11:10:37 - app.infra.docker.client - INFO - client.py:45 - 이미지 존재 확인: jupyter/scipy-notebook:latest
+2025-09-23 11:11:33 - app.infra.docker.client - INFO - client.py:45 - 이미지 존재 확인: jupyter/scipy-notebook:latest

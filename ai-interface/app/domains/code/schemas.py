@@ -38,7 +38,7 @@ class CodeExecutionResponse(BaseModel):
     stderr: Optional[str] = Field(None, description="에러 출력")
     execution_time: float = Field(..., description="실행 시간 (초)")
     environment: ExecutionEnvironment = Field(..., description="실행 환경")
-    language: str = Field(..., description="프로그래밍 언어")
+    language: str = Field(None, description="프로그래밍 언어")
     exit_code: Optional[int] = Field(None, description="종료 코드")
     variables: Optional[Dict[str, Any]] = Field(None, description="실행 결과 변수들")
     error: Optional[str] = Field(None, description="에러 메시지")

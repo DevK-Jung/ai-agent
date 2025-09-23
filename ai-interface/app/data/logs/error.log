@@ -18,3 +18,24 @@
 2025-09-23 10:06:08 - app.domains.file.service - ERROR - service.py:71 - 파일 추출 오류: I/O operation on closed file.
 2025-09-23 10:07:24 - app.domains.file.service - ERROR - service.py:71 - 파일 추출 오류: I/O operation on closed file.
 2025-09-23 10:17:28 - app.domains.file.service - ERROR - service.py:71 - 파일 추출 오류: Excel 추출 실패: Excel file format cannot be determined, you must specify an engine manually.
+2025-09-23 10:23:31 - app.domains.code.service - ERROR - service.py:41 - 코드 생성 실패: 코드 생성 실패: 'NoneType' object has no attribute 'ainvoke'
+2025-09-23 10:23:31 - app.api.v1.endpoints.code - ERROR - code.py:22 - 코드 생성 실패: 코드 생성 실패: 'NoneType' object has no attribute 'ainvoke'
+2025-09-23 10:23:34 - app.domains.code.service - ERROR - service.py:41 - 코드 생성 실패: 코드 생성 실패: 'NoneType' object has no attribute 'ainvoke'
+2025-09-23 10:23:34 - app.api.v1.endpoints.code - ERROR - code.py:22 - 코드 생성 실패: 코드 생성 실패: 'NoneType' object has no attribute 'ainvoke'
+2025-09-23 10:23:55 - app.domains.code.service - ERROR - service.py:41 - 코드 생성 실패: 코드 생성 실패: 'NoneType' object has no attribute 'ainvoke'
+2025-09-23 10:23:55 - app.api.v1.endpoints.code - ERROR - code.py:22 - 코드 생성 실패: 코드 생성 실패: 'NoneType' object has no attribute 'ainvoke'
+2025-09-23 10:40:05 - app.infra.ai.code.code_generator - ERROR - code_generator.py:119 - 코드 생성 실패: 'LLMMetadata' object has no attribute 'model_name'
+2025-09-23 10:40:05 - app.domains.code.service - ERROR - service.py:42 - 코드 생성 실패: 코드 생성 실패: 'LLMMetadata' object has no attribute 'model_name'
+2025-09-23 10:40:05 - app.api.v1.endpoints.code - ERROR - code.py:22 - 코드 생성 실패: 코드 생성 실패: 'LLMMetadata' object has no attribute 'model_name'
+2025-09-23 10:45:40 - app.domains.code.service - ERROR - service.py:65 - 코드 실행 실패: 1 validation error for CodeExecutionResponse
+language
+  Field required [type=missing, input_value={'execution_id': '2a493d6...nment.DOCKER: 'docker'>}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+2025-09-23 10:47:28 - app.domains.code.service - ERROR - service.py:65 - 코드 실행 실패: 1 validation error for CodeExecutionResponse
+language
+  Field required [type=missing, input_value={'execution_id': '7210879...nment.DOCKER: 'docker'>}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+2025-09-23 10:48:07 - app.domains.code.service - ERROR - service.py:65 - 코드 실행 실패: 1 validation error for CodeExecutionResponse
+language
+  Field required [type=missing, input_value={'execution_id': '1835eac...nment.DOCKER: 'docker'>}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing

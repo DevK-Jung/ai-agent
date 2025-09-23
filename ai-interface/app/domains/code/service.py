@@ -2,11 +2,11 @@ import logging
 import time
 
 from app.core.config.settings import Settings
-from .code_generator import CodeGenerator
 from .schemas import (
     CodeGenerationRequest, CodeGenerationResponse,
     CodeExecutionRequest, CodeExecutionResponse
 )
+from ...infra.ai.code.code_generator import CodeGenerator
 from ...infra.code.executor import DockerCodeExecutor
 from ...infra.docker.constants import ExecutionStatus
 
@@ -15,23 +15,24 @@ logger = logging.getLogger(__name__)
 
 class CodeService:
 
-    def __init__(self, code_executor: DockerCodeExecutor, settings: Settings):
+    def __init__(self, code_executor: DockerCodeExecutor, code_generator: CodeGenerator, settings: Settings):
         self.code_executor = code_executor
+        self.code_generator = code_generator
         self.settings = settings
-        self.generator = CodeGenerator()
 
     async def generate_code(self, request: CodeGenerationRequest) -> CodeGenerationResponse:
         """코드 생성"""
         try:
-            # 기존 코드 생성기 사용
-            result = await self.generator.generate_code(
+            # 새로운 CodeGenerator 사용
+            result = await self.code_generator.generate_code(
                 query=request.query,
                 context=request.context,
-                modify_existing=request.modify_existing
+                modify_existing=request.modify_existing,
+                language=request.language.value.lower()
             )
 
             return CodeGenerationResponse(
-                generated_code=result["code"],
+                generated_code=result["generated_code"],
                 explanation=result["explanation"],
                 language=request.language.value,
                 execution_ready=True
