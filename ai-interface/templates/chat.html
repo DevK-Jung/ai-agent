@@ -67,12 +67,12 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             width: 100%;
             background: white;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            height: calc(100vh - 80px); /* header 높이 제외 */
+            height: 100vh;
             position: relative;
         }
 
@@ -84,6 +84,7 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+            height: calc(100vh - 80px - 140px); /* header와 input 영역 제외 */
         }
 
         .message {
@@ -452,14 +453,14 @@
     </style>
 </head>
 <body>
-<div class="header">
-    <h1>💬 AI 챗봇</h1>
-    <button class="back-button" onclick="goHome()">
-        ← 홈으로
-    </button>
-</div>
-
 <div class="chat-container">
+    <header class="header">
+        <button class="back-button" onclick="goHome()">
+            ← 홈으로
+        </button>
+        <h1>💬 AI 챗봇</h1>
+        <div style="width: 88px;"> <!-- 레이아웃 균형을 위한 공간 --></div>
+    </header>
     <div class="chat-messages" id="chat-messages">
         <div class="message assistant">
             <div class="message-avatar">🤖</div>

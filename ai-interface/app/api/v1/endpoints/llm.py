@@ -6,7 +6,6 @@ from sse_starlette import EventSourceResponse
 from app.domains.file.dependencies import FileServiceDep
 from app.domains.llm import SimpleChatRequest, ChatResponse, ChatRequest, DomainInfo
 from app.domains.llm.dependencies import LLMServiceDep
-from app.domains.llm.schemas import as_form
 from app.infra.ai.llm.schemas import LLMResponse
 
 router = APIRouter()
@@ -20,7 +19,7 @@ async def chat_simple(request: SimpleChatRequest, llm_service: LLMServiceDep):
 @router.post("/chat/blocking", response_model=ChatResponse)
 async def chat_blocking(llm_service: LLMServiceDep,
                         file_service: FileServiceDep,
-                        request: ChatRequest = Depends(as_form),
+                        request: ChatRequest = Depends(ChatRequest.as_form),
                         file: UploadFile = File(None, description="파일")):
     file_content = await file_service.extract_file_content(file)
 
@@ -32,7 +31,7 @@ async def chat_blocking(llm_service: LLMServiceDep,
              response_class=EventSourceResponse)
 async def chat_streaming(llm_service: LLMServiceDep,
                          file_service: FileServiceDep,
-                         request: ChatRequest = Depends(as_form),
+                         request: ChatRequest = Depends(ChatRequest.as_form),
                          file: UploadFile = File(None, description="파일")):
     file_content = await file_service.extract_file_content(file)
 
