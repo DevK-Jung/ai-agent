@@ -2,13 +2,14 @@ import logging
 from http import HTTPStatus
 from typing import List, AsyncGenerator
 
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 
 from app.core.config.settings import Settings
 from app.infra.ai.llm.constants import LLMProvider
 from app.infra.ai.llm.llm_manager import LLMManager
-from app.infra.ai.llm.schemas import LLMRequest, ModelConfig, ChatMessage, LLMResponse
+from app.infra.ai.llm.schemas import LLMRequest, ModelConfig, ChatMessage
 from .schemas import SimpleChatRequest, ChatRequest, DomainInfo, ChatResponse
+from ..file.service import FileService
 from ...infra.ai.prompt.constants import PromptRole
 
 logger = logging.getLogger(__name__)
@@ -17,10 +18,11 @@ logger = logging.getLogger(__name__)
 class LLMService:
     """LLM 비즈니스 로직 서비스"""
 
-    def __init__(self, settings: Settings, llm_manager: LLMManager):
+    def __init__(self, settings: Settings, llm_manager: LLMManager, file_service: FileService):
         self.settings = settings
         self.llm_manager = llm_manager
         self.default_model_name = settings.ollama_default_model
+        self.file_service = file_service
 
     async def chat_simple(self, request: SimpleChatRequest) -> ChatResponse:
         """간단한 단일 메시지 채팅"""
@@ -62,10 +64,10 @@ class LLMService:
             logger.error(f"예상치 못한 오류: {str(e)}")
             raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="서비스 오류가 발생했습니다.")
 
-    async def chat_blocking(self, request: ChatRequest) -> ChatResponse:
+    async def chat_blocking(self, request: ChatRequest, file_content: str | None) -> ChatResponse:
         """다중 턴 채팅"""
         try:
-            llm_request = await self._create_llm_request(request)
+            llm_request = await self._create_llm_request(request, file_content)
 
             # LLM 호출
             response = await self.llm_manager.generate_response(llm_request)
@@ -86,14 +88,22 @@ class LLMService:
             logger.error(f"예상치 못한 오류: {str(e)}")
             raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="서비스 오류가 발생했습니다.")
 
-    async def chat_streaming(self, request: ChatRequest) -> AsyncGenerator[str, None]:
+    async def chat_streaming(self, request: ChatRequest, file_content: str | None) -> AsyncGenerator[str, None]:
         """스트리밍 채팅 응답"""
-        llm_request = await self._create_llm_request(request)
+        llm_request = await self._create_llm_request(request, file_content)
 
         async for chunk in self.llm_manager.generate_response_stream(llm_request):
             yield chunk.model_dump_json()
 
-    async def _create_llm_request(self, request):
+    async def _create_llm_request(self, request: ChatRequest, file_content: str | None):
+
+        if file_content:
+            # 사용자 메시지 뒤에 붙여줌
+            request.messages.append(ChatMessage(
+                role=PromptRole.USER.value,
+                content=f"사용자가 업로드한 파일 내용입니다:\n\n{file_content}"
+            ))
+
         # 모델 설정이 없으면 기본값 사용
         if request.llm_config is None:
             model_config = ModelConfig(

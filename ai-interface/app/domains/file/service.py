@@ -73,9 +73,9 @@ class FileService:
         except Exception as e:
             logger.error(f"예상치 못한 오류: {str(e)}")
             raise HTTPException(status_code=500, detail="파일 처리 중 오류가 발생했습니다.")
-        finally:
-            # 파일 스트림 리셋
-            await file.seek(0)
+        # finally:
+        # 파일 스트림 리셋
+        # await file.seek(0)
 
     async def extract_multiple_files(
             self,

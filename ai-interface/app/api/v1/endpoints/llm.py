@@ -1,10 +1,12 @@
 from typing import List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile, File, Depends
 from sse_starlette import EventSourceResponse
 
+from app.domains.file.dependencies import FileServiceDep
 from app.domains.llm import SimpleChatRequest, ChatResponse, ChatRequest, DomainInfo
 from app.domains.llm.dependencies import LLMServiceDep
+from app.domains.llm.schemas import as_form
 from app.infra.ai.llm.schemas import LLMResponse
 
 router = APIRouter()
@@ -16,15 +18,35 @@ async def chat_simple(request: SimpleChatRequest, llm_service: LLMServiceDep):
 
 
 @router.post("/chat/blocking", response_model=ChatResponse)
-async def chat_blocking(request: ChatRequest, llm_service: LLMServiceDep):
-    return await llm_service.chat_blocking(request)
+async def chat_blocking(llm_service: LLMServiceDep,
+                        file_service: FileServiceDep,
+                        request: ChatRequest = Depends(as_form),
+                        file: UploadFile = File(None, description="파일")):
+    file_content = await extract_file_content(file, file_service)
+
+    return await llm_service.chat_blocking(request, file_content)
 
 
 @router.post("/chat/streaming",
              response_model=LLMResponse,
              response_class=EventSourceResponse)
-async def chat_streaming(request: ChatRequest, llm_service: LLMServiceDep):
-    return EventSourceResponse(llm_service.chat_streaming(request))
+async def chat_streaming(llm_service: LLMServiceDep,
+                         file_service: FileServiceDep,
+                         request: ChatRequest = Depends(as_form),
+                         file: UploadFile = File(None, description="파일")):
+    file_content = await extract_file_content(file, file_service)
+
+    return EventSourceResponse(llm_service.chat_streaming(request, file_content))
+
+
+async def extract_file_content(file, file_service):
+    # 파일 내용 추출
+    if not file:
+        return None
+
+    file_result = await file_service.extract_file_content(file)
+    if file_result and file_result.content:
+        return file_result.content
 
 
 @router.post("/available-domains", response_model=List[DomainInfo])

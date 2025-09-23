@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot - 파일 첨부 대화</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-2px);
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            background: white;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            height: calc(100vh - 80px); /* header 높이 제외 */
+            position: relative;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            padding-bottom: 140px; /* 입력 영역을 위한 여백 */
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .message {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            flex-shrink: 0;
+        }
+
+        .user .message-avatar {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .assistant .message-avatar {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 18px;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .user .message-content {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .assistant .message-content {
+            background: #f8f9fa;
+            color: #2c3e50;
+            border: 1px solid #e9ecef;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-content h1, .message-content h2, .message-content h3 {
+            margin: 15px 0 10px 0;
+            color: inherit;
+        }
+
+        .message-content h1 { font-size: 1.4em; }
+        .message-content h2 { font-size: 1.3em; }
+        .message-content h3 { font-size: 1.2em; }
+
+        .message-content p {
+            margin-bottom: 10px;
+        }
+
+        .message-content ul, .message-content ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .message-content li {
+            margin-bottom: 5px;
+        }
+
+        .message-content code {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+        }
+
+        .user .message-content code {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .message-content pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .file-attachment {
+            background: rgba(52, 152, 219, 0.1);
+            border: 1px solid #3498db;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-icon {
+            width: 30px;
+            height: 30px;
+            background: #3498db;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .file-size {
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        .chat-input-area {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            max-width: 100%;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .file-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            background: #6c757d;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .file-input-label:hover {
+            background: #5a6268;
+        }
+
+        .selected-files {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .selected-file {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 20px;
+            padding: 5px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #1976d2;
+        }
+
+        .remove-file {
+            background: none;
+            border: none;
+            color: #1976d2;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .message-input {
+            width: 100%;
+            min-height: 50px;
+            max-height: 150px;
+            padding: 15px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 25px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: none;
+            outline: none;
+            transition: border-color 0.3s;
+            line-height: 1.4;
+        }
+
+        .message-input:focus {
+            border-color: #3498db;
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .send-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .send-button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            color: #6c757d;
+            font-style: italic;
+            padding: 15px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            position: absolute;
+            bottom: 100px; /* 입력 영역 위에 위치 */
+            left: 0;
+            right: 0;
+            z-index: 99;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #6c757d;
+            border-radius: 50%;
+            animation: typingAnimation 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingAnimation {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .error-message {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .chat-messages {
+                padding: 20px 15px;
+            }
+
+            .chat-input-area {
+                padding: 20px 15px;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .input-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            .send-button {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>💬 AI 챗봇</h1>
+    <button class="back-button" onclick="goHome()">
+        ← 홈으로
+    </button>
+</div>
+
+<div class="chat-container">
+    <div class="chat-messages" id="chat-messages">
+        <div class="message assistant">
+            <div class="message-avatar">🤖</div>
+            <div class="message-content">
+                안녕하세요! 저는 AI 어시스턴트입니다. 파일을 첨부하여 질문하거나 자유롭게 대화해보세요.
+                어떤 도움이 필요하신가요?
+            </div>
+        </div>
+    </div>
+
+    <div class="typing-indicator" id="typing-indicator">
+        <div class="message-avatar">🤖</div>
+        <span>AI가 응답을 생성하고 있습니다</span>
+        <div class="typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>
+    </div>
+
+    <div class="chat-input-area">
+        <div class="input-container">
+            <div class="input-wrapper">
+                <div class="file-input-container">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="file-input" class="file-input" multiple
+                               accept=".txt,.py,.js,.json,.md,.csv,.xml,.html,.css">
+                        <label for="file-input" class="file-input-label">
+                            📎 파일 첨부
+                        </label>
+                    </div>
+                    <div class="selected-files" id="selected-files"></div>
+                </div>
+                <textarea
+                    id="message-input"
+                    class="message-input"
+                    placeholder="메시지를 입력하세요... (Enter로 전송, Shift+Enter로 줄바꿈)"
+                    rows="1"
+                ></textarea>
+            </div>
+            <button id="send-button" class="send-button" onclick="sendMessage()">
+                ➤
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedFiles = [];
+    let isStreaming = false;
+
+    // 마크다운 렌더러 설정
+    marked.setOptions({
+        highlight: function(code, lang) {
+            if (Prism.languages[lang]) {
+                return Prism.highlight(code, Prism.languages[lang], lang);
+            }
+            return code;
+        },
+        breaks: true,
+        gfm: true
+    });
+
+    function goHome() {
+        window.location.href = '/';
+    }
+
+    // 파일 선택 처리
+    document.getElementById('file-input').addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        files.forEach(file => {
+            if (!selectedFiles.find(f => f.name === file.name && f.size === file.size)) {
+                selectedFiles.push(file);
+            }
+        });
+        updateSelectedFiles();
+        e.target.value = '';
+    });
+
+    function updateSelectedFiles() {
+        const container = document.getElementById('selected-files');
+        container.innerHTML = '';
+
+        selectedFiles.forEach((file, index) => {
+            const fileElement = document.createElement('div');
+            fileElement.className = 'selected-file';
+            fileElement.innerHTML = `
+                <span>📄 ${file.name}</span>
+                <button class="remove-file" onclick="removeFile(${index})">×</button>
+            `;
+            container.appendChild(fileElement);
+        });
+    }
+
+    function removeFile(index) {
+        selectedFiles.splice(index, 1);
+        updateSelectedFiles();
+    }
+
+    // 메시지 입력 자동 크기 조절
+    const messageInput = document.getElementById('message-input');
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+    });
+
+    // Enter 키 처리 (Shift+Enter는 줄바꿈, Enter는 전송)
+    messageInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    function addMessage(content, isUser = false, files = []) {
+        const messagesContainer = document.getElementById('chat-messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+
+        let filesHtml = '';
+        if (files.length > 0) {
+            filesHtml = files.map(file => `
+                <div class="file-attachment">
+                    <div class="file-icon">📄</div>
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${formatFileSize(file.size)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        messageDiv.innerHTML = `
+            <div class="message-avatar">${isUser ? '👤' : '🤖'}</div>
+            <div class="message-content">
+                ${filesHtml}
+                ${isUser ? escapeHtml(content) : marked.parse(content)}
+            </div>
+        `;
+
+        messagesContainer.appendChild(messageDiv);
+        scrollToBottom();
+
+        // 코드 하이라이팅 적용
+        if (!isUser) {
+            Prism.highlightAllUnder(messageDiv);
+        }
+
+        return messageDiv;
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function scrollToBottom() {
+        const messagesContainer = document.getElementById('chat-messages');
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+        document.getElementById('typing-indicator').style.display = 'flex';
+        scrollToBottom();
+    }
+
+    function hideTypingIndicator() {
+        document.getElementById('typing-indicator').style.display = 'none';
+    }
+
+    function showError(message) {
+        const messagesContainer = document.getElementById('chat-messages');
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = `오류: ${message}`;
+        messagesContainer.appendChild(errorDiv);
+        scrollToBottom();
+    }
+
+    async function sendMessage() {
+        const messageText = messageInput.value.trim();
+        if (!messageText && selectedFiles.length === 0) return;
+
+        if (isStreaming) return;
+
+        // 사용자 메시지 추가
+        addMessage(messageText || '파일을 첨부했습니다.', true, selectedFiles);
+
+        // 입력 필드 초기화
+        const files = [...selectedFiles];
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+        selectedFiles = [];
+        updateSelectedFiles();
+
+        // 전송 버튼 비활성화
+        const sendButton = document.getElementById('send-button');
+        sendButton.disabled = true;
+
+        // 타이핑 인디케이터 표시
+        showTypingIndicator();
+        isStreaming = true;
+
+        try {
+            // FormData 생성 - 서버 API 스펙에 맞춰 구성
+            const formData = new FormData();
+
+            // 메시지가 있으면 messages 배열에 추가
+            if (messageText) {
+                formData.append('messages', messageText);
+            }
+
+            // 필수 필드들
+            formData.append('domain', 'analysis');
+            formData.append('parameters', '{}');
+            formData.append('model_name', 'gemma3:27b'); // 기본 모델
+            formData.append('temperature', '0.7');
+
+            // 파일이 있으면 첫 번째 파일만 추가 (API는 단일 파일만 지원)
+            if (files.length > 0) {
+                formData.append('file', files[0]);
+            }
+
+            // API 요청
+            const response = await fetch('/api/v1/llm/chat/streaming', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            hideTypingIndicator();
+
+            // 응답 메시지 컨테이너 생성
+            const responseMessage = addMessage('', false);
+            const contentDiv = responseMessage.querySelector('.message-content');
+
+            let fullResponse = '';
+
+            // 스트리밍 응답 처리
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.slice(6));
+                            if (data.content) {
+                                fullResponse += data.content;
+                                contentDiv.innerHTML = marked.parse(fullResponse);
+                                Prism.highlightAllUnder(contentDiv);
+                                scrollToBottom();
+                            }
+                        } catch (e) {
+                            // JSON 파싱 오류 무시 (불완전한 청크)
+                        }
+                    }
+                }
+            }
+
+        } catch (error) {
+            hideTypingIndicator();
+            showError(error.message);
+        } finally {
+            isStreaming = false;
+            sendButton.disabled = false;
+        }
+    }
+
+    // 초기 스크롤
+    scrollToBottom();
+</script>
+</body>
+</html>

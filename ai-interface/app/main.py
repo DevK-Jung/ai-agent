@@ -2,10 +2,13 @@
 FastAPI AI 인터페이스 메인 애플리케이션
 """
 import multiprocessing
+from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.gzip import GZipMiddleware
 from starlette.middleware.cors import CORSMiddleware
+from starlette.responses import HTMLResponse
+from starlette.templating import Jinja2Templates
 
 from app.api import v1_router
 from app.core.config.settings import get_settings
@@ -66,12 +69,39 @@ app.include_router(
 
 
 # =============================================================================
+# 템플릿 설정
+# =============================================================================
+
+# 프로젝트 루트 디렉토리 기준으로 템플릿 경로 설정
+BASE_DIR = Path(__file__).resolve().parent.parent
+TEMPLATES_DIR = BASE_DIR / "templates"
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+
+# =============================================================================
 # 루트 엔드포인트
 # =============================================================================
 
-@app.get("/")
-async def root():
-    """루트 엔드포인트 - API 버전 정보 제공"""
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    """홈 화면 - 채팅/코딩 선택"""
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.get("/chat", response_class=HTMLResponse)
+async def chat_page(request: Request):
+    """채팅 화면"""
+    return templates.TemplateResponse("chat.html", {"request": request})
+
+
+@app.get("/code", response_class=HTMLResponse)
+async def code_page(request: Request):
+    """코딩 화면"""
+    return templates.TemplateResponse("code.html", {"request": request})
+
+
+@app.get("/api")
+async def api_info():
+    """API 정보 제공"""
     return {
         "message": "AI Interface API",
         "description": "FastAPI 기반 AI 인터페이스",

@@ -1,16 +1,15 @@
 from typing import Dict, Any, Optional, List
 
+from fastapi import Form, File, UploadFile
 from pydantic import BaseModel, Field
 
+from app.infra.ai.llm.constants import LLMProvider
 # Re-export infra schemas for domain use
 from app.infra.ai.llm.schemas import (
     ChatMessage,
     ModelConfig,
-    LLMRequest,
-    LLMResponse,
-    LLMMetadata
+    LLMResponse
 )
-from app.infra.ai.llm.constants import LLMProvider
 
 
 class SimpleChatRequest(BaseModel):
@@ -27,6 +26,47 @@ class ChatRequest(BaseModel):
     parameters: Optional[Dict[str, Any]] = Field(default={}, description="Template parameters")
     llm_config: Optional[ModelConfig] = Field(default=None, description="Model configuration")
     provider: LLMProvider = Field(default=LLMProvider.OLLAMA, description="LLM provider")
+
+
+# FormData -> ChatRequest 변환
+def as_form(
+        messages: List[str] = Form(..., description="사용자 입력 메시지 (여러개 가능)"),
+        domain: str = Form("general"),
+        parameters: str = Form("{}", description="Template parameters (JSON string)"),
+        model_name: str = Form(..., description="모델 이름"),
+        temperature: float = Form(0.7),
+        max_tokens: Optional[int] = Form(None),
+        top_p: Optional[float] = Form(None),
+        top_k: Optional[int] = Form(None),
+        repeat_penalty: Optional[float] = Form(None),
+        stop: Optional[str] = Form(None, description="중지 토큰들 (JSON array string)"),
+        provider: LLMProvider = Form(LLMProvider.OLLAMA, description="LLM provider"),
+) -> ChatRequest:
+    import json
+
+    parameters_parsed = json.loads(parameters)
+    stop_parsed = json.loads(stop) if stop else None
+
+    # 들어온 메시지를 전부 user role로 변환
+    chat_messages = [ChatMessage(role="user", content=m) for m in messages]
+
+    llm_config = ModelConfig(
+        model_name=model_name,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        top_p=top_p,
+        top_k=top_k,
+        repeat_penalty=repeat_penalty,
+        stop=stop_parsed,
+    )
+
+    return ChatRequest(
+        messages=chat_messages,
+        domain=domain,
+        parameters=parameters_parsed,
+        llm_config=llm_config,
+        provider=provider,
+    )
 
 
 class DomainInfo(BaseModel):

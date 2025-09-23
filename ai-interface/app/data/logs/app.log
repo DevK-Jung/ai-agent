@@ -209,3 +209,115 @@
 2025-09-22 17:08:57 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
 2025-09-22 17:08:57 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
 2025-09-22 17:08:57 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 2 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 17:13:57 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 17:13:57 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 17:13:57 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 17:13:57 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 2 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 17:18:56 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 17:18:56 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 17:18:56 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 17:18:56 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 2 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 17:23:57 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 17:23:57 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 17:23:57 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 17:23:57 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 2 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-22 17:29:08 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-22 17:29:08 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-22 17:29:08 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-22 17:29:08 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 2 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 09:23:26 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 09:23:26 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 09:23:26 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-23 09:23:26 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 09:24:36 - app.domains.file.service - INFO - service.py:46 - 파일 처리 시작: 탄소중립과 기후 대응.txt, 크기: 285 bytes, 해시: f60f08f2036aa1bb...
+2025-09-23 09:24:36 - app.domains.file.service - INFO - service.py:65 - 파일 처리 완료: 탄소중립과 기후 대응.txt
+2025-09-23 09:38:35 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 09:38:35 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 09:38:35 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-23 09:38:35 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 09:40:06 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 09:40:06 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 09:40:06 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-23 09:40:06 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 09:40:22 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 09:40:22 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 09:40:22 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-23 09:40:22 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 09:42:18 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 09:42:18 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 09:42:19 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-23 09:42:19 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 09:43:29 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 09:43:29 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 09:43:29 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-23 09:43:29 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 09:43:46 - app.domains.code.service - ERROR - service.py:41 - 코드 생성 실패: 코드 생성 실패: 'NoneType' object has no attribute 'ainvoke'
+2025-09-23 09:43:46 - app.api.v1.endpoints.code - ERROR - code.py:33 - 코드 생성 실패: 코드 생성 실패: 'NoneType' object has no attribute 'ainvoke'
+2025-09-23 09:43:52 - app.domains.code.service - ERROR - service.py:41 - 코드 생성 실패: 코드 생성 실패: 'NoneType' object has no attribute 'ainvoke'
+2025-09-23 09:43:52 - app.api.v1.endpoints.code - ERROR - code.py:33 - 코드 생성 실패: 코드 생성 실패: 'NoneType' object has no attribute 'ainvoke'
+2025-09-23 09:47:32 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 09:47:32 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 09:47:32 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-23 09:47:32 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 09:48:02 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 09:48:02 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 09:48:02 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-23 09:48:02 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 09:48:55 - app.domains.file.service - ERROR - service.py:72 - 파일 추출 오류: I/O operation on closed file.
+2025-09-23 09:55:34 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 09:55:34 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 09:55:34 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-23 09:55:34 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 09:55:58 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 09:55:58 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 09:55:58 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-23 09:55:58 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 09:56:15 - app.domains.file.service - ERROR - service.py:87 - 파일 추출 오류: I/O operation on closed file.
+2025-09-23 09:59:34 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 09:59:34 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 09:59:34 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-23 09:59:34 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 09:59:53 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 09:59:53 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 09:59:53 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-23 09:59:53 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 10:00:08 - app.domains.file.service - ERROR - service.py:87 - 파일 추출 오류: I/O operation on closed file.
+2025-09-23 10:04:40 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 10:04:40 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 10:04:40 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-23 10:04:40 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 10:04:53 - app.domains.file.service - ERROR - service.py:71 - 파일 추출 오류: I/O operation on closed file.
+2025-09-23 10:06:02 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 10:06:02 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 10:06:02 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-23 10:06:02 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 10:06:08 - app.domains.file.service - ERROR - service.py:71 - 파일 추출 오류: I/O operation on closed file.
+2025-09-23 10:07:14 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 10:07:14 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 10:07:14 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-23 10:07:14 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 10:07:24 - app.domains.file.service - ERROR - service.py:71 - 파일 추출 오류: I/O operation on closed file.
+2025-09-23 10:12:16 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 10:12:16 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 10:12:16 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-23 10:12:16 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 10:12:40 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 10:12:40 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 10:12:40 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-23 10:12:40 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 10:13:02 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 탄소중립과 기후 대응.txt, 크기: 285 bytes, 해시: f60f08f2036aa1bb...
+2025-09-23 10:13:02 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 탄소중립과 기후 대응.txt
+2025-09-23 10:16:17 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 10:16:17 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 10:16:17 - app.infra.docker.client - WARNING - client.py:34 - Docker 초기화 실패: Error while fetching server API version: (2, 'CreateFile', '지정된 파일을 찾을 수 없습니다.')
+2025-09-23 10:16:17 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 3 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 10:16:37 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 탄소중립과 기후 대응.txt, 크기: 285 bytes, 해시: f60f08f2036aa1bb...
+2025-09-23 10:16:37 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 탄소중립과 기후 대응.txt
+2025-09-23 10:17:28 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: TB_SHC_FRNC_INFO_202507.csv, 크기: 241492 bytes, 해시: 1e45cd46f80c0c7d...
+2025-09-23 10:17:28 - app.domains.file.service - ERROR - service.py:71 - 파일 추출 오류: Excel 추출 실패: Excel file format cannot be determined, you must specify an engine manually.
+2025-09-23 10:17:48 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 22~25년_공공배달앱인_대구로_생활_플랫폼_내_결제정보.xlsx, 크기: 10835 bytes, 해시: 66e69af878c365a2...
+2025-09-23 10:17:48 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 22~25년_공공배달앱인_대구로_생활_플랫폼_내_결제정보.xlsx
+2025-09-23 10:20:35 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 일자별_대출_조회_현황_통계정보.xlsx, 크기: 10554 bytes, 해시: 0cc9e746feb4d5e9...
+2025-09-23 10:20:35 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 일자별_대출_조회_현황_통계정보.xlsx
+2025-09-23 10:21:44 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 일자별_대출_조회_현황_통계정보.xlsx, 크기: 10554 bytes, 해시: 0cc9e746feb4d5e9...
+2025-09-23 10:21:44 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 일자별_대출_조회_현황_통계정보.xlsx
