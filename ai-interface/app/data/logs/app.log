@@ -609,3 +609,23 @@ file_content
 2025-09-23 16:42:24 - app.domains.file.service - INFO - service.py:45 - 파일 처리 시작: 일자별_대출_조회_현황_통계정보.xlsx, 크기: 10554 bytes, 해시: 0cc9e746feb4d5e9...
 2025-09-23 16:42:24 - app.domains.file.service - INFO - service.py:64 - 파일 처리 완료: 일자별_대출_조회_현황_통계정보.xlsx
 2025-09-23 16:44:46 - app.infra.docker.client - INFO - client.py:45 - 이미지 존재 확인: jupyter/scipy-notebook:latest
+2025-09-23 16:46:42 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 16:46:42 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 16:46:42 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-23 16:46:42 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 16:55:25 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 16:55:25 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 16:55:25 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-23 16:55:25 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 16:55:28 - app.domains.file.service - INFO - service.py:49 - 파일 처리 시작: 일자별_대출_조회_현황_통계정보.xlsx, 크기: 10554 bytes, 해시: 0cc9e746feb4d5e9...
+2025-09-23 16:55:29 - app.domains.file.service - INFO - service.py:68 - 파일 처리 완료: 일자별_대출_조회_현황_통계정보.xlsx
+2025-09-23 16:56:54 - app.infra.docker.client - INFO - client.py:45 - 이미지 존재 확인: jupyter/scipy-notebook:latest
+2025-09-23 16:57:50 - app.infra.docker.client - INFO - client.py:45 - 이미지 존재 확인: jupyter/scipy-notebook:latest
+2025-09-23 16:58:20 - app.domains.file.service - INFO - service.py:49 - 파일 처리 시작: 일자별_대출_조회_현황_통계정보.xlsx, 크기: 10554 bytes, 해시: 0cc9e746feb4d5e9...
+2025-09-23 16:58:20 - app.domains.file.service - INFO - service.py:68 - 파일 처리 완료: 일자별_대출_조회_현황_통계정보.xlsx
+2025-09-23 16:58:24 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-23 16:58:24 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-23 16:58:24 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-23 16:58:24 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-23 16:58:41 - app.domains.file.service - INFO - service.py:49 - 파일 처리 시작: 일자별_대출_조회_현황_통계정보.xlsx, 크기: 10554 bytes, 해시: 0cc9e746feb4d5e9...
+2025-09-23 16:58:41 - app.domains.file.service - INFO - service.py:68 - 파일 처리 완료: 일자별_대출_조회_현황_통계정보.xlsx

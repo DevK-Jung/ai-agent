@@ -9,6 +9,7 @@ from app.infra.ai.llm.constants import LLMProvider
 from app.infra.ai.llm.llm_manager import LLMManager
 from app.infra.ai.llm.schemas import LLMRequest, ModelConfig, ChatMessage
 from .schemas import SimpleChatRequest, ChatRequest, DomainInfo, ChatResponse
+from ..file.schemas import FileExtractionResult
 from ..file.service import FileService
 from ...infra.ai.prompt.constants import PromptRole
 
@@ -67,7 +68,7 @@ class LLMService:
             logger.error(f"예상치 못한 오류: {str(e)}")
             raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="서비스 오류가 발생했습니다.")
 
-    async def chat_blocking(self, request: ChatRequest, file_content: str | None) -> ChatResponse:
+    async def chat_blocking(self, request: ChatRequest, file_content: FileExtractionResult | None) -> ChatResponse:
         """다중 턴 채팅"""
         try:
             llm_request = await self._create_llm_request(request, file_content)
@@ -91,14 +92,14 @@ class LLMService:
             logger.error(f"예상치 못한 오류: {str(e)}")
             raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="서비스 오류가 발생했습니다.")
 
-    async def chat_streaming(self, request: ChatRequest, file_content: str | None) -> AsyncGenerator[str, None]:
+    async def chat_streaming(self, request: ChatRequest, file_content: FileExtractionResult | None) -> AsyncGenerator[str, None]:
         """스트리밍 채팅 응답"""
         llm_request = await self._create_llm_request(request, file_content)
 
         async for chunk in self.llm_manager.generate_response_stream(llm_request):
             yield chunk.model_dump_json()
 
-    async def _create_llm_request(self, request: ChatRequest, file_content: str | None):
+    async def _create_llm_request(self, request: ChatRequest, file_content: FileExtractionResult | None):
 
         # 모델 설정이 없으면 기본값 사용
         if request.llm_config is None:
@@ -118,7 +119,7 @@ class LLMService:
             parameters=request.parameters,
             llm_config=model_config,
             provider=request.provider,
-            file_content=file_content
+            file_info=file_content
         )
 
         return llm_request

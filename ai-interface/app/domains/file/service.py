@@ -30,6 +30,10 @@ class FileService:
             extract_options: Optional[Dict[str, Any]] = None
     ) -> Optional[FileExtractionResult]:
         """파일 내용 추출 메인 메서드"""
+
+        if not file:
+            return None
+
         try:
             # 파일 유효성 검증
             self._validate_file(file)

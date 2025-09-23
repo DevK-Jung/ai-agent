@@ -7,6 +7,7 @@ from .schemas import (
     CodeGenerationRequest, CodeGenerationResponse,
     CodeExecutionRequest, CodeExecutionResponse
 )
+from ..file.schemas import FileExtractionResult
 from ...infra.ai.llm.constants import LLMProvider
 from ...infra.ai.llm.llm_manager import LLMManager
 from ...infra.ai.llm.schemas import ChatMessage, LLMRequest
@@ -30,7 +31,7 @@ class CodeService:
 
     async def generate_code(self,
                             request: CodeGenerationRequest,
-                            file_content: str | None) -> CodeGenerationResponse:
+                            file_content: FileExtractionResult | None) -> CodeGenerationResponse:
         """코드 생성"""
         try:
 
@@ -54,7 +55,7 @@ class CodeService:
             logger.error(f"코드 생성 실패: {e}")
             raise
 
-    def _create_llm_request(self, request: CodeGenerationRequest, file_content: str | None) -> LLMRequest:
+    def _create_llm_request(self, request: CodeGenerationRequest, file_content: FileExtractionResult | None) -> LLMRequest:
 
         messages = [ChatMessage(role=PromptRole.USER.value, content=request.query)]
 
@@ -65,7 +66,7 @@ class CodeService:
             parameters={"language": request.language.value},
             provider=LLMProvider.OLLAMA,
             llm_config=None,
-            file_content=file_content,
+            file_info=file_content,
         )
 
         return llm_request
@@ -106,10 +107,7 @@ class CodeService:
 
         return code, explanation
 
-    async def execute_code(
-            self,
-            request: CodeExecutionRequest
-    ) -> CodeExecutionResponse:
+    async def execute_code(self, request: CodeExecutionRequest) -> CodeExecutionResponse:
         """코드 실행"""
         start_time = time.time()
 

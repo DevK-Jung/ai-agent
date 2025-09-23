@@ -2,6 +2,7 @@ from typing import Dict, Any, Optional, List
 
 from pydantic import BaseModel, Field
 
+from app.domains.file.schemas import FileExtractionResult
 from app.infra.ai.llm.constants import LLMProvider
 
 
@@ -26,7 +27,7 @@ class LLMRequest(BaseModel):
     parameters: Optional[Dict[str, Any]] = Field(default={}, description="Template parameters")
     llm_config: Optional[ModelConfig] = Field(None, description="Model configuration")
     provider: LLMProvider = Field(default=LLMProvider.OLLAMA, description="LLM provider")
-    file_content: Optional[Any] = Field(default=None, description="File content")
+    file_info: Optional[FileExtractionResult] = Field(default=None, description="File content")
 
 
 class LLMMetadata(BaseModel):

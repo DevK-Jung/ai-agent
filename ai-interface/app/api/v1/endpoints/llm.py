@@ -22,7 +22,7 @@ async def chat_blocking(llm_service: LLMServiceDep,
                         file_service: FileServiceDep,
                         request: ChatRequest = Depends(as_form),
                         file: UploadFile = File(None, description="파일")):
-    file_content = await extract_file_content(file, file_service)
+    file_content = await file_service.extract_file_content(file)
 
     return await llm_service.chat_blocking(request, file_content)
 
@@ -34,19 +34,9 @@ async def chat_streaming(llm_service: LLMServiceDep,
                          file_service: FileServiceDep,
                          request: ChatRequest = Depends(as_form),
                          file: UploadFile = File(None, description="파일")):
-    file_content = await extract_file_content(file, file_service)
+    file_content = await file_service.extract_file_content(file)
 
     return EventSourceResponse(llm_service.chat_streaming(request, file_content))
-
-
-async def extract_file_content(file, file_service):
-    # 파일 내용 추출
-    if not file:
-        return None
-
-    file_result = await file_service.extract_file_content(file)
-    if file_result and file_result.content:
-        return file_result.content
 
 
 @router.post("/available-domains", response_model=List[DomainInfo])

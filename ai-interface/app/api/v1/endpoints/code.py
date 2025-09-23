@@ -19,21 +19,10 @@ async def generate_code(code_service: CodeServiceDep,
                         file_service: FileServiceDep,
                         request: CodeGenerationRequest = Depends(CodeGenerationRequest.as_form),
                         file: UploadFile = File(None, description="파일")):
-    file_content = await extract_file_content(file, file_service)
+    file_content = await file_service.extract_file_content(file)
 
     result = await code_service.generate_code(request, file_content)
     return result
-
-
-async def extract_file_content(file, file_service):
-    # 파일 내용 추출
-    if not file:
-        return None
-
-    file_result = await file_service.extract_file_content(file)
-    if file_result and file_result.content:
-        return file_result.content
-
 
 @router.post("/execute", response_model=CodeExecutionResponse)
 async def execute_code(request: CodeExecutionRequest,

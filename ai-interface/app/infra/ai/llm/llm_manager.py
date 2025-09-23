@@ -94,11 +94,11 @@ class LLMManager:
             raise RuntimeError(f"Failed to generate streaming response: {str(e)}")
 
     def _append_file_content(self, request: LLMRequest):
-        if request.file_content:
+        if request.file_info:
             # 사용자 메시지 뒤에 붙여줌
             request.messages.append(ChatMessage(
                 role=PromptRole.USER.value,
-                content=f"사용자가 업로드한 파일 내용입니다:\n\n{request.file_content}"
+                content=f"사용자가 업로드한 파일 내용입니다:\n\n{request.file_info}"
             ))
 
     def _create_model(self, provider: LLMProvider, config: ModelConfig):
