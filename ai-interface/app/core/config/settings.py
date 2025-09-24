@@ -232,6 +232,10 @@ class Settings(BaseSettings):
         default=30,
         description="벡터 DB 연결 풀 타임아웃"
     )
+    vector_table_prefix: str = Field(
+        default="embeddings_",
+        description="벡터 DB 테이블 prefix"
+    )
 
     # 텍스트 분할 기본 설정
     default_chunk_size: int = Field(
@@ -300,9 +304,8 @@ class Settings(BaseSettings):
     def vector_async_connection_string(self) -> str:
         """벡터 DB 비동기 연결 문자열"""
         return (
-            f"postgresql+asyncpg://{self.vector_postgres_user}:"
-            f"{self.vector_postgres_password}@{self.vector_postgres_host}:"
-            f"{self.vector_postgres_port}/{self.vector_postgres_db}"
+            f"postgresql+asyncpg://{self.vector_postgres_user}:{self.vector_postgres_password}@{self.vector_postgres_host}"
+            f":{self.vector_postgres_port}/{self.vector_postgres_db}"
         )
 
     class Config:

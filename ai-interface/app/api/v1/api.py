@@ -35,11 +35,11 @@ api_router.include_router(
 )
 
 # 벡터 관리 엔드포인트
-api_router.include_router(
-    endpoints.vector_router,
-    prefix="/vector",
-    tags=["Vector V1"]
-)
+# api_router.include_router(
+#     endpoints.vector_router,
+#     prefix="/vector",
+#     tags=["Vector V1"]
+# )
 
 # 벡터 관리 엔드포인트
 api_router.include_router(
@@ -62,6 +62,11 @@ api_router.include_router(
     tags=["LLM V1"]
 )
 
+api_router.include_router(
+    endpoints.collection_router,
+    prefix="/collections",
+    tags=["Collection V1"]
+)
 
 
 # =============================================================================

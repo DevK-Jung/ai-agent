@@ -1,4 +1,4 @@
-# app/infra/docker/client.py
+# app/infra/docker/connection.py
 import asyncio
 import logging
 import time

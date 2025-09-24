@@ -182,3 +182,12 @@ file_content
                     FROM langchain_pg_embedding_documents
                 ]
 (Background on this error at: https://sqlalche.me/e/20/f405)
+2025-09-24 08:55:27 - app.domains.vector.repository - ERROR - repository.py:423 - 컬렉션 목록 조회 실패: Textual SQL expression '\n                    SELE...' should be explicitly declared as text('\n                    SELE...')
+2025-09-24 08:55:27 - app.core.database.vector_connection - ERROR - vector_connection.py:225 - 벡터스토어 정보 조회 실패: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "langchain_pg_embedding_documents" does not exist
+[SQL: 
+                    SELECT
+                        COUNT(*) as document_count,
+                        pg_size_pretty(pg_total_relation_size('langchain_pg_embedding_documents')) as table_size
+                    FROM langchain_pg_embedding_documents
+                ]
+(Background on this error at: https://sqlalche.me/e/20/f405)

@@ -2,17 +2,13 @@
 import logging
 from typing import Optional, List, Dict, Any
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Body
+from fastapi import APIRouter, HTTPException, UploadFile, File, Query, Body
 
 from app.domains.vector.constants import ChunkingStrategy
 # 도메인별 의존성 임포트
-from app.domains.vector.dependencies import (
-    get_vector_service,
-    health_check_vector
-)
+from app.domains.vector.dependencies import VectorServiceDep
 from app.domains.vector.schemas import VectorStoreStatus, DocumentResponse, DocumentRequest, SearchResponse, \
     SearchRequest
-from app.domains.vector.service import VectorService
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -23,14 +19,27 @@ logger = logging.getLogger(__name__)
 # ========================================
 
 @router.get("/health")
-async def vector_health_check():
+async def vector_health_check(
+        vector_service: VectorServiceDep
+):
     """벡터 도메인 헬스체크"""
-    return await health_check_vector()
+    try:
+        status = await vector_service.get_status()
+        return {
+            "status": "healthy" if status.is_connected else "unhealthy",
+            "details": status.dict()
+        }
+    except Exception as e:
+        logger.error(f"벡터 헬스체크 실패: {e}")
+        return {
+            "status": "unhealthy",
+            "error": str(e)
+        }
 
 
 @router.get("/status", response_model=VectorStoreStatus)
 async def get_vector_status(
-        vector_service: VectorService = Depends(get_vector_service)
+        vector_service: VectorServiceDep
 ):
     """벡터 저장소 상태 조회"""
     try:
@@ -46,9 +55,9 @@ async def get_vector_status(
 
 @router.post("/documents/text", response_model=DocumentResponse)
 async def upload_text_document(
+        vector_service: VectorServiceDep,
         request: DocumentRequest,
-        collection_name: Optional[str] = Query(None, description="컬렉션 이름"),
-        vector_service: VectorService = Depends(get_vector_service)
+        collection_name: Optional[str] = Query(None, description="컬렉션 이름")
 ):
     """텍스트 문서 업로드"""
     try:
@@ -62,12 +71,12 @@ async def upload_text_document(
 
 @router.post("/documents/file", response_model=DocumentResponse)
 async def upload_file_document(
+        vector_service: VectorServiceDep,
         file: UploadFile = File(...),
         collection_name: Optional[str] = Query(None, description="컬렉션 이름"),
         chunk_size: Optional[int] = Query(None, ge=100, le=5000, description="청크 크기"),
         chunk_overlap: Optional[int] = Query(None, ge=0, le=1000, description="청크 겹침"),
-        chunking_strategy: ChunkingStrategy = Query(ChunkingStrategy.RECURSIVE_CHARACTER, description="분할 전략"),
-        vector_service: VectorService = Depends(get_vector_service)
+        chunking_strategy: ChunkingStrategy = Query(ChunkingStrategy.RECURSIVE_CHARACTER, description="분할 전략")
 ):
     """파일 문서 업로드 (PDF, TXT, MD, HTML 지원)"""
     try:
@@ -107,8 +116,8 @@ async def upload_file_document(
 @router.get("/documents/{document_id}")
 async def get_document_by_id(
         document_id: str,
-        collection_name: Optional[str] = Query(None, description="컬렉션 이름"),
-        vector_service: VectorService = Depends(get_vector_service)
+        vector_service: VectorServiceDep,
+        collection_name: Optional[str] = Query(None, description="컬렉션 이름")
 ):
     """ID로 문서 조회"""
     try:
@@ -132,10 +141,10 @@ async def get_document_by_id(
 @router.put("/documents/{document_id}")
 async def update_document(
         document_id: str,
+        vector_service: VectorServiceDep,
         new_content: Optional[str] = Body(None),
         new_metadata: Optional[Dict[str, Any]] = Body(None),
-        collection_name: Optional[str] = Query(None, description="컬렉션 이름"),
-        vector_service: VectorService = Depends(get_vector_service)
+        collection_name: Optional[str] = Query(None, description="컬렉션 이름")
 ):
     """문서 업데이트"""
     try:
@@ -163,9 +172,9 @@ async def update_document(
 
 @router.delete("/documents")
 async def delete_documents(
+        vector_service: VectorServiceDep,
         document_ids: List[str] = Body(...),
-        collection_name: Optional[str] = Query(None, description="컬렉션 이름"),
-        vector_service: VectorService = Depends(get_vector_service)
+        collection_name: Optional[str] = Query(None, description="컬렉션 이름")
 ):
     """문서 삭제"""
     try:
@@ -186,9 +195,9 @@ async def delete_documents(
 
 @router.delete("/documents/by-metadata")
 async def bulk_delete_by_metadata(
+        vector_service: VectorServiceDep,
         metadata_filter: Dict[str, Any] = Body(...),
-        collection_name: Optional[str] = Query(None, description="컬렉션 이름"),
-        vector_service: VectorService = Depends(get_vector_service)
+        collection_name: Optional[str] = Query(None, description="컬렉션 이름")
 ):
     """메타데이터 조건으로 대량 삭제"""
     try:
@@ -212,7 +221,7 @@ async def bulk_delete_by_metadata(
 @router.post("/search", response_model=SearchResponse)
 async def search_documents(
         request: SearchRequest,
-        vector_service: VectorService = Depends(get_vector_service)
+        vector_service: VectorServiceDep
 ):
     """문서 검색 (고급 필터링 지원)"""
     try:
@@ -224,11 +233,11 @@ async def search_documents(
 
 @router.get("/search", response_model=SearchResponse)
 async def search_documents_simple(
+        vector_service: VectorServiceDep,
         q: str = Query(..., description="검색 쿼리"),
         k: int = Query(5, ge=1, le=50, description="반환할 결과 수"),
         collection_name: Optional[str] = Query(None, description="컬렉션 이름"),
-        score_threshold: Optional[float] = Query(None, ge=0.0, le=1.0, description="점수 임계값"),
-        vector_service: VectorService = Depends(get_vector_service)
+        score_threshold: Optional[float] = Query(None, ge=0.0, le=1.0, description="점수 임계값")
 ):
     """간단한 문서 검색 (GET 방식)"""
     try:
@@ -246,12 +255,12 @@ async def search_documents_simple(
 
 @router.post("/search/by-vector", response_model=SearchResponse)
 async def search_by_vector(
+        vector_service: VectorServiceDep,
         embedding: List[float] = Body(...),
         k: int = Body(5, ge=1, le=50),
         collection_name: Optional[str] = Body(None),
         metadata_filter: Optional[Dict[str, Any]] = Body(None),
-        score_threshold: Optional[float] = Body(None),
-        vector_service: VectorService = Depends(get_vector_service)
+        score_threshold: Optional[float] = Body(None)
 ):
     """벡터로 직접 검색"""
     try:
@@ -269,10 +278,10 @@ async def search_by_vector(
 
 @router.post("/search/by-metadata")
 async def search_by_metadata(
+        vector_service: VectorServiceDep,
         metadata_filter: Dict[str, Any] = Body(...),
         collection_name: Optional[str] = Query(None, description="컬렉션 이름"),
-        limit: int = Query(100, ge=1, le=1000, description="최대 결과 수"),
-        vector_service: VectorService = Depends(get_vector_service)
+        limit: int = Query(100, ge=1, le=1000, description="최대 결과 수")
 ):
     """메타데이터 조건으로 문서 검색"""
     try:
@@ -304,7 +313,7 @@ async def search_by_metadata(
 
 @router.get("/collections")
 async def list_collections(
-        vector_service: VectorService = Depends(get_vector_service)
+        vector_service: VectorServiceDep
 ):
     """컬렉션 목록 조회"""
     try:
@@ -318,7 +327,7 @@ async def list_collections(
 @router.post("/collections/{collection_name}")
 async def create_collection(
         collection_name: str,
-        vector_service: VectorService = Depends(get_vector_service)
+        vector_service: VectorServiceDep
 ):
     """컬렉션 생성"""
     try:
@@ -336,7 +345,7 @@ async def create_collection(
 @router.delete("/collections/{collection_name}")
 async def delete_collection(
         collection_name: str,
-        vector_service: VectorService = Depends(get_vector_service)
+        vector_service: VectorServiceDep
 ):
     """컬렉션 삭제"""
     try:
