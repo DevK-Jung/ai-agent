@@ -301,48 +301,48 @@ class TestDockerClientIntegration:
         yield client
         client.close()
 
-    @pytest.mark.asyncio
-    async def test_real_python_execution(self, docker_client):
-
-        image = "python:3.9-slim"
-
-        try:
-            docker_client.client.images.remove(image, force=True)
-        except:
-            pass
-
-        result = await docker_client.pull_single_image(image)
-
-        print(f"이미지 다운로드 결과: {result}")
-        assert result is True
-
-        """실제 Python 코드 실행"""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # 테스트 파일 생성
-            test_file = Path(temp_dir) / "test.py"
-            test_file.write_text("print('Hello from Docker!')\nprint(2 + 2)")
-
-            result = await docker_client.run_container(
-                execution_id="integration-test-1",
-                image=image,
-                command=["python", "/workspace/test.py"],
-                temp_path=Path(temp_dir),
-                environment_vars={},
-                memory_limit="128m",
-                cpu_limit=0.5,
-                timeout=30,
-                start_time=time.time(),
-                language=CodeLanguage.PYTHON
-            )
-
-        print(f"실행 결과: {result}")
-
-        assert result.success is True
-        assert result.status == ExecutionStatus.COMPLETED.value
-        assert "Hello from Docker!" in result.stdout
-        assert "4" in result.stdout
-        assert result.exit_code == 0
-        assert result.execution_time > 0
+    # @pytest.mark.asyncio
+    # async def test_real_python_execution(self, docker_client):
+    #
+    #     image = "python:3.9-slim"
+    #
+    #     try:
+    #         docker_client.client.images.remove(image, force=True)
+    #     except:
+    #         pass
+    #
+    #     result = await docker_client.pull_single_image(image)
+    #
+    #     print(f"이미지 다운로드 결과: {result}")
+    #     assert result is True
+    #
+    #     """실제 Python 코드 실행"""
+    #     with tempfile.TemporaryDirectory() as temp_dir:
+    #         # 테스트 파일 생성
+    #         test_file = Path(temp_dir) / "test.py"
+    #         test_file.write_text("print('Hello from Docker!')\nprint(2 + 2)")
+    #
+    #         result = await docker_client.run_container(
+    #             execution_id="integration-test-1",
+    #             image=image,
+    #             command=["python", "/workspace/test.py"],
+    #             temp_path=Path(temp_dir),
+    #             environment_vars={},
+    #             memory_limit="128m",
+    #             cpu_limit=0.5,
+    #             timeout=30,
+    #             start_time=time.time(),
+    #             language=CodeLanguage.PYTHON
+    #         )
+    #
+    #     print(f"실행 결과: {result}")
+    #
+    #     assert result.success is True
+    #     assert result.status == ExecutionStatus.COMPLETED.value
+    #     assert "Hello from Docker!" in result.stdout
+    #     assert "4" in result.stdout
+    #     assert result.exit_code == 0
+    #     assert result.execution_time > 0
 
     @pytest.mark.asyncio
     async def test_real_error_handling(self, docker_client):

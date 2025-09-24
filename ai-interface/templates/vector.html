@@ -222,8 +222,12 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .result-box {
@@ -460,12 +464,12 @@
     let collections = [];
 
     // 페이지 로드 시 초기화
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         checkVectorStatus();
         loadCollections();
 
         // 파일 선택 시 피드백
-        document.getElementById('upload-file').addEventListener('change', function(e) {
+        document.getElementById('upload-file').addEventListener('change', function (e) {
             const file = e.target.files[0];
             const fileInput = e.target;
 
@@ -507,11 +511,11 @@
     // 컬렉션 목록 로드
     async function loadCollections() {
         try {
-            const response = await fetch('/api/v1/vector/collections');
+            const response = await fetch('/api/v1/collections');
             const data = await response.json();
 
             if (response.ok) {
-                collections = data.collections;
+                collections = data;
                 updateCollectionSelector();
             }
         } catch (error) {
@@ -541,9 +545,16 @@
         }
 
         showLoading();
+
         try {
-            const response = await fetch(`/api/v1/vector/collections/${encodeURIComponent(name)}`, {
-                method: 'POST'
+            const response = await fetch(`/api/v1/collections/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: name
+                })
             });
             const data = await response.json();
 
@@ -638,7 +649,7 @@
                 },
                 body: JSON.stringify({
                     content: content,
-                    metadata: { title: title }
+                    metadata: {title: title}
                 })
             });
             const data = await response.json();
@@ -806,7 +817,7 @@
     }
 
     // Enter 키로 검색
-    document.getElementById('search-query').addEventListener('keydown', function(e) {
+    document.getElementById('search-query').addEventListener('keydown', function (e) {
         if (e.ctrlKey && e.key === 'Enter') {
             searchDocuments();
         }

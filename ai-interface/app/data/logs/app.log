@@ -991,3 +991,58 @@ file_content
 2025-09-24 15:30:01 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
 2025-09-24 15:30:15 - app.domains.collection.repository - INFO - repository.py:35 - 테이블 초기화 완료: embeddings_test
 2025-09-24 15:30:33 - app.domains.collection.repository - INFO - repository.py:50 - 테이블 삭제 완료: embeddings_test
+2025-09-24 15:52:43 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-24 15:52:43 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-24 15:52:43 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-24 15:52:43 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-24 15:58:24 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-24 15:58:24 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-24 15:58:24 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-24 15:58:24 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-24 16:03:31 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-24 16:03:31 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-24 16:03:31 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-24 16:03:31 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-24 16:05:01 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-24 16:05:01 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-24 16:05:01 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-24 16:05:01 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-24 16:05:11 - app.domains.collection.repository - INFO - repository.py:73 - 발견된 컬렉션: 1개
+2025-09-24 16:05:33 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-24 16:05:33 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-24 16:05:33 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-24 16:05:33 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-24 16:09:08 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-24 16:09:08 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-24 16:09:08 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-24 16:09:08 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-24 16:09:14 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-24 16:09:14 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-24 16:09:14 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-24 16:09:14 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-24 16:12:45 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-24 16:12:45 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-24 16:12:46 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-24 16:12:46 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-24 16:13:31 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-24 16:13:31 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-24 16:13:31 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-24 16:13:31 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-24 16:13:31 - app.domains.collection.repository - INFO - repository.py:73 - 발견된 컬렉션: 1개
+2025-09-24 16:14:02 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-24 16:14:02 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-24 16:14:02 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-24 16:14:02 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-24 16:14:03 - app.domains.collection.repository - INFO - repository.py:73 - 발견된 컬렉션: 1개
+2025-09-24 16:15:58 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-24 16:15:58 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-24 16:15:58 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-24 16:15:58 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-24 16:16:00 - app.domains.collection.repository - INFO - repository.py:73 - 발견된 컬렉션: 1개
+2025-09-24 16:17:26 - app - INFO - __init__.py:23 - 로깅 설정 완료
+2025-09-24 16:17:26 - app - INFO - __init__.py:24 - 로그 디렉토리: C:\workspace\side\ai-agent\ai-interface\app\data\logs
+2025-09-24 16:17:26 - app.infra.docker.client - INFO - client.py:32 - Docker 클라이언트 초기화 완료
+2025-09-24 16:17:26 - app.infra.ai.prompt.prompt_manager - INFO - prompt_manager.py:47 - Loaded 5 system prompts from C:\workspace\side\ai-agent\ai-interface\prompts\system
+2025-09-24 16:17:27 - app.domains.collection.repository - INFO - repository.py:73 - 발견된 컬렉션: 1개
+2025-09-24 16:17:31 - app.domains.collection.repository - INFO - repository.py:38 - 테이블 초기화 완료: embeddings_test
+2025-09-24 16:17:31 - app.domains.collection.repository - INFO - repository.py:73 - 발견된 컬렉션: 2개

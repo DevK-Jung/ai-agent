@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 from .repository import CollectionRepository
 from .schemas import CollectionCreateRequest, CollectionResponse
@@ -32,6 +33,9 @@ class CollectionService:
                 message=f"컬렉션 생성 중 오류가 발생했습니다: {str(e)}",
                 collection_name=request.name
             )
+
+    async def list_collection(self) -> List[str]:
+        return await self.repository.list_collections()
 
     async def delete_collection(self, name: str) -> CollectionResponse:
         """컬렉션 삭제"""
