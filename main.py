@@ -1,0 +1,21 @@
+from fastapi import FastAPI
+from app.api.endpoints import users
+from app.core.config import settings
+import uvicorn
+
+app = FastAPI(
+    title="AI Agent RAG System",
+    description="Agent-based Explainable RAG System",
+    version="0.1.0"
+)
+
+app.include_router(users.router)
+
+
+@app.get("/")
+def read_root():
+    return {"message": "AI Agent RAG System", "version": "0.1.0"}
+
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=settings.PORT, reload=True)
