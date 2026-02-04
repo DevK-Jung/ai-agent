@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.endpoints import users
+from app.api.endpoints import users, chat
 from app.core.config import settings
 import uvicorn
 
@@ -9,7 +9,9 @@ app = FastAPI(
     version="0.1.0"
 )
 
+# 라우터 등록
 app.include_router(users.router)
+app.include_router(chat.router)
 
 
 @app.get("/")

@@ -10,6 +10,12 @@ class Settings(BaseSettings):
     # OpenAI
     OPENAI_API_KEY: str = ""
     
+    # Agent Node Models
+    CLASSIFIER_MODEL: str = "gpt-4o-mini"
+    CLASSIFIER_TEMPERATURE: float = 0.1
+    GENERATOR_MODEL: str = "gpt-4o-mini"
+    GENERATOR_TEMPERATURE: float = 0.7
+    
     # Database
     DATABASE_URL: str = "postgresql://user:password@localhost/ai_agent"
     
