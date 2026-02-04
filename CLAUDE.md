@@ -54,25 +54,41 @@ python main.py
 
 ### Running Services
 ```bash
-# Start API server (development)
-uvicorn app:app --host 0.0.0.0 --port 8080 --reload
-
-# Run directly via main.py
+# Start API server (runs on port 8000 by default)
 python main.py
+
+# Access API documentation
+# http://localhost:8000/docs (Swagger UI)
+# http://localhost:8000/redoc (ReDoc)
 ```
 
 ## Current Project Structure
 
 ```
 /
-├── app.py              # FastAPI application entry point
-├── main.py             # Application runner with uvicorn
-├── config/
-│   └── config.py       # Configuration settings
-├── controller/
-│   ├── __init__.py
-│   └── users.py        # Basic user endpoints (placeholder)
-└── pyproject.toml      # Project dependencies and metadata
+├── main.py                    # FastAPI app + uvicorn runner (single entry point)
+├── app/
+│   ├── api/
+│   │   └── endpoints/
+│   │       └── users.py       # User API endpoints
+│   ├── agents/                # LangGraph agents and workflows
+│   │   ├── nodes/            # Individual agent nodes
+│   │   └── workflows/        # Workflow definitions
+│   ├── services/             # Business logic layer
+│   ├── schemas/              # Pydantic models for API
+│   ├── core/
+│   │   └── config.py         # Configuration with pydantic-settings
+│   ├── db/                   # Database models and connections
+│   └── utils/                # Utility functions
+├── data/                     # Data storage
+│   ├── documents/            # Original documents
+│   └── processed/            # Processed data
+├── scripts/                  # Utility scripts
+├── tests/                    # Test files
+├── docker/                   # Docker configuration
+├── notebook/                 # Jupyter notebooks for development
+├── .env                      # Environment variables
+└── pyproject.toml           # Project dependencies
 ```
 
 ## Implementation Phases
@@ -106,24 +122,34 @@ python main.py
 2. Retrieval weight adjustment logic
 3. RAG evaluation and monitoring
 
+## Configuration
+
+- Environment variables are managed in `.env` file
+- Configuration class uses `pydantic-settings` for validation
+- Default server port: 8000 (configurable via PORT environment variable)
+- OpenAI API key required in OPENAI_API_KEY environment variable
+
 ## Key Dependencies
 
 - **fastapi**: Web framework for API endpoints
-- **langchain**: LLM framework and integrations
-- **langgraph**: Graph-based workflow orchestration
+- **langchain & langchain-openai**: LLM framework and OpenAI integration
+- **langgraph**: Graph-based workflow orchestration  
 - **uvicorn**: ASGI server for FastAPI
+- **pydantic-settings**: Configuration management
+- **python-dotenv**: Environment variable loading
 
 ## Development Notes
 
-- Current implementation is minimal FastAPI setup
-- Controller structure follows modular pattern
-- Configuration is centralized in config/config.py
-- Server runs on port 8080 by default
+- Single `main.py` entry point follows FastAPI best practices
+- Modular app structure separates concerns (API, agents, services, etc.)
+- Configuration centralized in `app/core/config.py` with environment validation
+- Server runs on port 8000 by default (configurable)
+- Uses structured directory layout for enterprise-level development
 
 ## Next Steps for Implementation
 
-1. Add required dependencies (OpenAI, Milvus, PostgreSQL clients)
-2. Implement LangGraph nodes for question processing
-3. Set up vector storage and document management
-4. Create RAG pipeline with agent-based routing
-5. Implement explainable answer formatting
+1. Add RAG-specific dependencies (Milvus, PostgreSQL, text processing)
+2. Implement LangGraph nodes for question processing workflow
+3. Set up vector storage and document management services
+4. Create agent-based routing and retrieval strategies
+5. Implement explainable answer formatting with evidence
