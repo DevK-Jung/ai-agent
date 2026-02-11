@@ -1,12 +1,24 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 from app.api.endpoints import users, chat
 from app.core.config import settings
+from app.db.database import init_database, close_database
 import uvicorn
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    await init_database()
+    yield
+    # Shutdown
+    await close_database()
 
 app = FastAPI(
     title="AI Agent RAG System",
     description="Agent-based Explainable RAG System",
-    version="0.1.0"
+    version="0.1.0",
+    lifespan=lifespan
 )
 
 # 라우터 등록
