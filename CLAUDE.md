@@ -16,12 +16,11 @@ This is an Agent-based Explainable RAG (Retrieval-Augmented Generation) system t
 [ LangGraph Orchestrator ]
     ├─ Question Classifier Agent
     ├─ Retrieval Strategy Selector Agent
-    ├─ Retriever (Milvus)
-    ├─ Answer Generator (OpenAI)
+    ├─ Vector Retriever (PostgreSQL + pgvector)
+    ├─ Answer Generator (BGE-M3)
     └─ Evidence Assembler
     |
-[ PostgreSQL ]  (Question/Answer logs, Feedback)
-[ Milvus ]     (Document Vector Store)
+[ PostgreSQL + pgvector ]  (Documents, Embeddings, Chat logs)
 ```
 
 ## Core Concepts
@@ -36,9 +35,9 @@ This is an Agent-based Explainable RAG (Retrieval-Augmented Generation) system t
 - **Language**: Python
 - **API Server**: FastAPI
 - **LLM Orchestration**: LangGraph
-- **LLM**: OpenAI API
-- **Vector DB**: Milvus
-- **Metadata/Log DB**: PostgreSQL
+- **Embedding Model**: BGE-M3 (HuggingFace)
+- **Vector Database**: PostgreSQL with pgvector extension
+- **Database**: PostgreSQL with async SQLAlchemy
 - **Container**: Docker
 
 ## Development Commands
@@ -54,12 +53,15 @@ python main.py
 
 ### Running Services
 ```bash
-# Start API server (runs on port 8000 by default)
+# Start PostgreSQL with pgvector
+docker compose --env-file .env -f docker/docker-compose.infra.yml up -d
+
+# Start API server (runs on port 8888 by default)
 python main.py
 
 # Access API documentation
-# http://localhost:8000/docs (Swagger UI)
-# http://localhost:8000/redoc (ReDoc)
+# http://localhost:8888/docs (Swagger UI)
+# http://localhost:8888/redoc (ReDoc)
 ```
 
 ## Current Project Structure
@@ -70,16 +72,24 @@ python main.py
 ├── app/
 │   ├── api/
 │   │   └── endpoints/
+│   │       ├── chat.py        # Chat API endpoints
 │   │       └── users.py       # User API endpoints
 │   ├── agents/                # LangGraph agents and workflows
 │   │   ├── nodes/            # Individual agent nodes
 │   │   └── workflows/        # Workflow definitions
+│   ├── models/               # SQLAlchemy ORM models
+│   │   ├── __init__.py
+│   │   └── document.py       # Document and DocumentChunk models
 │   ├── services/             # Business logic layer
 │   ├── schemas/              # Pydantic models for API
 │   ├── core/
 │   │   └── config.py         # Configuration with pydantic-settings
-│   ├── db/                   # Database models and connections
+│   ├── db/                   # Database connections and utilities
+│   │   ├── __init__.py
+│   │   └── database.py       # Async SQLAlchemy setup
 │   └── utils/                # Utility functions
+├── docker/
+│   └── docker-compose.infra.yml  # PostgreSQL with pgvector
 ├── data/                     # Data storage
 │   ├── documents/            # Original documents
 │   └── processed/            # Processed data
@@ -93,12 +103,11 @@ python main.py
 
 ## Implementation Phases
 
-### Phase 1: Basic RAG Foundation
-1. Document collection and preprocessing
-2. Chunking strategy implementation
-3. Embedding generation
-4. Milvus vector storage
-5. Basic Retrieval + Answer generation API
+### Phase 1: Database & Infrastructure ✅
+1. PostgreSQL + pgvector setup with Docker
+2. SQLAlchemy async ORM models (Document, DocumentChunk)
+3. Database connection and initialization
+4. BGE-M3 embedding model preparation
 
 ### Phase 2: LangGraph Integration
 1. LangGraph project structure design
@@ -137,6 +146,11 @@ python main.py
 - **uvicorn**: ASGI server for FastAPI
 - **pydantic-settings**: Configuration management
 - **python-dotenv**: Environment variable loading
+- **sqlalchemy**: ORM for database operations
+- **asyncpg**: PostgreSQL async driver
+- **pgvector**: PostgreSQL vector extension Python interface
+- **sentence-transformers**: BGE-M3 embedding model
+- **torch**: PyTorch for model inference
 
 ## Development Notes
 
