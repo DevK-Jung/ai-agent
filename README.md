@@ -29,6 +29,7 @@ LangGraph 기반의 에이전트 구동 질문 분류 및 답변 생성 시스�
 - **Framework**: FastAPI
 - **AI Orchestration**: LangGraph
 - **LLM**: OpenAI GPT-4o-mini
+- **Vector Database**: PostgreSQL with pgvector
 - **Configuration**: Pydantic Settings
 - **Language**: Python 3.13+
 
@@ -103,6 +104,13 @@ pip install -r requirements.txt
 OPENAI_API_KEY=your_openai_api_key_here
 PORT=8888
 
+# Database Configuration
+POSTGRES_EXTERNAL_PORT=5433
+POSTGRES_INTERNAL_PORT=5432
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=ai_agent
+
 # Agent Node Models
 CLASSIFIER_MODEL=gpt-4o-mini
 CLASSIFIER_TEMPERATURE=0.1
@@ -110,7 +118,17 @@ GENERATOR_MODEL=gpt-4o-mini
 GENERATOR_TEMPERATURE=0.7
 ```
 
-### 3. 서버 실행
+### 3. 인프라 서비스 실행 (PostgreSQL with pgvector)
+
+```bash
+# PostgreSQL with pgvector 실행
+docker compose --env-file .env -f docker/docker-compose.infra.yml up -d
+
+# 서비스 상태 확인
+docker compose -f docker/docker-compose.infra.yml ps
+```
+
+### 4. 서버 실행
 
 ```bash
 python main.py
@@ -174,7 +192,7 @@ curl http://localhost:8888/chat/health
 ## 향후 계획
 
 ### Phase 1: RAG 검색 기능 구현
-- [ ] Vector Database (Milvus) 연동
+- [x] Vector Database (PostgreSQL with pgvector) 연동
 - [ ] 문서 임베딩 및 벡터 저장
 - [ ] 의미적 검색 (Semantic Search) 구현
 - [ ] 하이브리드 검색 (키워드 + 벡터) 구현
