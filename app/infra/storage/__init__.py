@@ -1,0 +1,1 @@
+# Storage infrastructure - 파일 시스템, 클라우드 스토리지 등

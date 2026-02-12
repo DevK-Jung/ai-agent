@@ -1,0 +1,1 @@
+# AI infrastructure - 임베딩, LLM, 벡터 검색 등

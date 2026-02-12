@@ -12,3 +12,7 @@ wheels/
 .env
 
 .idea
+
+data
+
+logs

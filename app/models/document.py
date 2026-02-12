@@ -13,6 +13,7 @@ except ImportError:
     from sqlalchemy import Text as Vector
 
 from app.db.database import Base
+from app.core.config import settings
 
 
 class Document(Base):
@@ -25,7 +26,7 @@ class Document(Base):
     file_path = Column(String(1000), nullable=True)
     file_size = Column(Integer, nullable=True)  # bytes
     file_type = Column(String(50), nullable=True)  # pdf, txt, docx, etc
-    content = Column(Text, nullable=False)  # 전체 원본 내용
+    # content는 저장하지 않고, 필요시 file_path에서 읽어옴
     content_hash = Column(String(64), nullable=True)  # SHA256 해시 (중복 체크용)
     source_url = Column(String(1000), nullable=True)  # 웹에서 수집된 경우 원본 URL
     language = Column(String(10), nullable=True, default='ko')  # 언어 코드
@@ -57,8 +58,8 @@ class DocumentChunk(Base):
     content_hash = Column(String(64), nullable=True)  # 청크 내용의 해시
     
     # Embedding 관련
-    embedding = Column(Vector(1024), nullable=True)  # BGE-M3: 1024차원
-    embedding_model = Column(String(50), nullable=True, default='BAAI/bge-m3')
+    embedding = Column(Vector(settings.EMBEDDING_DIMENSIONS), nullable=True)  # 환경변수에서 차원 설정
+    embedding_model = Column(String(50), nullable=True, default=settings.EMBEDDING_MODEL)
     
     # 텍스트 처리 정보
     token_count = Column(Integer, nullable=True)  # 청크의 토큰 수

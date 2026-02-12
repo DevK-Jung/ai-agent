@@ -1,0 +1,1 @@
+# Infrastructure layer - 외부 시스템과의 연동을 담당
