@@ -1,12 +1,12 @@
-# AI Agent RAG System
+# AI Agent System
 
-LangGraph 기반의 에이전트 구동 질문 분류 및 답변 생성 시스템입니다.
+다양한 AI 기술을 실험하고 학습하기 위한 포괄적인 AI 에이전트 시스템입니다.
 
 ## 프로젝트 개요
 
-사용자 질문을 지능적으로 분류하고 적절한 답변을 생성하는 AI 에이전트 시스템입니다. LangGraph를 활용하여 질문 분류 → 답변 생성의 워크플로우를 구현했습니다.
+현업에서 활용되는 다양한 AI 기술들을 학습하고 실험하기 위한 플랫폼입니다. 현재는 RAG 시스템을 중심으로 구현되어 있지만, 향후 다양한 AI 에이전트 기능들을 확장해나갈 예정입니다.
 
-이 프로젝트는 최근 기업들이 구현하고 있는 AI Agent 기반 기능들을 연습하고 학습하기 위한 목적으로 개발되었습니다. RAG(Retrieval-Augmented Generation), MCP(Model Context Protocol), STT(Speech-to-Text) 등 현업에서 활용되는 다양한 AI 기술들을 단계적으로 구현해볼 예정입니다.
+이 프로젝트는 AI Agent 기반 기능들을 체계적으로 연구하고 개발하기 위한 목적으로 만들어졌습니다. RAG(Retrieval-Augmented Generation), MCP(Model Context Protocol), STT(Speech-to-Text), LangGraph 워크플로우 등 다양한 기술 스택을 단계적으로 구현하며 학습합니다.
 
 ## 아키텍처
 
@@ -15,38 +15,67 @@ LangGraph 기반의 에이전트 구동 질문 분류 및 답변 생성 시스�
     |
 [ FastAPI ]
     |
-[ LangGraph Workflow ]
-    ├─ Question Classifier Agent
-    └─ Answer Generator Agent
+[ Services Layer ]
+    ├─ Document Service (업로드, 처리)
+    ├─ Embedding Service (BGE-M3)
+    ├─ File Storage Service  
+    ├─ Search Service (의미적/하이브리드 검색)
+    └─ Chat Workflow (LangGraph)
+    |
+[ Database Layer ]
+    ├─ PostgreSQL (문서 메타데이터)
+    └─ pgvector (벡터 저장소)
 ```
 
-### 워크플로우
-1. **Question Classifier**: 사용자 질문을 4개 카테고리로 분류
-2. **Answer Generator**: 질문 유형에 따라 맞춤형 답변 생성
+### 현재 구현된 워크플로우
+1. **Document Upload**: PDF, TXT, DOCX 파일 업로드 및 처리
+2. **Text Processing**: LangChain을 사용한 문서 청킹
+3. **Embedding Generation**: BGE-M3 모델 로컬 임베딩 생성
+4. **Vector Storage**: pgvector 코사인 유사도 검색
+5. **Semantic Search**: 의미적 검색 및 하이브리드 검색
+6. **Chat Workflow**: LangGraph 기반 질문 분류 및 답변 생성
 
 ## 기술 스택
 
 - **Framework**: FastAPI
 - **AI Orchestration**: LangGraph
 - **LLM**: OpenAI GPT-4o-mini
+- **Embedding Model**: BGE-M3 (로컬 추론)
 - **Vector Database**: PostgreSQL with pgvector
+- **Text Processing**: LangChain
 - **Configuration**: Pydantic Settings
 - **Language**: Python 3.13+
 
 ## 현재 구현 상태
 
 ### ✅ 완료된 기능
+
+#### Core Infrastructure
 - FastAPI 웹 서버 설정
+- PostgreSQL + pgvector 데이터베이스 설정
+- SQLAlchemy 비동기 ORM 모델
+- Docker Compose 인프라 구성
+- 환경 변수 기반 설정 관리
+- 구조화된 로깅 시스템
+
+#### Document Processing
+- 문서 업로드 API (PDF, TXT, DOCX 지원)
+- BGE-M3 모델 로컬 임베딩 생성
+- LangChain 기반 문서 청킹
+- 문서 메타데이터 관리
+- 백그라운드 문서 처리 태스크
+
+#### Search & Retrieval
+- pgvector 코사인 유사도 검색
+- 의미적 검색 (Semantic Search)
+- 하이브리드 검색 (키워드 + 의미적)
+- 검색 통계 및 모니터링
+
+#### Chat & Agent
 - LangGraph 워크플로우 구현
-- 질문 분류 에이전트 (4개 카테고리: FACT, SUMMARY, COMPARE, EVIDENCE)
+- 질문 분류 에이전트 (FACT, SUMMARY, COMPARE, EVIDENCE)
 - 답변 생성 에이전트 (카테고리별 맞춤 프롬프트)
-- 환경 변수 기반 모델 설정
 - 프롬프트 템플릿 분리
-- RESTful API 엔드포인트
-- **PostgreSQL + pgvector 데이터베이스 설정**
-- **SQLAlchemy 비동기 ORM 모델**
-- **Document/DocumentChunk 테이블 구조**
-- **Docker Compose 인프라 구성**
 
 ### 질문 분류 카테고리
 - **FACT**: 구체적인 사실이나 정보를 묻는 질문
@@ -61,33 +90,40 @@ LangGraph 기반의 에이전트 구동 질문 분류 및 답변 생성 시스�
 ├── app/
 │   ├── api/
 │   │   └── endpoints/
-│   │       ├── chat.py              # 채팅 API 엔드포인트
-│   │       └── users.py             # 사용자 API 엔드포인트
+│   │       ├── chat.py              # 채팅 API
+│   │       ├── documents.py         # 문서 업로드/관리 API
+│   │       ├── search.py            # 검색 API
+│   │       └── users.py             # 사용자 API
 │   ├── agents/
-│   │   ├── nodes/
-│   │   │   ├── classifier.py        # 질문 분류 에이전트
-│   │   │   └── generator.py         # 답변 생성 에이전트
-│   │   ├── prompts/
-│   │   │   ├── classification.py    # 분류 프롬프트 템플릿
-│   │   │   └── generation.py        # 생성 프롬프트 템플릿
-│   │   ├── workflows/
-│   │   │   └── chat_workflow.py     # LangGraph 워크플로우
-│   │   └── state.py                 # 상태 정의
+│   │   ├── nodes/                   # LangGraph 노드
+│   │   ├── prompts/                 # 프롬프트 템플릿
+│   │   ├── workflows/               # 워크플로우 정의
+│   │   └── state.py                 # 상태 관리
 │   ├── models/                      # SQLAlchemy ORM 모델
-│   │   ├── __init__.py
-│   │   └── document.py              # Document, DocumentChunk 모델
-│   ├── schemas/
-│   │   └── chat.py                  # Pydantic 모델
-│   ├── core/
-│   │   └── config.py                # 설정 관리
-│   ├── db/                          # 데이터베이스 연결
-│   │   ├── __init__.py
-│   │   └── database.py              # 비동기 SQLAlchemy 설정
-│   └── services/                    # 비즈니스 로직 (미구현)
+│   │   └── document.py              # Document, DocumentChunk
+│   ├── schemas/                     # Pydantic 스키마
+│   │   ├── chat.py                  # 채팅 관련
+│   │   ├── document.py              # 문서 관련
+│   │   └── search.py                # 검색 관련
+│   ├── services/                    # 비즈니스 로직
+│   │   ├── document_service.py      # 문서 처리
+│   │   └── search_service.py        # 검색 서비스
+│   ├── infra/                       # 인프라 서비스
+│   │   ├── ai/                      # AI 관련 (임베딩)
+│   │   └── storage/                 # 파일 저장소
+│   ├── dependencies/                # 의존성 주입
+│   ├── core/                        # 핵심 설정
+│   │   ├── config.py                # 환경 설정
+│   │   └── logging.py               # 로깅 설정
+│   ├── db/                          # 데이터베이스
+│   └── utils/                       # 유틸리티
+├── data/                            # 데이터 저장소
+│   ├── documents/                   # 업로드된 문서
+│   └── models/                      # AI 모델 캐시
 ├── docker/
-│   └── docker-compose.infra.yml     # PostgreSQL + pgvector
+│   └── docker-compose.infra.yml     # 인프라 서비스
 ├── .env                             # 환경 변수
-├── pyproject.toml                   # 프로젝트 설정
+├── pyproject.toml                   # 의존성 관리
 └── README.md
 ```
 
@@ -112,17 +148,35 @@ pip install -r requirements.txt
 `.env` 파일을 생성하고 다음 설정을 추가하세요:
 
 ```env
+# API Configuration
 OPENAI_API_KEY=your_openai_api_key_here
-PORT=8888
+PORT=8000
+ENVIRONMENT=development
+LOG_LEVEL=INFO
 
 # Database Configuration
 POSTGRES_EXTERNAL_PORT=5433
-POSTGRES_INTERNAL_PORT=5432
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=ai_agent
+POSTGRES_HOST=localhost
 
-# Agent Node Models
+# Embedding Configuration
+EMBEDDING_MODEL=BAAI/bge-m3
+EMBEDDING_DIMENSIONS=1024
+EMBEDDING_DEVICE=cpu
+EMBEDDING_CACHE_DIR=./data/models
+
+# Document Processing
+CHUNK_SIZE=500
+CHUNK_OVERLAP=50
+MAX_FILE_SIZE_MB=50
+
+# File Storage
+FILE_STORAGE_PATH=./data/documents
+ALLOWED_FILE_TYPES=pdf,txt,docx
+
+# Agent Models
 CLASSIFIER_MODEL=gpt-4o-mini
 CLASSIFIER_TEMPERATURE=0.1
 GENERATOR_MODEL=gpt-4o-mini
@@ -146,19 +200,60 @@ python main.py
 ```
 
 서버가 실행되면 다음 URL에서 접근할 수 있습니다:
-- API 문서: http://localhost:8888/docs
-- ReDoc 문서: http://localhost:8888/redoc
+- API 문서: http://localhost:8000/docs
+- ReDoc 문서: http://localhost:8000/redoc
 
 ## API 사용법
 
-### 채팅 엔드포인트
+### 1. 문서 업로드
+
+**POST /documents/upload**
+
+문서를 업로드하고 임베딩 처리를 수행합니다.
+
+```bash
+curl -X POST "http://localhost:8000/documents/upload" \
+  -F "file=@document.pdf" \
+  -F "title=샘플 문서"
+```
+
+### 2. 문서 검색
+
+**POST /search/semantic**
+
+의미적 검색을 수행합니다.
+
+```bash
+curl -X POST "http://localhost:8000/search/semantic" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Python 프로그래밍에 대해 알려주세요",
+    "limit": 5,
+    "threshold": 0.7
+  }'
+```
+
+**POST /search/hybrid**
+
+하이브리드 검색(의미적 + 키워드)을 수행합니다.
+
+```bash
+curl -X POST "http://localhost:8000/search/hybrid?semantic_weight=0.7&keyword_weight=0.3" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Python",
+    "limit": 10
+  }'
+```
+
+### 3. 채팅 에이전트
 
 **POST /chat/**
 
 사용자 메시지를 처리하고 AI 응답을 반환합니다.
 
 ```bash
-curl -X POST "http://localhost:8888/chat/" \
+curl -X POST "http://localhost:8000/chat/" \
   -H "Content-Type: application/json" \
   -d '{
     "message": "Python이란 무엇인가요?",
@@ -167,24 +262,14 @@ curl -X POST "http://localhost:8888/chat/" \
   }'
 ```
 
-**Response:**
-```json
-{
-  "answer": "Python은 고급 프로그래밍 언어입니다...",
-  "session_id": "session456",
-  "question_type": "FACT",
-  "model_used": "gpt-4o-mini"
-}
-```
+### 4. 시스템 상태 확인
 
-### 상태 확인 엔드포인트
+**GET /search/stats**
 
-**GET /chat/health**
-
-채팅 서비스 상태를 확인합니다.
+검색 시스템 통계를 확인합니다.
 
 ```bash
-curl http://localhost:8888/chat/health
+curl http://localhost:8000/search/stats
 ```
 
 ## 설정
@@ -202,12 +287,14 @@ curl http://localhost:8888/chat/health
 
 ## 향후 계획
 
-### Phase 1: RAG 검색 기능 구현
-- [x] Vector Database (PostgreSQL with pgvector) 연동
-- [ ] 문서 임베딩 및 벡터 저장
-- [ ] 의미적 검색 (Semantic Search) 구현
-- [ ] 하이브리드 검색 (키워드 + 벡터) 구현
-- [ ] 문서 청킹 및 메타데이터 관리
+### Phase 1: RAG 시스템 구현 ✅
+- [x] PostgreSQL + pgvector 데이터베이스 연동
+- [x] BGE-M3 로컬 임베딩 모델 통합
+- [x] 문서 업로드 및 처리 파이프라인
+- [x] 의미적 검색 (Semantic Search) 구현
+- [x] 하이브리드 검색 (키워드 + 의미적) 구현
+- [x] 문서 청킹 및 메타데이터 관리
+- [x] 검색 통계 및 모니터링
 - [ ] 검색 결과 리랭킹 시스템
 
 ### Phase 2: MCP(Model Context Protocol) 활용
@@ -232,13 +319,14 @@ curl http://localhost:8888/chat/health
 - [ ] 개인화 추천 시스템
 
 ### Phase 5: 인프라 및 운영
-- [ ] PostgreSQL 연동 및 데이터 관리
+- [x] PostgreSQL 연동 및 데이터 관리
+- [x] 구조화된 로깅 시스템
+- [x] Docker Compose 인프라 구성
 - [ ] Redis 캐싱 시스템
 - [ ] 사용자 피드백 수집 및 분석
 - [ ] 답변 품질 평가 메트릭
-- [ ] Docker 컨테이너화
 - [ ] Kubernetes 배포
-- [ ] 모니터링 및 로깅 시스템
+- [ ] 모니터링 및 알림 시스템
 
 ## 기여
 
