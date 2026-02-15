@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from sse_starlette.sse import EventSourceResponse
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.agents.workflows.chat_workflow import process_chat, process_chat_stream
+from app.core.exceptions import WorkflowException, ValidationException
 import json
 
 router = APIRouter(
@@ -20,6 +21,10 @@ async def chat_endpoint(request: ChatRequest):
     - **user_id**: 선택적 사용자 ID
     - **session_id**: 선택적 세션 ID (없으면 자동 생성)
     """
+    # 입력 검증
+    if not request.message or not request.message.strip():
+        raise ValidationException("메시지가 비어있습니다.")
+    
     try:
         result = await process_chat(
             message=request.message,
@@ -30,9 +35,10 @@ async def chat_endpoint(request: ChatRequest):
         return ChatResponse(**result)
         
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"채팅 처리 중 오류가 발생했습니다: {str(e)}"
+        # 커스텀 예외로 래핑하여 예외 핸들러가 처리하도록 함
+        raise WorkflowException(
+            message="채팅 워크플로우 실행 중 오류가 발생했습니다.",
+            details={"original_error": str(e)}
         )
 
 

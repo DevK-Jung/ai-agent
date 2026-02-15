@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from app.api.endpoints import users, chat, documents, search
 from app.core.config import settings
 from app.core.logging import setup_logging
+from app.core.exception_handlers import setup_exception_handlers
 from app.db.database import init_database, close_database
 import uvicorn
 
@@ -22,6 +23,9 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan
 )
+
+# 예외 핸들러 등록
+setup_exception_handlers(app)
 
 # 라우터 등록
 app.include_router(users.router)
