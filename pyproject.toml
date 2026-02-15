@@ -31,4 +31,6 @@ dependencies = [
     "pymupdf>=1.27.1",
     "langchain-core>=1.2.8",
     "python-multipart>=0.0.22",
+    "llama-cloud>=1.4.0",
+    "sse-starlette>=2.1.3",
 ]
