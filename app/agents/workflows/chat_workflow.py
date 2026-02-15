@@ -3,6 +3,7 @@ from app.agents.state import ChatState
 from app.agents.nodes.classifier import classify_question
 from app.agents.nodes.generator import generate_answer
 from app.agents.constants import WorkflowSteps, StreamEventTypes, StreamMessages
+from app.core.config import settings
 from typing import AsyncGenerator, Dict, Any
 import uuid
 
@@ -110,14 +111,18 @@ async def process_chat_stream(message: str, user_id: str = None, session_id: str
                     "type": StreamEventTypes.PROGRESS,
                     "step": "classified",
                     "question_type": output.get("question_type"),
+                    "used_model": output.get("model_used"),
                     "message": StreamMessages.question_type_classified(output.get("question_type", "알 수 없음"))
                 }
             
             # 답변 생성 시작 시
             elif event_type == "on_chain_start" and event_name == WorkflowSteps.GENERATOR:
+                # 입력 데이터에서 현재 상태 확인
+                input_data = event_data.get("input", {})
                 yield {
                     "type": StreamEventTypes.PROGRESS,
                     "step": WorkflowSteps.GENERATOR,
+                    "used_model": settings.GENERATOR_MODEL,
                     "message": StreamMessages.GENERATING_ANSWER
                 }
             

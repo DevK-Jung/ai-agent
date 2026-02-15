@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     # Agent Node Models
     CLASSIFIER_MODEL: str = "gpt-4o-mini"
     CLASSIFIER_TEMPERATURE: float = 0.1
-    GENERATOR_MODEL: str = "gpt-4o-mini"
+    GENERATOR_MODEL: str = "gpt-4o"
     GENERATOR_TEMPERATURE: float = 0.7
     
     # PostgreSQL Configuration

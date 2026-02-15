@@ -36,5 +36,6 @@ def classify_question(state: ChatState) -> ChatState:
 
     # 상태 업데이트
     state["question_type"] = question_type
+    state["model_used"] = settings.CLASSIFIER_MODEL
 
     return state
