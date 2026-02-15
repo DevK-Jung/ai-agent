@@ -57,9 +57,12 @@
 - Docker Compose 인프라 구성
 - 환경 변수 기반 설정 관리
 - 구조화된 로깅 시스템
+- **FastAPI 예외 핸들러 시스템** (새로 추가)
+- **구조화된 에러 응답 스키마** (새로 추가)
 
 #### Document Processing
 - 문서 업로드 API (PDF, TXT, DOCX 지원)
+- **LlamaParser 통합** - PDF/Excel/PowerPoint/Word 고품질 마크다운 변환 (새로 추가)
 - BGE-M3 모델 로컬 임베딩 생성
 - LangChain 기반 문서 청킹
 - 문서 메타데이터 관리
@@ -76,6 +79,13 @@
 - 질문 분류 에이전트 (FACT, SUMMARY, COMPARE, EVIDENCE)
 - 답변 생성 에이전트 (카테고리별 맞춤 프롬프트)
 - 프롬프트 템플릿 분리
+- **SSE(Server-Sent Events) 스트리밍 응답** (새로 추가)
+- **실시간 워크플로우 진행 상태 추적** (새로 추가)
+- **워크플로우 상수 및 메시지 분리** (새로 추가)
+
+#### Testing & Quality Assurance
+- **포괄적인 예외 핸들러 테스트 스위트** (새로 추가)
+- **pytest 설정 및 테스트 환경 구성** (새로 추가)
 
 ### 질문 분류 카테고리
 - **FACT**: 구체적인 사실이나 정보를 묻는 질문
@@ -260,6 +270,19 @@ curl -X POST "http://localhost:8000/chat/" \
     "user_id": "user123",
     "session_id": "session456"
   }'
+```
+
+**POST /chat/stream**
+
+실시간 스트리밍 채팅 응답을 받습니다 (SSE).
+
+```bash
+curl -X POST "http://localhost:8000/chat/stream" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Python에 대해 자세히 설명해주세요"
+  }' \
+  --no-buffer
 ```
 
 ### 4. 시스템 상태 확인
