@@ -28,6 +28,13 @@ class Settings(BaseSettings):
     POSTGRES_EXTERNAL_PORT: int = 5433
     POSTGRES_INTERNAL_PORT: int = 5432
     
+    # Database Connection Pool Configuration
+    DB_POOL_SIZE: int = 10
+    DB_POOL_MAX_OVERFLOW: int = 20
+    DB_POOL_TIMEOUT: int = 30
+    DB_POOL_RECYCLE: int = 3600
+    DB_POOL_PRE_PING: bool = True
+    
     @computed_field
     @property
     def DATABASE_URL(self) -> str:
