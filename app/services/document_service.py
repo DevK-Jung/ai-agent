@@ -27,7 +27,7 @@ class DocumentService:
         self.processor = processor or DocumentProcessor()
         self.embedding_service = embedding_service or get_embedding_service()
     
-    async def create_document_from_upload(self, file: UploadFile) -> Document:
+    async def create_document_from_upload(self, file: UploadFile, domain: str = "general") -> Document:
         """
         업로드된 파일로부터 Document 레코드를 생성합니다.
         
@@ -41,8 +41,8 @@ class DocumentService:
             # 문서 ID 생성
             document_id = uuid.uuid4()
             
-            # 파일 저장
-            upload_result = await self.file_storage.save_uploaded_file(file, document_id)
+            # 파일 저장 (도메인별 디렉토리 구분)
+            upload_result = await self.file_storage.save_uploaded_file(file, document_id, domain)
             
             # 파일에서 텍스트 추출
             content = self.processor.extract_text_from_file(upload_result.file_path, file.content_type)
