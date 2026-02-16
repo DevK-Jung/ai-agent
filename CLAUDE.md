@@ -74,7 +74,12 @@ This is an Agent-based Explainable RAG (Retrieval-Augmented Generation) system t
     ├─ Question Classifier Agent (gpt-4o-mini)
     ├─ Answer Generator Agent (gpt-4o)  
     ├─ Vector Retriever (PostgreSQL + pgvector)
-    ├─ Document Processor (LlamaParser + BGE-M3)
+    ├─ Document Processor (Separated Parser System + BGE-M3)
+    │   ├─ PDF Parser (PyMuPDF + PyPDF2)
+    │   ├─ DOCX Parser (python-docx)
+    │   ├─ XLSX Parser (openpyxl)
+    │   ├─ CSV Parser (multi-encoding)
+    │   └─ DOC Parser (docx2txt/antiword)
     └─ Real-time Status Tracking
     |
 [ PostgreSQL + pgvector ]  (Documents, Embeddings, Chat logs)
@@ -84,7 +89,10 @@ This is an Agent-based Explainable RAG (Retrieval-Augmented Generation) system t
 
 - **Question Classification**: Agents interpret and classify user questions (FACT, SUMMARY, COMPARE, EVIDENCE)
 - **Streaming Responses**: Real-time SSE streaming with workflow progress tracking
-- **Document Processing**: LlamaParser for high-quality PDF/Office document conversion
+- **Document Processing**: Separated parser system with Factory pattern for optimal file handling
+  - Support for PDF, DOC, DOCX, XLSX, CSV formats
+  - Multi-encoding support for international documents
+  - Fallback mechanisms for robust parsing
 - **Exception Handling**: Comprehensive error handling with structured responses
 - **LangGraph Structure**: Clear node-based reasoning flow with constants management
 
@@ -154,6 +162,16 @@ python main.py
 │   │   └── search.py                # Search schemas
 │   ├── infra/                       # Infrastructure services
 │   │   ├── ai/                      # AI services (embeddings)
+│   │   ├── parsers/                 # Document parser system ⭐ NEW
+│   │   │   ├── __init__.py          # ParserFactory export
+│   │   │   ├── factory.py           # Parser factory with MIME type mapping
+│   │   │   ├── base.py              # BaseParser abstract class
+│   │   │   ├── models.py            # ParsedContent, Table, Image models
+│   │   │   ├── pdf_parser.py        # PDF parser (PyMuPDF + PyPDF2)
+│   │   │   ├── docx_parser.py       # DOCX parser (python-docx)
+│   │   │   ├── xlsx_parser.py       # XLSX parser (openpyxl)
+│   │   │   ├── csv_parser.py        # CSV parser (multi-encoding)
+│   │   │   └── doc_parser.py        # DOC parser (docx2txt/antiword)
 │   │   ├── llama_parser.py          # LlamaParser integration
 │   │   └── storage/                 # File storage services
 │   ├── core/                        # Core configuration
@@ -193,9 +211,11 @@ python main.py
 
 ### Phase 2: Document Processing ✅
 1. **LlamaParser integration for high-quality document conversion**
-2. Document upload and processing pipeline
-3. Multiple file format support (PDF, Excel, PowerPoint, Word)
-4. Embedding generation and vector storage
+2. **Separated parser system implementation** - Factory pattern with specialized parsers
+3. Multiple file format support (PDF, DOC, DOCX, XLSX, CSV)
+4. Multi-encoding support for international documents (CP949, EUC-KR, UTF-8)
+5. Document upload and processing pipeline
+6. Embedding generation and vector storage
 
 ### Phase 3: LangGraph Workflow ✅
 1. LangGraph project structure design
@@ -298,7 +318,11 @@ python -m pytest --cov=app tests/
 ## Current Features
 
 ### Completed ✅
-1. **Document Processing**: LlamaParser integration for high-quality conversion
+1. **Document Processing**: 
+   - LlamaParser integration for high-quality conversion
+   - Separated parser system with Factory pattern (PDF, DOC, DOCX, XLSX, CSV)
+   - Multi-encoding support for international documents
+   - Repository pattern implementation with dependency injection
 2. **Vector Search**: PostgreSQL + pgvector with BGE-M3 embeddings
 3. **LangGraph Workflow**: Question classification and answer generation
 4. **Streaming API**: Real-time SSE responses with progress tracking

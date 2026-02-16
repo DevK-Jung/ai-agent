@@ -28,12 +28,13 @@
 ```
 
 ### 현재 구현된 워크플로우
-1. **Document Upload**: PDF, TXT, DOCX 파일 업로드 및 처리
-2. **Text Processing**: LangChain을 사용한 문서 청킹
-3. **Embedding Generation**: BGE-M3 모델 로컬 임베딩 생성
-4. **Vector Storage**: pgvector 코사인 유사도 검색
-5. **Semantic Search**: 의미적 검색 및 하이브리드 검색
-6. **Chat Workflow**: LangGraph 기반 질문 분류 및 답변 생성
+1. **Document Upload**: PDF, DOC, DOCX, XLSX, CSV 파일 업로드 및 처리
+2. **Advanced Parsing**: 분리된 파서 시스템으로 파일별 최적화된 텍스트 추출
+3. **Text Processing**: LangChain을 사용한 문서 청킹
+4. **Embedding Generation**: BGE-M3 모델 로컬 임베딩 생성
+5. **Vector Storage**: pgvector 코사인 유사도 검색
+6. **Semantic Search**: 의미적 검색 및 하이브리드 검색
+7. **Chat Workflow**: LangGraph 기반 질문 분류 및 답변 생성
 
 ## 기술 스택
 
@@ -61,8 +62,14 @@
 - **구조화된 에러 응답 스키마** (새로 추가)
 
 #### Document Processing
-- 문서 업로드 API (PDF, TXT, DOCX 지원)
-- **LlamaParser 통합** - PDF/Excel/PowerPoint/Word 고품질 마크다운 변환 (새로 추가)
+- **다중 파일 형식 지원**: PDF, DOC, DOCX, XLSX, CSV 파일 업로드 및 처리
+- **분리된 파서 시스템**: Factory 패턴 기반 파일별 최적화된 텍스트 추출
+  - PDF 파서: PyMuPDF + PyPDF2 fallback
+  - DOCX 파서: python-docx 기반 구조화된 텍스트 추출
+  - XLSX 파서: openpyxl 기반 시트별 테이블 데이터 처리
+  - CSV 파서: 다중 인코딩 지원 (CP949, EUC-KR, UTF-8)
+  - DOC 파서: docx2txt/antiword/olefile 지원 (레거시 Word 문서)
+- **LlamaParser 통합** - PDF/Excel/PowerPoint/Word 고품질 마크다운 변환
 - BGE-M3 모델 로컬 임베딩 생성
 - LangChain 기반 문서 청킹
 - 문서 메타데이터 관리
@@ -120,6 +127,16 @@
 │   │   └── search_service.py        # 검색 서비스
 │   ├── infra/                       # 인프라 서비스
 │   │   ├── ai/                      # AI 관련 (임베딩)
+│   │   ├── parsers/                 # 문서 파서 시스템 ⭐ 새로 추가
+│   │   │   ├── __init__.py          # ParserFactory export
+│   │   │   ├── factory.py           # 파서 팩토리
+│   │   │   ├── base.py              # BaseParser 추상 클래스
+│   │   │   ├── models.py            # ParsedContent 모델
+│   │   │   ├── pdf_parser.py        # PDF 파서
+│   │   │   ├── docx_parser.py       # DOCX 파서
+│   │   │   ├── xlsx_parser.py       # XLSX 파서
+│   │   │   ├── csv_parser.py        # CSV 파서
+│   │   │   └── doc_parser.py        # DOC 파서
 │   │   └── storage/                 # 파일 저장소
 │   ├── dependencies/                # 의존성 주입
 │   ├── core/                        # 핵심 설정
@@ -184,7 +201,7 @@ MAX_FILE_SIZE_MB=50
 
 # File Storage
 FILE_STORAGE_PATH=./data/documents
-ALLOWED_FILE_TYPES=pdf,txt,docx
+ALLOWED_FILE_TYPES=pdf,doc,docx,xlsx,csv,txt
 
 # Agent Models
 CLASSIFIER_MODEL=gpt-4o-mini

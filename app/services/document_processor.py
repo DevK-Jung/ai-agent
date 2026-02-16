@@ -7,6 +7,7 @@ from langchain_core.documents import Document as LangChainDocument
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from app.core.config import settings
+from app.infra.parsers import ParserFactory
 
 
 class DocumentProcessor:
@@ -23,7 +24,7 @@ class DocumentProcessor:
             separators=settings.CHUNK_SEPARATORS_LIST
         )
 
-    def extract_text_from_file(self, file_path: str, file_type: str) -> str:
+    async def extract_text_from_file(self, file_path: str, file_type: str) -> str:
         """
         파일에서 텍스트를 추출합니다.
         
@@ -35,14 +36,21 @@ class DocumentProcessor:
             str: 추출된 텍스트
         """
         try:
+            # 텍스트 파일은 간단하게 직접 처리
             if file_type == "text/plain":
                 return self._extract_from_txt(file_path)
-            elif file_type == "application/pdf":
-                return self._extract_from_pdf(file_path)
-            elif file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-                return self._extract_from_docx(file_path)
-            else:
+            
+            # 지원 여부 확인
+            if not ParserFactory.is_supported_mime_type(file_type):
                 raise ValueError(f"지원하지 않는 파일 형식: {file_type}")
+            
+            # 적절한 파서를 사용하여 파싱
+            parser = ParserFactory.get_parser(file_type)
+            parsed_content = await parser.parse(file_path)
+            
+            self.logger.info(f"파일 파싱 완료: {file_path} (테이블: {len(parsed_content.tables)}개, 이미지: {len(parsed_content.images)}개)")
+            
+            return parsed_content.raw_text
 
         except Exception as e:
             self.logger.error(f"텍스트 추출 실패 ({file_path}): {e}")
@@ -61,71 +69,6 @@ class DocumentProcessor:
 
         raise ValueError(f"텍스트 파일 인코딩을 식별할 수 없습니다: {file_path}")
 
-    def _extract_from_pdf(self, file_path: str) -> str:
-        """PDF 파일에서 텍스트 추출 (LangChain PDFLoader 사용)"""
-        try:
-            from langchain_community.document_loaders import PyMuPDFLoader
-
-            # PyMuPDFLoader 사용 (가장 안정적)
-            loader = PyMuPDFLoader(file_path)
-            documents = loader.load()
-
-            # 모든 페이지의 텍스트 결합
-            text = ""
-            for doc in documents:
-                page_text = doc.page_content.strip()
-                if page_text:
-                    text += page_text + "\n\n"
-
-            return text.strip()
-
-        except ImportError:
-            # PyMuPDF가 없으면 PyPDF2 fallback
-            self.logger.warning("PyMuPDF가 없습니다. PyPDF2로 fallback합니다.")
-            return self._extract_from_pdf_fallback(file_path)
-        except Exception as e:
-            self.logger.warning(f"PyMuPDF 추출 실패, PyPDF2로 fallback: {e}")
-            return self._extract_from_pdf_fallback(file_path)
-
-    def _extract_from_pdf_fallback(self, file_path: str) -> str:
-        """PDF 파일에서 텍스트 추출 (PyPDF2 fallback)"""
-        try:
-            import PyPDF2
-
-            text = ""
-            with open(file_path, 'rb') as file:
-                pdf_reader = PyPDF2.PdfReader(file)
-                for page_num, page in enumerate(pdf_reader.pages):
-                    try:
-                        text += page.extract_text() + "\n"
-                    except Exception as e:
-                        self.logger.warning(f"PDF 페이지 {page_num} 추출 실패: {e}")
-                        continue
-
-            return text.strip()
-
-        except ImportError:
-            raise ImportError("PDF 처리를 위해 pymupdf 또는 PyPDF2가 필요합니다: pip install pymupdf 또는 pip install PyPDF2")
-        except Exception as e:
-            raise ValueError(f"PDF 텍스트 추출 실패: {e}")
-
-    def _extract_from_docx(self, file_path: str) -> str:
-        """DOCX 파일에서 텍스트 추출"""
-        try:
-            from docx import Document
-
-            doc = Document(file_path)
-            text = ""
-
-            for paragraph in doc.paragraphs:
-                text += paragraph.text + "\n"
-
-            return text.strip()
-
-        except ImportError:
-            raise ImportError("DOCX 처리를 위해 python-docx가 필요합니다: pip install python-docx")
-        except Exception as e:
-            raise ValueError(f"DOCX 텍스트 추출 실패: {e}")
 
     def chunk_text(self, text: str, metadata: Dict[str, Any] = None) -> List[Dict[str, Any]]:
         """

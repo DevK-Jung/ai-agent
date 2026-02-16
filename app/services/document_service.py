@@ -45,7 +45,7 @@ class DocumentService:
             upload_result = await self.file_storage.save_uploaded_file(file, document_id, domain)
             
             # 파일에서 텍스트 추출
-            content = self.processor.extract_text_from_file(upload_result.file_path, file.content_type)
+            content = await self.processor.extract_text_from_file(upload_result.file_path, file.content_type)
             
             # 텍스트 유효성 검증
             if not self.processor.validate_file_content(content):
@@ -98,7 +98,7 @@ class DocumentService:
             if not document.file_path:
                 raise ValueError("파일 경로가 없습니다.")
             
-            content = self.processor.extract_text_from_file(document.file_path, document.file_type)
+            content = await self.processor.extract_text_from_file(document.file_path, document.file_type)
             
             # 텍스트 청킹
             chunks_data = self.processor.chunk_text(
