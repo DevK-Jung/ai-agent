@@ -6,6 +6,7 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.document_service import DocumentService
+from app.repositories.document_repository import DocumentRepository
 from app.services.document_processor import DocumentProcessor
 from app.infra.storage.file_storage import FileStorageService
 from .database import get_database_session
@@ -19,17 +20,25 @@ def get_document_processor() -> DocumentProcessor:
     return DocumentProcessor()
 
 
+def get_document_repository(
+    db: AsyncSession = Depends(get_database_session)
+) -> DocumentRepository:
+    """DocumentRepository 의존성 주입"""
+    return DocumentRepository(db)
+
+
 def get_document_service(
-    db: AsyncSession = Depends(get_database_session),
+    document_repository: DocumentRepository = Depends(get_document_repository),
     file_storage: FileStorageService = Depends(get_file_storage_service),
     processor: DocumentProcessor = Depends(get_document_processor),
     embedding_service = Depends(get_embedding_service_cached)
 ) -> DocumentService:
-    """DocumentService 의존성 주입"""
-    return DocumentService(db, file_storage, processor, embedding_service)
+    """DocumentService 의존성 주입 - Repository 패턴 적용"""
+    return DocumentService(document_repository, file_storage, processor, embedding_service)
 
 
 __all__ = [
     "get_document_processor",
+    "get_document_repository", 
     "get_document_service"
 ]

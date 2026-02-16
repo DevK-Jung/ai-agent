@@ -1,12 +1,10 @@
 import uuid
 from typing import List, Optional, Tuple
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, and_, or_
-from sqlalchemy.orm import selectinload
 from fastapi import UploadFile
 
 import logging
 from app.models.document import Document, DocumentChunk
+from app.repositories.document_repository import DocumentRepository
 from app.infra.storage.file_storage import FileStorageService
 from app.services.document_processor import DocumentProcessor
 from app.infra.ai.embedding_service import get_embedding_service
@@ -14,16 +12,16 @@ from app.core.config import settings
 
 
 class DocumentService:
-    """문서 관리 서비스"""
+    """문서 관리 서비스 - Repository 패턴 적용"""
     
     def __init__(
         self, 
-        db: AsyncSession,
+        document_repository: DocumentRepository,
         file_storage: FileStorageService = None,
         processor: DocumentProcessor = None,
         embedding_service = None
     ):
-        self.db = db
+        self.document_repository = document_repository
         self.logger = logging.getLogger(__name__)
         self.file_storage = file_storage or FileStorageService()
         self.processor = processor or DocumentProcessor()
@@ -66,16 +64,13 @@ class DocumentService:
                 status="pending"
             )
             
-            # 데이터베이스 저장
-            self.db.add(document)
-            await self.db.commit()
-            await self.db.refresh(document)
+            # 데이터베이스 저장 (Repository에 위임)
+            document = await self.document_repository.create_document(document)
             
             self.logger.info(f"문서 생성 완료: {document_id}")
             return document
             
         except Exception as e:
-            await self.db.rollback()
             self.logger.error(f"문서 생성 실패: {e}")
             raise
     
@@ -88,14 +83,14 @@ class DocumentService:
             document_id: 처리할 문서 ID
         """
         try:
-            # 문서 조회
-            document = await self.get_document_by_id(document_id)
+            # 문서 조회 (Repository에 위임)
+            document = await self.document_repository.get_document_by_id(document_id)
             if not document:
                 raise ValueError(f"문서를 찾을 수 없습니다: {document_id}")
             
-            # 상태를 processing으로 변경
+            # 상태를 processing으로 변경 (Repository에 위임)
             document.status = "processing"
-            await self.db.commit()
+            await self.document_repository.update_document(document)
             
             self.logger.info(f"문서 처리 시작: {document_id}")
             
@@ -138,25 +133,24 @@ class DocumentService:
                     )
                     chunk_objects.append(chunk)
             
-            # 청크들을 데이터베이스에 저장
+            # 청크들을 데이터베이스에 저장 (Repository에 위임)
             if chunk_objects:
-                self.db.add_all(chunk_objects)
+                await self.document_repository.create_chunks(chunk_objects)
             
-            # 문서 상태 업데이트
+            # 문서 상태 업데이트 (Repository에 위임)
             document.chunk_count = len(chunk_objects)
             document.status = "completed" if chunk_objects else "failed"
-            
-            await self.db.commit()
+            await self.document_repository.update_document(document)
             
             self.logger.info(f"문서 처리 완료: {document_id}, 청크 수: {len(chunk_objects)}")
             
         except Exception as e:
             # 실패 시 상태 업데이트
             try:
-                document = await self.get_document_by_id(document_id)
+                document = await self.document_repository.get_document_by_id(document_id)
                 if document:
                     document.status = "failed"
-                    await self.db.commit()
+                    await self.document_repository.update_document(document)
             except:
                 pass
             
@@ -173,13 +167,8 @@ class DocumentService:
         Returns:
             Document: 문서 객체 또는 None
         """
-        try:
-            stmt = select(Document).where(Document.id == document_id)
-            result = await self.db.execute(stmt)
-            return result.scalar_one_or_none()
-        except Exception as e:
-            self.logger.error(f"문서 조회 실패: {e}")
-            return None
+        # Repository에 위임
+        return await self.document_repository.get_document_by_id(document_id)
     
     async def get_documents(
         self, 
@@ -198,34 +187,11 @@ class DocumentService:
         Returns:
             Tuple[List[Document], int]: (문서 목록, 전체 개수)
         """
+        # Repository에 위임
         try:
-            # 기본 쿼리
-            conditions = []
-            if status:
-                conditions.append(Document.status == status)
-            
-            where_clause = and_(*conditions) if conditions else None
-            
-            # 전체 개수 조회
-            count_stmt = select(func.count(Document.id))
-            if where_clause is not None:
-                count_stmt = count_stmt.where(where_clause)
-            
-            total_result = await self.db.execute(count_stmt)
-            total = total_result.scalar()
-            
-            # 문서 목록 조회
-            stmt = select(Document)
-            if where_clause is not None:
-                stmt = stmt.where(where_clause)
-            
-            stmt = stmt.order_by(Document.created_at.desc()).offset(skip).limit(limit)
-            
-            result = await self.db.execute(stmt)
-            documents = result.scalars().all()
-            
-            return list(documents), total
-            
+            documents = await self.document_repository.find_documents(skip, limit, status)
+            total = await self.document_repository.count_documents(status)
+            return documents, total
         except Exception as e:
             self.logger.error(f"문서 목록 조회 실패: {e}")
             return [], 0
@@ -241,8 +207,8 @@ class DocumentService:
             bool: 삭제 성공 여부
         """
         try:
-            # 문서 조회
-            document = await self.get_document_by_id(document_id)
+            # 문서 조회 (Repository에 위임)
+            document = await self.document_repository.get_document_by_id(document_id)
             if not document:
                 return False
             
@@ -250,15 +216,14 @@ class DocumentService:
             if document.file_path:
                 self.file_storage.delete_file(document.file_path)
             
-            # 데이터베이스에서 삭제 (CASCADE로 청크도 자동 삭제)
-            await self.db.delete(document)
-            await self.db.commit()
+            # 데이터베이스에서 삭제 (Repository에 위임)
+            success = await self.document_repository.delete_document(document_id)
             
-            self.logger.info(f"문서 삭제 완료: {document_id}")
-            return True
+            if success:
+                self.logger.info(f"문서 삭제 완료: {document_id}")
+            return success
             
         except Exception as e:
-            await self.db.rollback()
             self.logger.error(f"문서 삭제 실패: {e}")
             return False
     
@@ -279,19 +244,5 @@ class DocumentService:
         Returns:
             List[DocumentChunk]: 유사한 청크 리스트
         """
-        try:
-            # PostgreSQL의 pgvector 코사인 유사도 검색
-            stmt = select(DocumentChunk).where(
-                DocumentChunk.embedding.cosine_distance(query_embedding) < (1 - threshold)
-            ).order_by(
-                DocumentChunk.embedding.cosine_distance(query_embedding)
-            ).limit(limit)
-            
-            result = await self.db.execute(stmt)
-            chunks = result.scalars().all()
-            
-            return list(chunks)
-            
-        except Exception as e:
-            self.logger.error(f"유사 청크 검색 실패: {e}")
-            return []
+        # Repository에 위임
+        return await self.document_repository.find_similar_chunks(query_embedding, limit, threshold)
