@@ -30,18 +30,11 @@ class DocumentRepository:
         Returns:
             Document: 생성된 문서 객체
         """
-        try:
-            self.db.add(document)
-            await self.db.commit()
-            await self.db.refresh(document)
-            
-            self.logger.debug(f"문서 생성 완료: {document.id}")
-            return document
-            
-        except Exception as e:
-            await self.db.rollback()
-            self.logger.error(f"문서 생성 실패: {e}")
-            raise
+        self.db.add(document)
+        await self.db.flush()  # ID 생성을 위해 flush
+        
+        self.logger.debug(f"문서 생성 준비 완료: {document.id}")
+        return document
     
     async def get_document_by_id(self, document_id: uuid.UUID) -> Optional[Document]:
         """
@@ -171,17 +164,10 @@ class DocumentRepository:
         Returns:
             Document: 업데이트된 문서 객체
         """
-        try:
-            await self.db.commit()
-            await self.db.refresh(document)
-            
-            self.logger.debug(f"문서 업데이트 완료: {document.id}")
-            return document
-            
-        except Exception as e:
-            await self.db.rollback()
-            self.logger.error(f"문서 업데이트 실패: {e}")
-            raise
+        await self.db.flush()
+        
+        self.logger.debug(f"문서 업데이트 준비 완료: {document.id}")
+        return document
     
     async def delete_document(self, document_id: uuid.UUID) -> bool:
         """
@@ -193,23 +179,17 @@ class DocumentRepository:
         Returns:
             bool: 삭제 성공 여부
         """
-        try:
-            # 문서 조회
-            document = await self.get_document_by_id(document_id)
-            if not document:
-                return False
-            
-            # 문서 삭제 (CASCADE로 청크도 자동 삭제)
-            await self.db.delete(document)
-            await self.db.commit()
-            
-            self.logger.info(f"문서 삭제 완료: {document_id}")
-            return True
-            
-        except Exception as e:
-            await self.db.rollback()
-            self.logger.error(f"문서 삭제 실패: {e}")
+        # 문서 조회
+        document = await self.get_document_by_id(document_id)
+        if not document:
             return False
+        
+        # 문서 삭제 (CASCADE로 청크도 자동 삭제)
+        await self.db.delete(document)
+        await self.db.flush()
+        
+        self.logger.info(f"문서 삭제 준비 완료: {document_id}")
+        return True
     
     async def create_chunks(self, chunks: List[DocumentChunk]) -> List[DocumentChunk]:
         """
@@ -221,22 +201,12 @@ class DocumentRepository:
         Returns:
             List[DocumentChunk]: 생성된 청크 리스트
         """
-        try:
-            if chunks:
-                self.db.add_all(chunks)
-                await self.db.commit()
-                
-                # 모든 청크를 refresh
-                for chunk in chunks:
-                    await self.db.refresh(chunk)
-            
-            self.logger.debug(f"청크 생성 완료: {len(chunks)}개")
-            return chunks
-            
-        except Exception as e:
-            await self.db.rollback()
-            self.logger.error(f"청크 생성 실패: {e}")
-            raise
+        if chunks:
+            self.db.add_all(chunks)
+            await self.db.flush()  # ID 생성을 위해 flush
+        
+        self.logger.debug(f"청크 생성 준비 완료: {len(chunks)}개")
+        return chunks
     
     async def find_chunks_by_document(
         self, 

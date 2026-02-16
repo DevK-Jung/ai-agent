@@ -1,3 +1,7 @@
+import logging
+from contextlib import asynccontextmanager
+from functools import wraps
+from typing import Optional, Any, Callable
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import text
@@ -28,10 +32,14 @@ AsyncSessionLocal = async_sessionmaker(
 
 
 async def get_database_session():
-    """Dependency to get database session"""
+    """Dependency to get database session with transaction"""
     async with AsyncSessionLocal() as session:
         try:
             yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
         finally:
             await session.close()
 
@@ -46,6 +54,8 @@ async def init_database():
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         # Create all tables
         await conn.run_sync(Base.metadata.create_all)
+
+
 
 
 async def close_database():
