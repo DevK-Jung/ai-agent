@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from sqlalchemy import Column, Integer, String, DateTime, Text, Float, JSON, ForeignKey, Boolean, Index
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, text
 from sqlalchemy.orm import relationship
 import uuid
 
@@ -41,9 +41,18 @@ class Document(Base):
     chunks = relationship("DocumentChunk", back_populates="document", cascade="all, delete-orphan")
 
     __table_args__ = (
+        # 기존 단일 인덱스
         Index('ix_documents_status', 'status'),
         Index('ix_documents_created_at', 'created_at'),
         Index('ix_documents_content_hash', 'content_hash'),
+        
+        # Phase 1: 핵심 복합 인덱스 - 가장 빈번한 쿼리 패턴 최적화
+        Index('ix_documents_status_created_at', 'status', 'created_at'),  # status + 날짜 정렬 조합
+        Index('ix_documents_file_type_status', 'file_type', 'status'),   # 파일타입 필터링 + 상태 확인
+        
+        # 부분 인덱스: 완료된 문서만 대상 (90% 쿼리가 completed 조회)
+        Index('ix_documents_completed_created_at', 'created_at', 
+              postgresql_where=text("status = 'completed'")),
     )
 
 
@@ -81,7 +90,26 @@ class DocumentChunk(Base):
     document = relationship("Document", back_populates="chunks")
 
     __table_args__ = (
+        # 기존 인덱스
         Index('ix_document_chunks_document_id', 'document_id'),
         Index('ix_document_chunks_chunk_index', 'document_id', 'chunk_index'),
-        Index('ix_document_chunks_embedding', 'embedding', postgresql_using='ivfflat', postgresql_ops={'embedding': 'vector_cosine_ops'}),  # 벡터 검색용 인덱스
+        # 기본 벡터 인덱스 - IVFFlat (호환성) todo 제거 hnsw만 사용
+        Index('ix_document_chunks_embedding_ivf', 'embedding', postgresql_using='ivfflat', postgresql_ops={'embedding': 'vector_cosine_ops'}),
+        
+        # Phase 3: HNSW 인덱스 - 더 나은 성능 (pgvector 0.5.0+)
+        Index('ix_document_chunks_embedding_hnsw', 'embedding', postgresql_using='hnsw', postgresql_ops={'embedding': 'vector_cosine_ops'}),
+        
+        # Phase 2: JOIN 최적화 - Document 테이블과의 조인 성능 향상
+        Index('ix_document_chunks_join_optimized', 'document_id', 'chunk_type', 'chunk_index'),  # covering index for frequent joins
+        
+        # 청크 타입 필터링 최적화
+        Index('ix_document_chunks_chunk_type', 'chunk_type'),
+        
+        # 텍스트 검색 최적화 (content 길이 기반 부분 인덱스)
+        Index('ix_document_chunks_content_length', 'char_count', 
+              postgresql_where=text("char_count > 50")),  # 너무 짧은 청크 제외
+        
+        # 임베딩이 있는 청크만 대상 (벡터 검색용)
+        Index('ix_document_chunks_with_embedding', 'document_id', 'embedding_model',
+              postgresql_where=text("embedding IS NOT NULL")),
     )
