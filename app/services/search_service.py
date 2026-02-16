@@ -3,22 +3,20 @@
 """
 import time
 import logging
-from typing import List, Optional, Dict, Any, Tuple
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, and_
-from sqlalchemy.orm import joinedload
+from typing import List, Optional, Dict, Any
 
-from app.models.document import Document, DocumentChunk
+from app.repositories.search_repository import SearchRepository
+from app.models.document import DocumentChunk
 from app.infra.ai.embedding_service import get_embedding_service
 from app.schemas.search import SearchRequest, SearchResult, SearchResponse, SearchStats
 from app.core.config import settings
 
 
 class SearchService:
-    """임베딩 기반 검색 서비스"""
+    """임베딩 기반 검색 서비스 - Repository 패턴 적용"""
     
-    def __init__(self, db: AsyncSession, embedding_service=None):
-        self.db = db
+    def __init__(self, search_repository: SearchRepository, embedding_service=None):
+        self.search_repository = search_repository
         self.logger = logging.getLogger(__name__)
         self.embedding_service = embedding_service or get_embedding_service()
     
@@ -40,8 +38,8 @@ class SearchService:
             # 1. 질의 텍스트를 임베딩으로 변환
             query_embedding = self.embedding_service.get_embeddings(search_request.query)
             
-            # 2. 벡터 유사도 검색 수행
-            chunks = await self._vector_search(
+            # 2. 벡터 유사도 검색 수행 (Repository에 위임)
+            chunks = await self.search_repository.find_similar_chunks(
                 query_embedding=query_embedding.tolist(),
                 limit=search_request.limit,
                 threshold=search_request.threshold,
@@ -67,72 +65,6 @@ class SearchService:
             self.logger.error(f"의미 검색 실패: {e}")
             raise
     
-    async def _vector_search(
-        self,
-        query_embedding: List[float],
-        limit: int,
-        threshold: float,
-        filters: Optional[Dict[str, Any]] = None
-    ) -> List[DocumentChunk]:
-        """
-        벡터 유사도 검색을 수행합니다.
-        
-        Args:
-            query_embedding: 질의 임베딩
-            limit: 결과 개수 제한
-            threshold: 유사도 임계값
-            filters: 추가 필터
-            
-        Returns:
-            List[DocumentChunk]: 검색된 청크들
-        """
-        try:
-            # 기본 쿼리: 코사인 유사도 검색
-            stmt = select(DocumentChunk).join(Document).where(
-                # 유사도 임계값 적용
-                DocumentChunk.embedding.cosine_distance(query_embedding) < (1 - threshold),
-                # 완료된 문서의 청크만 검색
-                Document.status == "completed"
-            ).options(
-                joinedload(DocumentChunk.document)
-            ).order_by(
-                DocumentChunk.embedding.cosine_distance(query_embedding)
-            ).limit(limit)
-            
-            # 추가 필터 적용
-            if filters:
-                conditions = []
-                
-                # 문서 타입 필터
-                if "file_types" in filters and filters["file_types"]:
-                    conditions.append(Document.file_type.in_(filters["file_types"]))
-                
-                # 문서 ID 필터
-                if "document_ids" in filters and filters["document_ids"]:
-                    conditions.append(Document.id.in_(filters["document_ids"]))
-                
-                # 청크 타입 필터
-                if "chunk_types" in filters and filters["chunk_types"]:
-                    conditions.append(DocumentChunk.chunk_type.in_(filters["chunk_types"]))
-                
-                # 날짜 범위 필터
-                if "date_from" in filters and filters["date_from"]:
-                    conditions.append(Document.created_at >= filters["date_from"])
-                
-                if "date_to" in filters and filters["date_to"]:
-                    conditions.append(Document.created_at <= filters["date_to"])
-                
-                if conditions:
-                    stmt = stmt.where(and_(*conditions))
-            
-            result = await self.db.execute(stmt)
-            chunks = result.scalars().all()
-            
-            return list(chunks)
-            
-        except Exception as e:
-            self.logger.error(f"벡터 검색 실패: {e}")
-            raise
     
     async def _format_search_results(
         self, 
@@ -188,21 +120,12 @@ class SearchService:
             SearchStats: 검색 시스템 통계
         """
         try:
-            # 총 문서 수
-            doc_count_stmt = select(func.count(Document.id)).where(
-                Document.status == "completed"
-            )
-            doc_result = await self.db.execute(doc_count_stmt)
-            total_documents = doc_result.scalar()
-            
-            # 총 청크 수
-            chunk_count_stmt = select(func.count(DocumentChunk.id))
-            chunk_result = await self.db.execute(chunk_count_stmt)
-            total_chunks = chunk_result.scalar()
+            # 검색 통계 (Repository에 위임)
+            stats = await self.search_repository.get_search_statistics()
             
             return SearchStats(
-                total_documents=total_documents,
-                total_chunks=total_chunks,
+                total_documents=stats['total_documents'],
+                total_chunks=stats['total_chunks'],
                 embedding_model=settings.EMBEDDING_MODEL,
                 embedding_dimensions=settings.EMBEDDING_DIMENSIONS
             )
@@ -236,8 +159,8 @@ class SearchService:
             # 1. 의미적 검색
             semantic_results = await self.semantic_search(search_request)
             
-            # 2. 키워드 검색 (간단한 전문 검색)
-            keyword_chunks = await self._keyword_search(
+            # 2. 키워드 검색 (Repository에 위임)
+            keyword_chunks = await self.search_repository.find_chunks_by_keyword(
                 query=search_request.query,
                 limit=search_request.limit,
                 filters=search_request.filters
@@ -267,42 +190,6 @@ class SearchService:
             self.logger.error(f"하이브리드 검색 실패: {e}")
             raise
     
-    async def _keyword_search(
-        self,
-        query: str,
-        limit: int,
-        filters: Optional[Dict[str, Any]] = None
-    ) -> List[DocumentChunk]:
-        """
-        키워드 기반 전문 검색을 수행합니다.
-        
-        Args:
-            query: 검색 질의
-            limit: 결과 개수 제한
-            filters: 추가 필터
-            
-        Returns:
-            List[DocumentChunk]: 검색된 청크들
-        """
-        try:
-            # PostgreSQL 전문 검색 (단순 ILIKE 사용)
-            stmt = select(DocumentChunk).join(Document).where(
-                DocumentChunk.content.ilike(f"%{query}%"),
-                Document.status == "completed"
-            ).options(
-                joinedload(DocumentChunk.document)
-            ).order_by(
-                DocumentChunk.chunk_index
-            ).limit(limit)
-            
-            result = await self.db.execute(stmt)
-            chunks = result.scalars().all()
-            
-            return list(chunks)
-            
-        except Exception as e:
-            self.logger.error(f"키워드 검색 실패: {e}")
-            return []
     
     def _combine_search_results(
         self,
