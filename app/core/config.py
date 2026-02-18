@@ -45,6 +45,16 @@ class Settings(BaseSettings):
     def DATABASE_URL_SYNC(self) -> str:
         return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_EXTERNAL_PORT}/{self.POSTGRES_DB}"
     
+    @computed_field
+    @property
+    def CHECKPOINTER_CONNECTION_STRING(self) -> str:
+        """체크포인터용 연결 문자열"""
+        return (
+            f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
+            f"@{self.POSTGRES_HOST}:{self.POSTGRES_EXTERNAL_PORT}"
+            f"/{self.POSTGRES_DB}"
+        )
+    
     # File Upload Configuration
     ALLOWED_FILE_TYPES: str = "text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     MAX_FILE_SIZE_MB: int = 10
@@ -83,6 +93,12 @@ class Settings(BaseSettings):
                 sep = ""
             processed.append(sep)
         return processed
+    
+    # Checkpointer Configuration
+    CHECKPOINTER_SCHEMA: str = "public"
+    CHECKPOINTER_APP_NAME: str = "ai-agent-checkpointer"
+    CHECKPOINTER_CONNECT_TIMEOUT: int = 10
+    CHECKPOINTER_STATEMENT_TIMEOUT: int = 30000
     
     # Logging
     LOG_LEVEL: str = "INFO"

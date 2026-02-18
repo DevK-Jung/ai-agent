@@ -3,7 +3,6 @@ from langchain_openai import ChatOpenAI
 from app.agents.state import ChatState
 from app.core.config import settings
 from app.agents.prompts.classification import (
-    CLASSIFICATION_PROMPT,
     VALID_QUESTION_TYPES,
     DEFAULT_QUESTION_TYPE
 )
@@ -18,12 +17,11 @@ def classify_question(state: ChatState) -> ChatState:
         api_key=settings.OPENAI_API_KEY
     )
 
-    classification_prompt = CLASSIFICATION_PROMPT.format(
-        user_message=state["user_message"]
-    )
+    # 전체 메시지 히스토리 사용
+    messages = state.get("messages", [])
 
     try:
-        response = llm.invoke(classification_prompt)
+        response = llm.invoke(messages)
         question_type = response.content.strip().upper()
 
         # 유효한 분류인지 확인

@@ -5,7 +5,11 @@ from app.core.config import settings
 from app.core.logging import setup_logging
 from app.core.exception_handlers import setup_exception_handlers
 from app.db.database import init_database, close_database
+from app.agents.infra.checkpointer import setup_checkpointer_tables
 import uvicorn
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -13,6 +17,14 @@ async def lifespan(app: FastAPI):
     # Startup
     setup_logging()  # 로깅 설정 초기화
     await init_database()
+    
+    # 체크포인터 테이블 초기화
+    try:
+        await setup_checkpointer_tables()
+        logger.info("Checkpointer tables initialized successfully")
+    except Exception as e:
+        logger.warning(f"Checkpointer tables setup failed or already exist: {e}")
+    
     yield
     # Shutdown
     await close_database()
