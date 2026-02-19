@@ -3,7 +3,11 @@
 class WorkflowSteps:
     """워크플로우 단계 상수"""
     CLASSIFIER = "classifier"
+    ROUTER = "router"
     GENERATOR = "generator"
+    SEARCH_GENERATOR = "search_generator"
+    SUMMARY_GENERATOR = "summary_generator"
+    COMPARE_GENERATOR = "compare_generator"
     
 class StreamEventTypes:
     """스트림 이벤트 타입 상수"""

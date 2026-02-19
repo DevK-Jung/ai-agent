@@ -8,6 +8,7 @@ from langgraph.graph import StateGraph, END
 from app.agents.constants import WorkflowSteps, StreamEventTypes, StreamMessages
 from app.agents.nodes.classifier import classify_question
 from app.agents.nodes.generator import generate_answer
+from app.agents.nodes.router import route_question
 from app.agents.state import ChatState
 from app.core.config import settings
 
@@ -20,10 +21,21 @@ async def create_chat_workflow():
     workflow = StateGraph(ChatState)
 
     workflow.add_node(WorkflowSteps.CLASSIFIER, classify_question)
+    workflow.add_node(WorkflowSteps.ROUTER, route_question)
     workflow.add_node(WorkflowSteps.GENERATOR, generate_answer)
 
     workflow.set_entry_point(WorkflowSteps.CLASSIFIER)
-    workflow.add_edge(WorkflowSteps.CLASSIFIER, WorkflowSteps.GENERATOR)
+    workflow.add_edge(WorkflowSteps.CLASSIFIER, WorkflowSteps.ROUTER)
+    workflow.add_conditional_edges(
+        WorkflowSteps.ROUTER,
+        route_question,
+        {
+            WorkflowSteps.GENERATOR: WorkflowSteps.GENERATOR,
+            "search_generator": WorkflowSteps.GENERATOR,  # 임시로 기본 generator 사용
+            "summary_generator": WorkflowSteps.GENERATOR,  # 임시로 기본 generator 사용
+            "compare_generator": WorkflowSteps.GENERATOR,  # 임시로 기본 generator 사용
+        }
+    )
     workflow.add_edge(WorkflowSteps.GENERATOR, END)
 
     checkpointer_context = await get_postgres_checkpointer()
@@ -123,6 +135,14 @@ async def process_chat_stream(
                         "message": StreamMessages.question_type_classified(
                             output.get("question_type", "알 수 없음")
                         ),
+                    }
+                
+                # 라우팅 완료
+                elif event_type == "on_chain_end" and event_name == WorkflowSteps.ROUTER:
+                    yield {
+                        "type": StreamEventTypes.PROGRESS,
+                        "step": "routed",
+                        "message": "적절한 처리 경로를 선택했습니다...",
                     }
 
                 # 답변 생성 시작
