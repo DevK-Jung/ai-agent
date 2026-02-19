@@ -8,7 +8,7 @@ from app.agents.prompts.classification import (
 )
 
 
-def classify_question(state: ChatState) -> ChatState:
+def classify_question(state: ChatState) -> dict:
     """사용자 질문을 분류하는 노드"""
 
     llm = ChatOpenAI(
@@ -32,8 +32,8 @@ def classify_question(state: ChatState) -> ChatState:
         print(f"Classification error: {e}")
         question_type = DEFAULT_QUESTION_TYPE
 
-    # 상태 업데이트
-    state["question_type"] = question_type
-    state["model_used"] = settings.CLASSIFIER_MODEL
-
-    return state
+    # dict 반환
+    return {
+        "question_type": question_type,
+        "model_used": settings.CLASSIFIER_MODEL
+    }

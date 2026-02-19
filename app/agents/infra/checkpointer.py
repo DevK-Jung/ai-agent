@@ -15,8 +15,9 @@ async def get_postgres_checkpointer() -> AsyncContextManager[AsyncPostgresSaver]
         conn_string = settings.CHECKPOINTER_CONNECTION_STRING
 
         # checkpointer 생성
-        checkpointer_context = AsyncPostgresSaver.from_conn_string(conn_string)
-        logger.debug(f"PostgreSQL checkpointer context created")
+        checkpointer_context = AsyncPostgresSaver.from_conn_string(
+            conn_string,
+        )
         return checkpointer_context
     except Exception as e:
         logger.error(f"Failed to create PostgreSQL checkpointer: {e}")

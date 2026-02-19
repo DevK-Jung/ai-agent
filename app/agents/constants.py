@@ -2,9 +2,22 @@
 
 class WorkflowSteps:
     """워크플로우 단계 상수"""
+    # 라우터 노드들
+    NEED_PREV_CONVERSATION_ROUTER = "need_prev_conversation_router"
+    CHECK_TOKEN_ROUTER = "check_token_router"
+    
+    # 기능 노드들
+    LOAD_DB = "load_db"
+    SUMMARIZE = "summarize"
+    SAVE_DB = "save_db"
+    
+    # 기존 노드들
+    CONVERSATION_RESTORE = "conversation_restore"  # deprecated
+    CONVERSATION_SUMMARY = "conversation_summary"  # deprecated  
     CLASSIFIER = "classifier"
     ROUTER = "router"
     GENERATOR = "generator"
+    CONVERSATION_SAVE = "conversation_save"  # deprecated
     SEARCH_GENERATOR = "search_generator"
     SUMMARY_GENERATOR = "summary_generator"
     COMPARE_GENERATOR = "compare_generator"
@@ -23,6 +36,8 @@ class StreamMessages:
     CLASSIFYING_QUESTION = "질문 유형을 분석 중입니다..."
     GENERATING_ANSWER = "답변을 생성하고 있습니다..."
     PROCESSING_ERROR = "죄송합니다. 처리 중 오류가 발생했습니다."
+    RESTORING_CONVERSATION = "이전 대화 기록을 복원하고 있습니다..."
+    SUMMARIZING_CONVERSATION = "이전 대화를 요약하고 있습니다..."
     
     @staticmethod
     def question_type_classified(question_type: str) -> str:

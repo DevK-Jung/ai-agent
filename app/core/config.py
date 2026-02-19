@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     CLASSIFIER_TEMPERATURE: float = 0.1
     GENERATOR_MODEL: str = "gpt-4o"
     GENERATOR_TEMPERATURE: float = 0.7
+    CONVERSATION_SUMMARY_MODEL: str = "gpt-4o-mini"
+    CONVERSATION_SUMMARY_TEMPERATURE: float = 0.1
     
     # PostgreSQL Configuration
     POSTGRES_USER: str = "postgres"
@@ -99,6 +101,7 @@ class Settings(BaseSettings):
     CHECKPOINTER_APP_NAME: str = "ai-agent-checkpointer"
     CHECKPOINTER_CONNECT_TIMEOUT: int = 10
     CHECKPOINTER_STATEMENT_TIMEOUT: int = 30000
+    CHECKPOINTER_TTL_SECONDS: int = 3600  # 1시간 TTL
     
     # Logging
     LOG_LEVEL: str = "INFO"

@@ -1,17 +1,16 @@
 from typing import AsyncGenerator
 
+from langchain_core.messages import AIMessage
 from langchain_openai import ChatOpenAI
 
-from app.agents.prompts.generation import (
-    ERROR_MESSAGE
-)
+from app.agents.prompts.generation import ERROR_MESSAGE
 from app.agents.state import ChatState
 from app.core.config import settings
 
 
-def generate_answer(state: ChatState) -> ChatState:
+async def generate_answer(state: ChatState) -> dict:
     """답변을 생성하는 노드"""
-    from langchain_core.messages import AIMessage
+    print("Generator: Starting generate_answer")
 
     llm = ChatOpenAI(
         model=settings.GENERATOR_MODEL,
@@ -19,15 +18,12 @@ def generate_answer(state: ChatState) -> ChatState:
         api_key=settings.OPENAI_API_KEY
     ).with_config(tags=["STREAM_GENERATOR"])
 
-    # 메시지 히스토리 사용
     messages = state.get("messages", [])
+    print(f"Generator: Got {len(messages)} messages")
 
     try:
-        # 전체 메시지 히스토리를 사용하여 응답 생성
         response = llm.invoke(messages)
         answer = response.content.strip()
-
-        # 응답을 메시지 히스토리에 추가
         messages.append(AIMessage(content=answer))
 
     except Exception as e:
@@ -35,12 +31,11 @@ def generate_answer(state: ChatState) -> ChatState:
         answer = ERROR_MESSAGE
         messages.append(AIMessage(content=answer))
 
-    # 상태 업데이트
-    state["answer"] = answer
-    state["model_used"] = settings.GENERATOR_MODEL
-    state["messages"] = messages
-
-    return state
+    return {
+        "answer": answer,
+        "model_used": settings.GENERATOR_MODEL,
+        "messages": messages,
+    }
 
 
 async def generate_answer_stream(state: ChatState) -> AsyncGenerator[str, None]:
@@ -53,7 +48,6 @@ async def generate_answer_stream(state: ChatState) -> AsyncGenerator[str, None]:
         streaming=True
     )
 
-    # 전체 메시지 히스토리 사용
     messages = state.get("messages", [])
 
     try:
