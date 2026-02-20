@@ -58,7 +58,7 @@ class ConversationService:
             self.logger.error(f"스레드 메시지 조회 실패: {e}")
             return []
     
-    async def get_past_messages_for_summary(
+    async def get_recent_messages(
         self, 
         thread_id: str, 
         limit: int = 20
