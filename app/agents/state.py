@@ -1,4 +1,5 @@
 from typing import Optional
+
 from langgraph.graph import MessagesState
 
 
@@ -11,3 +12,4 @@ class ChatState(MessagesState):
     answer: Optional[str]
     model_used: str
     summary: Optional[str]  # 이전 대화 요약
+    context: Optional[str]
