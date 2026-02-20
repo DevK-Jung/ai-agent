@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from app.api.endpoints import users, chat, documents, search
+from app.api.endpoints import users, chat, documents, search, meeting
 from app.core.config import settings
 from app.core.logging import setup_logging
 from app.core.exception_handlers import setup_exception_handlers
@@ -44,6 +44,7 @@ app.include_router(users.router)
 app.include_router(chat.router)
 app.include_router(documents.router)
 app.include_router(search.router)
+app.include_router(meeting.router)
 
 
 @app.get("/")

@@ -22,6 +22,16 @@ class Settings(BaseSettings):
     CONVERSATION_SUMMARY_MODEL: str = "gpt-4o-mini"
     CONVERSATION_SUMMARY_TEMPERATURE: float = 0.1
     
+    # Meeting Agent Models
+    MINUTES_MODEL: str = "gpt-4o"
+    MINUTES_TEMPERATURE: float = 0.3
+    
+    # WhisperX Configuration
+    HF_TOKEN: str = ""  # HuggingFace token for speaker diarization
+    WHISPERX_MODEL: str = "large-v2"  # Whisper model size
+    WHISPERX_DEVICE: str = "cpu"  # "cuda" or "cpu" 
+    WHISPERX_LANGUAGE: str = "ko"  # Default language code
+    
     # PostgreSQL Configuration
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres"
