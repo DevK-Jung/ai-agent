@@ -1,10 +1,25 @@
+# prompts/summary.py
 """대화 요약을 위한 프롬프트 템플릿"""
 
-CONVERSATION_SUMMARY_PROMPT = """이전 대화의 핵심 내용과 맥락을 간결하게 요약해주세요.
+from langchain_core.prompts import ChatPromptTemplate
 
-요약 기준:
-1. 주요 질문과 답변의 핵심 내용
-2. 대화의 맥락과 흐름
-3. 중요한 정보나 결론
+CONVERSATION_SUMMARY_PROMPT = ChatPromptTemplate.from_messages([
+    ("system", """당신은 대화 요약 전문가입니다. 아래 대화를 분석하여 핵심 내용을 요약해주세요.
 
-요약은 3-5문장으로 간결하게 작성해주세요."""
+{existing_summary}
+
+<conversation>
+{conversation}
+</conversation>
+
+<instructions>
+- 주요 질문과 답변의 핵심 내용 포함
+- 대화의 맥락과 흐름 유지
+- 중요한 정보나 결론 포함
+- 150토큰 이내로 작성
+</instructions>
+
+<output_format>
+[요약 내용만 작성, 별도 설명 없이]
+</output_format>""")
+])

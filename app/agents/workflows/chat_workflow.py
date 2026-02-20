@@ -25,18 +25,14 @@ async def create_chat_workflow():
 
     workflow = StateGraph(ChatState)
 
-    # 노드 정의 (아키텍처 다이어그램에 맞게)
+    # 노드 정의
     workflow.add_node(WorkflowSteps.LOAD_DB, load_history_from_db)
     workflow.add_node(WorkflowSteps.SUMMARIZE, summarize_conversation)
     workflow.add_node(WorkflowSteps.CLASSIFIER, classify_question)
     workflow.add_node(WorkflowSteps.GENERATOR, generate_answer)
     workflow.add_node(WorkflowSteps.SAVE_DB, save_message_to_db)
 
-    # workflow.add_node(WorkflowSteps.NEED_PREV_CONVERSATION_ROUTER, lambda state: state)
     workflow.add_node(WorkflowSteps.CHECK_TOKEN_ROUTER, lambda state: {})
-
-    # 시작점: need_prev_conversation 라우터
-    # workflow.set_entry_point(WorkflowSteps.NEED_PREV_CONVERSATION_ROUTER)
 
     # 1. need_prev_conversation 라우터
     workflow.set_conditional_entry_point(
