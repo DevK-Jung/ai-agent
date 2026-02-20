@@ -96,6 +96,13 @@ This is an Agent-based Explainable RAG (Retrieval-Augmented Generation) system t
 - **Exception Handling**: Comprehensive error handling with structured responses
 - **LangGraph Structure**: Clear node-based reasoning flow with constants management
 
+## Target Architecture (Planned)
+
+라우팅 에이전트 + 서브 에이전트 구조로 리팩토링 예정:
+- **Router Agent**: 공통 처리 (대화 이력, 토큰 체크, 요약, DB 저장)
+- **Chat Sub Agent**: 질문 분류 + 답변 생성
+- **Meeting Sub Agent**: Whisper STT + pyannote 화자 분리 + 회의록 생성
+
 ## Technology Stack
 
 - **Language**: Python
@@ -105,6 +112,49 @@ This is an Agent-based Explainable RAG (Retrieval-Augmented Generation) system t
 - **Vector Database**: PostgreSQL with pgvector extension
 - **Database**: PostgreSQL with async SQLAlchemy
 - **Container**: Docker
+
+## Code Conventions
+
+**IMPORTANT**: All code must follow these conventions exactly to ensure consistency and maintainability.
+
+### LLM and Chain Management
+- **LLM 인스턴스는 모듈 레벨에서 생성** (함수 내부 생성 금지)
+- **LCEL 체인으로 구성**: `prompt | llm | parser` 패턴 사용
+- **단순 텍스트 반환은 StrOutputParser 사용**
+
+### Prompt Management
+- **프롬프트는 ChatPromptTemplate 사용**
+- **노드 파일과 분리**: prompts/ 디렉토리에 별도 관리
+- **프롬프트 상수는 prompts 모듈에 정의**
+
+### Message and State Handling
+- **isinstance로 메시지 타입 체크** (`type().__name__` 사용 금지)
+- **State 직접 변경 금지**: 반환값으로만 상태 전달
+- **RemoveMessage 사용 시**: `messages[-2:]`는 반환값에 포함하지 않음
+
+### Database Operations
+- **DB 세션 로직은 헬퍼 함수로 분리**
+- **async/await 패턴 일관성 유지**
+
+### Error Handling
+- **구조화된 에러 응답 사용**
+- **예외 상황에서 기본값 반환**
+
+### Code Quality
+- **타입 힌트 사용**
+- **명확한 함수명과 변수명**
+- **단일 책임 원칙 준수**
+
+## Current Workflow (chat_workflow.py)
+
+```
+need_prev_conversation (is_new_session 기반)
+    → load_history_from_db 또는 check_token
+    → summarize_conversation (8000토큰 초과시)
+    → classify_question
+    → generate_answer
+    → save_message_to_db
+```
 
 ## Development Commands
 
@@ -122,12 +172,12 @@ python main.py
 # Start PostgreSQL with pgvector
 docker compose --env-file .env -f docker/docker-compose.infra.yml up -d
 
-# Start API server (runs on port 8888 by default)
+# Start API server (runs on port 8000 by default)
 python main.py
 
 # Access API documentation
-# http://localhost:8888/docs (Swagger UI)
-# http://localhost:8888/redoc (ReDoc)
+# http://localhost:8000/docs (Swagger UI)
+# http://localhost:8000/redoc (ReDoc)
 ```
 
 ## Current Project Structure
