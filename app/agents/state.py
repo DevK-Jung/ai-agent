@@ -13,3 +13,4 @@ class ChatState(MessagesState):
     model_used: str
     summary: Optional[str]  # 이전 대화 요약
     context: Optional[str]
+    is_new_session: Optional[bool]

@@ -87,7 +87,8 @@ async def process_chat(
         user_id: str | None = None,
         session_id: str | None = None,
 ) -> dict:
-    # 세션 없으면 새로 생성
+    is_new_session = session_id is None
+
     if not session_id:
         session_id = str(uuid.uuid4())
 
@@ -105,7 +106,8 @@ async def process_chat(
                 {
                     "messages": [HumanMessage(content=message)],
                     "session_id": session_id,
-                    "user_id": user_id
+                    "user_id": user_id,
+                    "is_new_session": is_new_session
                 },
                 config=config,
             )
@@ -135,6 +137,8 @@ async def process_chat_stream(
         user_id: str | None = None,
         session_id: str | None = None,
 ) -> AsyncGenerator[Dict[str, Any], None]:
+    is_new_session = session_id is None
+
     if not session_id:
         session_id = str(uuid.uuid4())
 
@@ -158,7 +162,8 @@ async def process_chat_stream(
                     {
                         "messages": [HumanMessage(content=message)],
                         "session_id": session_id,
-                        "user_id": user_id
+                        "user_id": user_id,
+                        "is_new_session": is_new_session
                     },
                     config=config,
                     version="v2",
