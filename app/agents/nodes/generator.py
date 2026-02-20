@@ -9,8 +9,9 @@ from app.core.config import settings
 _generator_llm = ChatOpenAI(
     model=settings.GENERATOR_MODEL,
     temperature=settings.GENERATOR_TEMPERATURE,
-    api_key=settings.OPENAI_API_KEY
-).with_config(tags=["STREAM_GENERATOR"])
+    api_key=settings.OPENAI_API_KEY,
+    tags=["STREAM_GENERATOR"]
+)
 
 
 async def generate_answer(state: ChatState) -> dict:
