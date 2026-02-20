@@ -60,7 +60,6 @@ async def create_chat_workflow():
     workflow.add_edge(WorkflowSteps.SUMMARIZE, WorkflowSteps.CLASSIFIER)
 
     # 5. 기존 classifier → router → generator 플로우
-    # workflow.add_edge(WorkflowSteps.CLASSIFIER, WorkflowSteps.ROUTER)
     workflow.add_conditional_edges(
         WorkflowSteps.CLASSIFIER,
         route_question,
