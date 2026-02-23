@@ -68,50 +68,104 @@ This is an Agent-based Explainable RAG (Retrieval-Augmented Generation) system t
 ```
 [ Client ]
     |
-[ FastAPI + Exception Handlers ]
+[ FastAPI + Exception Handlers + SSE Streaming ]
     |
-[ LangGraph Orchestrator with SSE Streaming ]
-    ├─ Question Classifier Agent (gpt-4o-mini)
-    ├─ Answer Generator Agent (gpt-4o)  
+[ LangGraph Orchestrator with Real-time Progress Tracking ]
+    ├─ Router Agent (공통 처리: 대화 이력, 토큰 체크, 요약, DB 저장)
+    ├─ Chat Sub Agent (질문 분류 + 답변 생성)
+    │   ├─ Question Classifier Agent (gpt-4o-mini)
+    │   └─ Answer Generator Agent (gpt-4o)
+    ├─ Meeting Sub Agent (STT + 화자 분리 + 회의록 생성) ⭐ NEW
+    │   ├─ WhisperX Audio Transcription (긴 오디오 청킹 처리)
+    │   ├─ Speaker Diarization (pyannote)
+    │   └─ Meeting Minutes Generator (gpt-4o)
     ├─ Vector Retriever (PostgreSQL + pgvector)
-    ├─ Document Processor (Separated Parser System + BGE-M3)
-    │   ├─ PDF Parser (PyMuPDF + PyPDF2)
-    │   ├─ DOCX Parser (python-docx)
-    │   ├─ XLSX Parser (openpyxl)
-    │   ├─ CSV Parser (multi-encoding)
-    │   └─ DOC Parser (docx2txt/antiword)
-    └─ Real-time Status Tracking
+    └─ Document Processor (LlamaParser + 분리된 파서 시스템)
+        ├─ PDF Parser (PyMuPDF + PyPDF2)
+        ├─ DOCX Parser (python-docx)
+        ├─ XLSX Parser (openpyxl)
+        ├─ CSV Parser (multi-encoding)
+        └─ DOC Parser (docx2txt/antiword)
     |
-[ PostgreSQL + pgvector ]  (Documents, Embeddings, Chat logs)
+[ AI Infrastructure ]
+    ├─ WhisperX Manager (스레드 안전 모델 캐싱) ⭐ NEW
+    ├─ BGE-M3 Embedding Service
+    └─ OpenAI LLM Services
+    |
+[ PostgreSQL + pgvector ] (Documents, Embeddings, Chat logs, Checkpointer)
 ```
 
 ## Core Concepts
 
-- **Question Classification**: Agents interpret and classify user questions (FACT, SUMMARY, COMPARE, EVIDENCE)
-- **Streaming Responses**: Real-time SSE streaming with workflow progress tracking
-- **Document Processing**: Separated parser system with Factory pattern for optimal file handling
+### Multi-Agent Architecture
+- **Router Agent**: Common processing logic (conversation history, token management, summarization, DB operations)
+- **Chat Sub Agent**: Document-based Q&A with intelligent question classification (FACT, SUMMARY, COMPARE, EVIDENCE)
+- **Meeting Sub Agent**: Audio-to-minutes pipeline with STT, speaker diarization, and AI summarization ⭐ NEW
+
+### Audio Processing (WhisperX Integration) ⭐ NEW
+- **Thread-safe Model Management**: FastAPI lifespan-based model caching with WhisperXManager
+- **Long Audio Support**: Chunked processing for files up to 2 hours (10-minute chunks)
+- **Dynamic Batch Sizing**: Automatic batch size adjustment based on audio length
+- **Speaker Diarization**: pyannote-based speaker identification and separation
+- **Intelligent Transcription**: Language detection with alignment optimization
+
+### Document & Content Processing
+- **LlamaParser Integration**: High-quality document conversion for PDF/Excel/PowerPoint/Word
+- **Separated Parser System**: Factory pattern with specialized parsers for optimal file handling
   - Support for PDF, DOC, DOCX, XLSX, CSV formats
-  - Multi-encoding support for international documents
+  - Multi-encoding support for international documents (CP949, EUC-KR, UTF-8)
   - Fallback mechanisms for robust parsing
+- **BGE-M3 Local Embeddings**: High-quality multilingual embeddings
+
+### Real-time & Streaming
+- **SSE Streaming**: Real-time responses with workflow progress tracking
+- **Live Status Updates**: Step-by-step processing status for long-running operations
+- **Async Processing**: Non-blocking operations with proper error handling
+
+### Infrastructure & Quality
 - **Exception Handling**: Comprehensive error handling with structured responses
 - **LangGraph Structure**: Clear node-based reasoning flow with constants management
+- **Configuration Management**: Complete .env-based configuration with validation
+- **Thread Safety**: Proper concurrent processing with model caching
 
-## Target Architecture (Planned)
+## Current Multi-Agent Architecture (Implemented) ✅
 
-라우팅 에이전트 + 서브 에이전트 구조로 리팩토링 예정:
+다중 에이전트 아키텍처로 성공적으로 리팩토링 완료:
 - **Router Agent**: 공통 처리 (대화 이력, 토큰 체크, 요약, DB 저장)
 - **Chat Sub Agent**: 질문 분류 + 답변 생성
-- **Meeting Sub Agent**: Whisper STT + pyannote 화자 분리 + 회의록 생성
+- **Meeting Sub Agent**: WhisperX STT + pyannote 화자 분리 + AI 회의록 생성 ✅
+
+### Meeting Workflow (meeting_workflow.py) ⭐ NEW
+```
+audio_upload
+    → transcribe_audio (WhisperX STT + 화자 분리)
+        ├─ 긴 오디오 감지 (30분+ → 10분 청킹)
+        ├─ 동적 배치 크기 조정
+        └─ 스레드 안전 모델 캐싱
+    → merge_transcript (화자별 발언 그룹화)
+    → generate_minutes (구조화된 회의록 생성)
+```
 
 ## Technology Stack
 
-- **Language**: Python
-- **API Server**: FastAPI
+### Core Framework
+- **Language**: Python 3.13+
+- **API Server**: FastAPI with async support
 - **LLM Orchestration**: LangGraph
-- **Embedding Model**: BGE-M3 (HuggingFace)
-- **Vector Database**: PostgreSQL with pgvector extension
+- **Real-time**: Server-Sent Events (SSE) streaming
+- **Container**: Docker Compose
+
+### AI & ML
+- **LLM**: OpenAI GPT-4o (답변/회의록), GPT-4o-mini (분류)
+- **STT**: WhisperX (transcription + speaker diarization) ⭐ NEW
+- **Embedding**: BGE-M3 (HuggingFace local inference)
+- **Document Processing**: LlamaParser + custom parser factory
+
+### Database & Storage
 - **Database**: PostgreSQL with async SQLAlchemy
-- **Container**: Docker
+- **Vector Database**: PostgreSQL with pgvector extension
+- **State Management**: PostgreSQL-based checkpointer
+- **File Storage**: Structured local filesystem
 
 ## Code Conventions
 
@@ -121,6 +175,12 @@ This is an Agent-based Explainable RAG (Retrieval-Augmented Generation) system t
 - **LLM 인스턴스는 모듈 레벨에서 생성** (함수 내부 생성 금지)
 - **LCEL 체인으로 구성**: `prompt | llm | parser` 패턴 사용
 - **단순 텍스트 반환은 StrOutputParser 사용**
+
+### WhisperX Model Management ⭐ NEW
+- **Thread-safe Singleton Pattern**: WhisperXManager 클래스로 모델 관리
+- **FastAPI Lifespan Integration**: 애플리케이션 시작 시 모델 사전 로드
+- **Dynamic Model Loading**: 언어별 alignment 모델 동적 로드
+- **Memory Optimization**: 긴 오디오용 배치 크기 자동 조정
 
 ### Prompt Management
 - **프롬프트는 ChatPromptTemplate 사용**
@@ -139,21 +199,37 @@ This is an Agent-based Explainable RAG (Retrieval-Augmented Generation) system t
 ### Error Handling
 - **구조화된 에러 응답 사용**
 - **예외 상황에서 기본값 반환**
+- **Logging with Context**: exc_info=True로 상세 오류 정보 로깅
+- **Graceful Degradation**: 모델 로드 실패 시 우아한 실패 처리
 
 ### Code Quality
 - **타입 힌트 사용**
 - **명확한 함수명과 변수명**
 - **단일 책임 원칙 준수**
 
-## Current Workflow (chat_workflow.py)
+## Current Workflows
 
+### Chat Workflow (chat_workflow.py)
 ```
 need_prev_conversation (is_new_session 기반)
     → load_history_from_db 또는 check_token
     → summarize_conversation (8000토큰 초과시)
-    → classify_question
-    → generate_answer
+    → classify_question (FACT, SUMMARY, COMPARE, EVIDENCE)
+    → generate_answer (카테고리별 맞춤 프롬프트)
     → save_message_to_db
+```
+
+### Meeting Workflow (meeting_workflow.py) ⭐ NEW
+```
+audio_upload
+    → transcribe_audio (WhisperX)
+        ├─ 오디오 길이 체크 (최대 2시간)
+        ├─ 긴 오디오 시 10분 단위 청킹
+        ├─ 동적 배치 크기 (8-16)
+        ├─ 언어 감지 및 정렬
+        └─ 화자 분리 (pyannote)
+    → merge_transcript (화자별 발언 그룹화)
+    → generate_minutes (AI 기반 구조화된 회의록)
 ```
 
 ## Development Commands
@@ -172,12 +248,12 @@ python main.py
 # Start PostgreSQL with pgvector
 docker compose --env-file .env -f docker/docker-compose.infra.yml up -d
 
-# Start API server (runs on port 8000 by default)
+# Start API server (runs on port 8888 by default, configurable via PORT)
 python main.py
 
 # Access API documentation
-# http://localhost:8000/docs (Swagger UI)
-# http://localhost:8000/redoc (ReDoc)
+# http://localhost:8888/docs (Swagger UI)
+# http://localhost:8888/redoc (ReDoc)
 ```
 
 ## Current Project Structure
@@ -191,14 +267,24 @@ python main.py
 │   │       ├── chat.py              # Chat API endpoints (with SSE streaming)
 │   │       ├── documents.py         # Document upload/management API
 │   │       ├── search.py            # Search API endpoints
+│   │       ├── meeting.py           # Meeting API endpoints ⭐ NEW
 │   │       └── users.py             # User API endpoints
 │   ├── agents/                      # LangGraph agents and workflows
 │   │   ├── constants.py             # Workflow steps and message constants
 │   │   ├── nodes/                   # Individual agent nodes
+│   │   │   ├── chat/                # Chat agent nodes
+│   │   │   └── meeting/             # Meeting agent nodes ⭐ NEW
+│   │   │       ├── transcribe_audio.py   # WhisperX STT + diarization
+│   │   │       ├── merge_transcript.py    # Speaker grouping
+│   │   │       └── generate_minutes.py   # AI meeting minutes
 │   │   ├── prompts/                 # Prompt templates
+│   │   │   ├── chat.py              # Chat prompts
+│   │   │   └── meeting.py           # Meeting prompts ⭐ NEW
 │   │   ├── workflows/               # Workflow definitions
-│   │   │   └── chat_workflow.py     # Main chat workflow with streaming
-│   │   └── state.py                 # State management
+│   │   │   ├── chat_workflow.py     # Chat workflow with streaming
+│   │   │   └── meeting_workflow.py  # Meeting workflow ⭐ NEW
+│   │   ├── infra/                   # Agent infrastructure
+│   │   └── state.py                 # State management (ChatState, MeetingState)
 │   ├── models/                      # SQLAlchemy ORM models
 │   │   ├── __init__.py
 │   │   └── document.py              # Document and DocumentChunk models
@@ -211,7 +297,9 @@ python main.py
 │   │   ├── errors.py                # Error response schemas
 │   │   └── search.py                # Search schemas
 │   ├── infra/                       # Infrastructure services
-│   │   ├── ai/                      # AI services (embeddings)
+│   │   ├── ai/                      # AI services
+│   │   │   ├── embedding_service.py # BGE-M3 embeddings
+│   │   │   └── whisperx_manager.py  # WhisperX model manager ⭐ NEW
 │   │   ├── parsers/                 # Document parser system ⭐ NEW
 │   │   │   ├── __init__.py          # ParserFactory export
 │   │   │   ├── factory.py           # Parser factory with MIME type mapping
@@ -249,7 +337,7 @@ python main.py
 └── pyproject.toml                   # Project dependencies
 ```
 
-## Implementation Phases
+## Implementation Status
 
 ### Phase 1: Core Infrastructure ✅
 1. PostgreSQL + pgvector setup with Docker
@@ -287,7 +375,15 @@ python main.py
 3. Search API endpoints
 4. Health check and monitoring endpoints
 
-### Phase 6: Testing & Quality Assurance ✅
+### Phase 6: Meeting Agent Implementation ✅ ⭐ NEW
+1. **WhisperX Integration**: STT with speaker diarization
+2. **Thread-safe Model Management**: FastAPI lifespan-based caching
+3. **Long Audio Processing**: Chunked processing up to 2 hours
+4. **Dynamic Performance Optimization**: Batch size adjustment
+5. **AI Meeting Minutes**: Structured summary generation
+6. **Real-time Progress Tracking**: Workflow status monitoring
+
+### Phase 7: Testing & Quality Assurance ✅
 1. **Exception handler test coverage (16 test cases)**
 2. **Mock-based testing for external services**
 3. **Integration tests for Chat API**
@@ -295,10 +391,12 @@ python main.py
 
 ## Configuration
 
-- Environment variables are managed in `.env` file
+- Environment variables are managed in `.env` file (copy from `.env.example`)
 - Configuration class uses `pydantic-settings` for validation
-- Default server port: 8000 (configurable via PORT environment variable)
-- OpenAI API key required in OPENAI_API_KEY environment variable
+- Default server port: 8888 (configurable via PORT environment variable)
+- Required API keys: OPENAI_API_KEY, LLAMA_CLOUD_API_KEY, HF_TOKEN
+- WhisperX settings: model size, device, language, batch size, audio length limits
+- Complete configuration reference in `.env.example`
 
 ## Key Dependencies
 
@@ -313,6 +411,8 @@ python main.py
 - **langgraph**: Graph-based workflow orchestration  
 - **sentence-transformers**: BGE-M3 embedding model
 - **torch**: PyTorch for model inference
+- **whisperx**: STT with speaker diarization ⭐ NEW
+- **librosa**: Audio processing utilities ⭐ NEW
 - **llama-cloud**: LlamaParser for document processing
 
 ### Database & Storage
@@ -336,8 +436,9 @@ python main.py
 - Single `main.py` entry point follows FastAPI best practices
 - Modular app structure separates concerns (API, agents, services, etc.)
 - Configuration centralized in `app/core/config.py` with environment validation
-- Server runs on port 8000 by default (configurable)
+- Server runs on port 8888 by default (configurable via PORT)
 - Uses structured directory layout for enterprise-level development
+- Multi-agent architecture with clear separation of concerns
 - **Comprehensive exception handling with structured error responses**
 - **Real-time streaming capabilities with SSE**
 - **Test-driven development with pytest configuration**
@@ -374,14 +475,22 @@ python -m pytest --cov=app tests/
    - Multi-encoding support for international documents
    - Repository pattern implementation with dependency injection
 2. **Vector Search**: PostgreSQL + pgvector with BGE-M3 embeddings
-3. **LangGraph Workflow**: Question classification and answer generation
-4. **Streaming API**: Real-time SSE responses with progress tracking
-5. **Exception Handling**: Structured error responses with proper logging
-6. **Testing Infrastructure**: Comprehensive test suite with proper configuration
+3. **Multi-Agent Architecture**: Router + Chat + Meeting agents
+4. **Meeting Agent (WhisperX)**: ⭐ NEW
+   - Thread-safe model caching with FastAPI lifespan
+   - Long audio processing (up to 2 hours, 10-minute chunks)
+   - Dynamic batch sizing based on audio length
+   - Speaker diarization and intelligent transcript merging
+   - AI-powered meeting minutes generation
+5. **Streaming API**: Real-time SSE responses with progress tracking
+6. **Exception Handling**: Structured error responses with proper logging
+7. **Configuration Management**: Complete .env-based settings with validation
+8. **Testing Infrastructure**: Comprehensive test suite with proper configuration
 
 ### Next Implementation Priority
-1. Search result re-ranking system
-2. User feedback collection and analysis
-3. Answer quality evaluation metrics
-4. Redis caching layer
-5. Kubernetes deployment configuration
+1. **STT Progress Monitoring**: Real-time progress updates for long audio processing
+2. **Multi-language STT**: Extended language support for WhisperX
+3. **Meeting Template Customization**: Configurable meeting minutes formats
+4. **Search Result Re-ranking**: Improved relevance scoring
+5. **Redis Caching**: Performance optimization
+6. **User Feedback System**: Quality assessment and improvement
