@@ -32,6 +32,10 @@ class Settings(BaseSettings):
     WHISPERX_DEVICE: str = "cpu"  # "cuda" or "cpu" 
     WHISPERX_LANGUAGE: str = "ko"  # Default language code
     WHISPERX_BATCH_SIZE: int = 16  # Batch size for transcription
+    WHISPERX_SAMPLE_RATE: int = 16000  # Audio sample rate
+    WHISPERX_MAX_DURATION_MINUTES: int = 120  # Max audio duration (2 hours)
+    WHISPERX_LONG_AUDIO_THRESHOLD_MINUTES: int = 30  # Long audio threshold (30 minutes)
+    WHISPERX_CHUNK_DURATION_MINUTES: int = 10  # Chunk duration for long audio (10 minutes)
     
     # PostgreSQL Configuration
     POSTGRES_USER: str = "postgres"
