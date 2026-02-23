@@ -1,8 +1,11 @@
 """전사 결과를 화자별 텍스트로 변환하는 노드"""
 
+import logging
 from typing import Dict, Any
 
 from app.agents.state import MeetingState
+
+logger = logging.getLogger(__name__)
 
 
 async def merge_transcript(state: MeetingState) -> Dict[str, Any]:
@@ -66,7 +69,7 @@ async def merge_transcript(state: MeetingState) -> Dict[str, Any]:
         }
         
     except Exception as e:
-        print(f"전사 결과 병합 중 오류 발생: {str(e)}")
+        logger.error(f"전사 결과 병합 중 오류 발생: {str(e)}", exc_info=True)
         return {
             "merged_transcript": "전사 결과를 처리하는 중 오류가 발생했습니다."
         }

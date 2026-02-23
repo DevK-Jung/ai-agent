@@ -1,144 +1,103 @@
 """오디오 전사 노드 - WhisperX를 사용한 STT와 화자 분리"""
 
+import asyncio
+import logging
 import os
-from typing import Dict, Any
+from typing import Any, Dict
 
-import torch
 import whisperx
-from whisperx.diarize import DiarizationPipeline
 
 from app.agents.state import MeetingState
 from app.core.config import settings
+from app.infra.ai.whisperx_manager import WhisperXManager, whisperx_manager
 
-# WhisperX 모델 캐싱 (모듈 레벨)
-_transcription_model = None
-_alignment_model = None
-_alignment_metadata = None
-_diarization_pipeline = None
+logger = logging.getLogger(__name__)
 
 
-def _get_device():
-    """사용 가능한 디바이스 반환"""
-    if hasattr(settings, 'WHISPERX_DEVICE') and settings.WHISPERX_DEVICE:
-        return settings.WHISPERX_DEVICE
-    return "cuda" if torch.cuda.is_available() else "cpu"
+def _transcribe_sync(state: MeetingState, manager: WhisperXManager) -> Dict[str, Any]:
+    """
+    동기 전사 로직 - run_in_executor에서 실행됩니다.
 
+    Args:
+        state: MeetingState
 
-def _get_compute_type():
-    """디바이스에 따른 compute type 반환"""
-    device = _get_device()
-    if device == "cuda":
-        return "float16"
-    return "int8"
+    Returns:
+        Dict containing transcript with speaker diarization, or error info
+    """
+    audio_file_path = state["audio_file_path"]
+    default_language = settings.WHISPERX_LANGUAGE
+    batch_size = settings.WHISPERX_BATCH_SIZE
 
+    # 파일 존재 확인
+    if not os.path.exists(audio_file_path):
+        raise FileNotFoundError(f"오디오 파일을 찾을 수 없습니다: {audio_file_path}")
 
-def _load_transcription_model():
-    """전사 모델 로드"""
-    global _transcription_model
-    if _transcription_model is None:
-        device = _get_device()
-        compute_type = _get_compute_type()
-        model_size = getattr(settings, 'WHISPERX_MODEL', 'large-v2')
+    # 1. 오디오 로드
+    logger.info(f"오디오 로드 중: {audio_file_path}")
+    audio = whisperx.load_audio(audio_file_path)
 
-        _transcription_model = whisperx.load_model(
-            model_size,
-            device=device,
-            compute_type=compute_type
-        )
-    return _transcription_model
+    # 2. 전사 수행
+    model = manager.get_transcription_model()
+    result = model.transcribe(audio, batch_size=batch_size)
 
+    # 3. 언어 감지 및 정렬
+    detected_language = result.get("language", default_language)
+    logger.info(f"감지된 언어: {detected_language}")
 
-def _load_alignment_model(language: str):
-    """정렬 모델 로드"""
-    global _alignment_model, _alignment_metadata
-    if _alignment_model is None or _alignment_metadata is None:
-        device = _get_device()
-        _alignment_model, _alignment_metadata = whisperx.load_align_model(
-            language_code=language,
-            device=device
-        )
-    return _alignment_model, _alignment_metadata
+    align_model, metadata = manager.get_alignment_model(detected_language)
+    result = whisperx.align(
+        result["segments"],
+        align_model,
+        metadata,
+        audio,
+        device=manager.device,
+        return_char_alignments=False,
+    )
 
+    # 4. 화자 분리
+    diarization_pipeline = manager.get_diarization_pipeline()
+    diarize_segments = diarization_pipeline(audio)
 
-def _load_diarization_pipeline():
-    """화자 분리 파이프라인 로드"""
-    global _diarization_pipeline
-    if _diarization_pipeline is None:
-        device = _get_device()
-        hf_token = getattr(settings, 'HF_TOKEN', None)
+    # 5. 화자 정보 할당
+    result = whisperx.assign_word_speakers(diarize_segments, result)
 
-        if not hf_token:
-            raise ValueError("HuggingFace token이 설정되지 않았습니다. HF_TOKEN 환경 변수를 설정하세요.")
+    # 6. 결과 정리
+    transcript_segments = [
+        {
+            "start": segment.get("start", 0),
+            "end": segment.get("end", 0),
+            "text": segment.get("text", "").strip(),
+            "speaker": segment.get("speaker", "SPEAKER_00"),
+        }
+        for segment in result["segments"]
+    ]
 
-        _diarization_pipeline = DiarizationPipeline(
-            token=hf_token,
-            device=device
-        )
-    return _diarization_pipeline
+    logger.info(f"전사 완료: {len(transcript_segments)}개 세그먼트")
+    return {"transcript": transcript_segments}
 
 
 async def transcribe_audio(state: MeetingState) -> Dict[str, Any]:
     """
     오디오 파일을 전사하고 화자 분리를 수행합니다.
-    
+    WhisperX의 동기 연산을 run_in_executor로 감싸 event loop 블로킹을 방지합니다.
+
     Args:
         state: MeetingState
-        
+
     Returns:
-        Dict containing transcript with speaker diarization
+        Dict containing transcript with speaker diarization, or error info
     """
     try:
-        audio_file_path = state["audio_file_path"]
-        language = getattr(settings, 'WHISPERX_LANGUAGE', 'ko')
+        # WhisperX 매니저 사용 (lifespan에서 초기화됨)
+        manager = whisperx_manager
 
-        # 파일 존재 확인
-        if not os.path.exists(audio_file_path):
-            raise FileNotFoundError(f"오디오 파일을 찾을 수 없습니다: {audio_file_path}")
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, _transcribe_sync, state, manager)
 
-        # 1. 오디오 로드
-        audio = whisperx.load_audio(audio_file_path)
-
-        # 2. 전사 수행
-        model = _load_transcription_model()
-        result = model.transcribe(audio, batch_size=16)
-
-        # 3. 언어 감지 및 정렬
-        detected_language = result.get("language", language)
-        align_model, metadata = _load_alignment_model(detected_language)
-
-        result = whisperx.align(
-            result["segments"],
-            align_model,
-            metadata,
-            audio,
-            device=_get_device(),
-            return_char_alignments=False
-        )
-
-        # 4. 화자 분리 - torchaudio 사용
-        diarization_pipeline = _load_diarization_pipeline()
-        diarize_segments = diarization_pipeline(audio)
-
-        # 5. 화자 정보 할당
-        result = whisperx.assign_word_speakers(diarize_segments, result)
-
-        # 6. 결과 정리
-        transcript_segments = []
-        for segment in result["segments"]:
-            transcript_segments.append({
-                "start": segment.get("start", 0),
-                "end": segment.get("end", 0),
-                "text": segment.get("text", "").strip(),
-                "speaker": segment.get("speaker", "SPEAKER_00")
-            })
-
-        return {
-            "transcript": transcript_segments,
-        }
+    except FileNotFoundError as e:
+        logger.error(str(e))
+        return {"transcript": [], "error": str(e)}
 
     except Exception as e:
-        print(f"오디오 전사 중 오류 발생: {str(e)}")
-        # 오류 발생 시 빈 결과 반환
-        return {
-            "transcript": [],
-        }
+        logger.error(f"오디오 전사 중 오류 발생: {str(e)}", exc_info=True)
+        return {"transcript": [], "error": f"오디오 전사 실패: {str(e)}"}

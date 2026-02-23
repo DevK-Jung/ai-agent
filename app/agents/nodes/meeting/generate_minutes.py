@@ -1,5 +1,6 @@
 """회의록 생성 노드 - LLM을 사용한 회의록 작성"""
 
+import logging
 from typing import Dict, Any
 
 from langchain_core.output_parsers import StrOutputParser
@@ -8,6 +9,8 @@ from langchain_openai import ChatOpenAI
 from app.agents.prompts.meeting import MEETING_MINUTES_PROMPT
 from app.agents.state import MeetingState
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 _generator_llm = ChatOpenAI(
     model=settings.GENERATOR_MODEL,
@@ -60,7 +63,7 @@ async def generate_minutes(state: MeetingState) -> Dict[str, Any]:
         }
 
     except Exception as e:
-        print(f"회의록 생성 중 오류 발생: {str(e)}")
+        logger.error(f"회의록 생성 중 오류 발생: {str(e)}", exc_info=True)
         return {
             "minutes": f"회의록 생성 중 오류가 발생했습니다: {str(e)}"
         }

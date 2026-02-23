@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     WHISPERX_MODEL: str = "large-v2"  # Whisper model size
     WHISPERX_DEVICE: str = "cpu"  # "cuda" or "cpu" 
     WHISPERX_LANGUAGE: str = "ko"  # Default language code
+    WHISPERX_BATCH_SIZE: int = 16  # Batch size for transcription
     
     # PostgreSQL Configuration
     POSTGRES_USER: str = "postgres"

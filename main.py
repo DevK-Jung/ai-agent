@@ -6,6 +6,7 @@ from app.core.logging import setup_logging
 from app.core.exception_handlers import setup_exception_handlers
 from app.db.database import init_database, close_database
 from app.agents.infra.checkpointer import setup_checkpointer_tables
+from app.infra.ai.whisperx_manager import whisperx_manager
 import uvicorn
 import logging
 
@@ -24,6 +25,15 @@ async def lifespan(app: FastAPI):
         logger.info("Checkpointer tables initialized successfully")
     except Exception as e:
         logger.warning(f"Checkpointer tables setup failed or already exist: {e}")
+    
+    # WhisperX 모델 초기화
+    try:
+        await whisperx_manager.initialize()
+        app.state.whisperx_manager = whisperx_manager
+        logger.info("WhisperX models initialized successfully")
+    except Exception as e:
+        logger.warning(f"WhisperX models initialization failed: {e}")
+        app.state.whisperx_manager = None
     
     yield
     # Shutdown
