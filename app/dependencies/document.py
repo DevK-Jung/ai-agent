@@ -11,7 +11,7 @@ from app.services.document_processor import DocumentProcessor
 from app.infra.storage.file_storage import FileStorageService
 from .database import get_database_session
 from .storage import get_file_storage_service
-from .ai import get_embedding_service_cached
+from .ai import get_embedding_service
 
 
 @lru_cache()
@@ -31,7 +31,7 @@ def get_document_service(
     document_repository: DocumentRepository = Depends(get_document_repository),
     file_storage: FileStorageService = Depends(get_file_storage_service),
     processor: DocumentProcessor = Depends(get_document_processor),
-    embedding_service = Depends(get_embedding_service_cached)
+    embedding_service = Depends(get_embedding_service)
 ) -> DocumentService:
     """DocumentService 의존성 주입 - Repository 패턴 적용"""
     return DocumentService(document_repository, file_storage, processor, embedding_service)

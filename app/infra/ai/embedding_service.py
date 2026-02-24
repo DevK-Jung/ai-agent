@@ -57,43 +57,59 @@ class BGEEmbeddingService:
             self.logger.error(f"임베딩 생성 실패: {e}")
             raise
     
-    def get_embedding_dimension(self) -> int:
+    def encode_query(self, query: str) -> np.ndarray:
         """
-        임베딩 벡터의 차원을 반환합니다.
-        
-        Returns:
-            int: 임베딩 차원 (환경변수에서 설정)
-        """
-        return settings.EMBEDDING_DIMENSIONS
-    
-    def batch_encode(self, texts: List[str], batch_size: int = 32) -> List[np.ndarray]:
-        """
-        대량의 텍스트를 배치로 처리하여 임베딩을 생성합니다.
+        검색 질의용 임베딩 생성 (BGE-M3 최적화)
         
         Args:
-            texts: 텍스트 리스트
+            query: 검색 질의 텍스트
+            
+        Returns:
+            np.ndarray: 임베딩 벡터
+        """
+        return self.get_embeddings(f"query: {query}")
+    
+    def encode_passage(self, text: str) -> np.ndarray:
+        """
+        문서 청크용 임베딩 생성 (BGE-M3 최적화)
+        
+        Args:
+            text: 문서 텍스트
+            
+        Returns:
+            np.ndarray: 임베딩 벡터
+        """
+        return self.get_embeddings(f"passage: {text}")
+    
+    def encode_passages(self, texts: List[str], batch_size: int = 32) -> List[np.ndarray]:
+        """
+        여러 문서 청크의 임베딩 일괄 생성 (BGE-M3 최적화 + 배치 처리)
+        
+        Args:
+            texts: 문서 텍스트 리스트
             batch_size: 배치 크기
             
         Returns:
-            List[np.ndarray]: 임베딩 리스트
+            List[np.ndarray]: 임베딩 벡터 리스트
         """
+        prefixed_texts = [f"passage: {text}" for text in texts]
         self._load_model()
         
         all_embeddings = []
         
-        for i in range(0, len(texts), batch_size):
-            batch = texts[i:i + batch_size]
+        for i in range(0, len(prefixed_texts), batch_size):
+            batch = prefixed_texts[i:i + batch_size]
             try:
                 batch_embeddings = self.model.encode(
-                    batch, 
+                    batch,
                     normalize_embeddings=True,
                     batch_size=batch_size
                 )
                 all_embeddings.extend(batch_embeddings)
                 
                 # 진행률 로그
-                processed = min(i + batch_size, len(texts))
-                self.logger.info(f"임베딩 진행률: {processed}/{len(texts)} ({processed/len(texts)*100:.1f}%)")
+                processed = min(i + batch_size, len(prefixed_texts))
+                self.logger.info(f"임베딩 진행률: {processed}/{len(prefixed_texts)} ({processed/len(prefixed_texts)*100:.1f}%)")
                 
             except Exception as e:
                 self.logger.error(f"배치 {i//batch_size + 1} 처리 실패: {e}")
@@ -102,24 +118,17 @@ class BGEEmbeddingService:
         
         return all_embeddings
     
-    def compute_similarity(self, embedding1: np.ndarray, embedding2: np.ndarray) -> float:
+    def get_embedding_dimension(self) -> int:
         """
-        두 임베딩 간의 코사인 유사도를 계산합니다.
+        임베딩 벡터의 차원을 반환합니다.
         
-        Args:
-            embedding1: 첫 번째 임베딩
-            embedding2: 두 번째 임베딩
-            
         Returns:
-            float: 코사인 유사도 (-1 ~ 1)
+            int: 임베딩 차원 (모델에서 직접 가져옴)
         """
-        try:
-            # 정규화된 벡터의 내적 = 코사인 유사도
-            similarity = np.dot(embedding1, embedding2)
-            return float(similarity)
-        except Exception as e:
-            self.logger.error(f"유사도 계산 실패: {e}")
-            return 0.0
+        self._load_model()
+        return self.model.get_sentence_embedding_dimension()
+    
+    
     
     def unload_model(self):
         """메모리에서 모델을 해제합니다."""
@@ -130,13 +139,3 @@ class BGEEmbeddingService:
                 torch.cuda.empty_cache()
             self.logger.info("BGE-M3 모델이 메모리에서 해제되었습니다.")
 
-
-# 전역 임베딩 서비스 인스턴스 (싱글톤 패턴)
-_embedding_service: Optional[BGEEmbeddingService] = None
-
-def get_embedding_service() -> BGEEmbeddingService:
-    """임베딩 서비스 인스턴스를 반환합니다."""
-    global _embedding_service
-    if _embedding_service is None:
-        _embedding_service = BGEEmbeddingService()
-    return _embedding_service

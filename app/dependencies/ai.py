@@ -1,14 +1,30 @@
 """
 AI/임베딩 관련 의존성
 """
-from functools import lru_cache
-from app.infra.ai.embedding_service import get_embedding_service
+from threading import Lock
+from typing import Optional
+
+from app.infra.ai.embedding_service import BGEEmbeddingService
 
 
-@lru_cache()
-def get_embedding_service_cached():
-    """EmbeddingService 의존성 주입 (싱글톤)"""
-    return get_embedding_service()
+# Thread-safe 싱글톤 패턴
+_embedding_service: Optional[BGEEmbeddingService] = None
+_lock = Lock()
 
 
-__all__ = ["get_embedding_service_cached"]
+def get_embedding_service() -> BGEEmbeddingService:
+    """
+    임베딩 서비스 인스턴스를 반환합니다. (Thread-safe 싱글톤 패턴)
+    
+    Returns:
+        BGEEmbeddingService: 임베딩 서비스 인스턴스
+    """
+    global _embedding_service
+    if _embedding_service is None:
+        with _lock:
+            if _embedding_service is None:  # double-checked locking
+                _embedding_service = BGEEmbeddingService()
+    return _embedding_service
+
+
+__all__ = ["get_embedding_service"]

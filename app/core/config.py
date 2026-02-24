@@ -77,9 +77,9 @@ class Settings(BaseSettings):
     MAX_FILE_SIZE_MB: int = 10
     UPLOAD_DIR: str = "data/uploads"
     
-    # Text Chunking Configuration
-    CHUNK_SIZE: int = 1000
-    CHUNK_OVERLAP: int = 100
+    # Text Chunking Configuration (Token-based)
+    CHUNK_SIZE: int = 512  # 토큰 단위
+    CHUNK_OVERLAP: int = 50  # 토큰 단위
     CHUNK_SEPARATORS: str = "\\n\\n,\\n,.,\\ ,"
     
     # Embedding Model Configuration

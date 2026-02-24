@@ -37,6 +37,8 @@ dependencies = [
     "langgraph-checkpoint-postgres>=3.0.4",
     # STT and audio processing
     "whisperx>=3.8.1",
+    "seaborn>=0.13.2",
+    "koreanize-matplotlib>=0.1.1",
 ]
 
 [dependency-groups]

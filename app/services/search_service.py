@@ -7,7 +7,7 @@ from typing import List, Optional, Dict, Any
 
 from app.repositories.search_repository import SearchRepository
 from app.models.document import DocumentChunk
-from app.infra.ai.embedding_service import get_embedding_service
+from app.dependencies import get_embedding_service
 from app.schemas.search import SearchRequest, SearchResult, SearchResponse, SearchStats
 from app.core.config import settings
 
@@ -35,8 +35,8 @@ class SearchService:
         try:
             self.logger.info(f"의미 검색 시작: '{search_request.query}'")
             
-            # 1. 질의 텍스트를 임베딩으로 변환
-            query_embedding = self.embedding_service.get_embeddings(search_request.query)
+            # 1. 질의 텍스트를 임베딩으로 변환 (BGE-M3 최적화)
+            query_embedding = self.embedding_service.encode_query(search_request.query)
             
             # 2. 벡터 유사도 검색 수행 (Repository에 위임)
             chunks = await self.search_repository.find_similar_chunks(

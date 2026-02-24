@@ -3,14 +3,14 @@
 """
 from .database import get_database_session
 from .storage import get_file_storage_service
-from .ai import get_embedding_service_cached
+from .ai import get_embedding_service
 from .document import get_document_service, get_document_processor
 from .search import get_search_service
 
 __all__ = [
     "get_database_session",
     "get_file_storage_service", 
-    "get_embedding_service_cached",
+    "get_embedding_service",
     "get_document_service",
     "get_document_processor",
     "get_search_service"

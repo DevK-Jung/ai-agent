@@ -5,6 +5,7 @@ from typing import List, Dict, Any
 from langchain_core.documents import Document as LangChainDocument
 # LangChain text splitters
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from app.utils.token_utils import count_tokens
 
 from app.core.config import settings
 from app.infra.parsers import ParserFactory
@@ -16,11 +17,11 @@ class DocumentProcessor:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
-        # 환경변수 기반 텍스트 분할기 설정
+        # 토큰 기반 텍스트 분할기 설정
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=settings.CHUNK_SIZE,
             chunk_overlap=settings.CHUNK_OVERLAP,
-            length_function=len,
+            length_function=count_tokens,  # 토큰 기반 청킹
             separators=settings.CHUNK_SEPARATORS_LIST
         )
 
@@ -127,14 +128,8 @@ class DocumentProcessor:
         return hashlib.sha256(content.encode()).hexdigest()
 
     def _estimate_token_count(self, text: str) -> int:
-        """토큰 수 추정 (대략적)"""
-        # 간단한 추정: 단어 수 * 1.3 (한국어 고려)
-        words = len(text.split())
-        korean_chars = len([c for c in text if ord(c) >= 0xAC00 and ord(c) <= 0xD7A3])
-
-        # 한국어 문자는 토큰 비율이 높음
-        estimated_tokens = words * 1.3 + korean_chars * 0.5
-        return int(estimated_tokens)
+        """정확한 토큰 수 계산"""
+        return count_tokens(text)
 
     def validate_file_content(self, text: str) -> bool:
         """

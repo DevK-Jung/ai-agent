@@ -19,12 +19,14 @@ router = APIRouter(
 async def upload_document(
         background_tasks: BackgroundTasks,
         file: UploadFile = File(...),
+        domain: Optional[str] = None,
         document_service: DocumentService = Depends(get_document_service)
 ):
     """
     파일을 업로드하고 임베딩 처리를 백그라운드에서 수행합니다.
     
     - **file**: 업로드할 파일 (PDF, TXT, DOCX 지원)
+    - **domain**: 문서가 속한 도메인 (선택적)
     - **return**: 업로드된 문서 정보와 처리 상태
     """
     # 파일 검증
@@ -44,7 +46,7 @@ async def upload_document(
     try:
 
         # 파일 저장 및 Document 레코드 생성
-        document = await document_service.create_document_from_upload(file)
+        document = await document_service.create_document_from_upload(file, domain or "general")
 
         # 백그라운드에서 임베딩 처리
         background_tasks.add_task(
