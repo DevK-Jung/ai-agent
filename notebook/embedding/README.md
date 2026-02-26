@@ -29,7 +29,7 @@ embedding_tests/
 ### 1. 환경 설정
 ```bash
 cd /Users/kimjunghyeon/Desktop/workspace/ai-agent
-jupyter lab notebook/embedding/search_test.ipynb
+jupyter lab notebook/embedding/test_retrival_search.ipynb
 ```
 
 ### 2. 필요 패키지

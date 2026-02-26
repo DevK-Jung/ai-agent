@@ -1,12 +1,15 @@
 """공통 Agent 팩토리 - 여러 워크플로우에서 재사용 가능한 agent 생성"""
 
 from typing import Callable
-from langchain_openai import ChatOpenAI
+
 from langchain_core.messages import SystemMessage
 from langchain_core.tools import BaseTool
+from langchain_openai import ChatOpenAI
+
+from app.agents.core.tool_node import build_tool_node
 
 
-def create_agent(
+def build_agent(
         tools: list[BaseTool],
         system_prompt: str,
         model: str = "gpt-4o",
@@ -25,7 +28,7 @@ def create_agent(
         LangGraph 노드로 사용 가능한 agent 함수
 
     Example:
-        >>> agent = create_agent(
+        >>> agent = build_agent(
         ...     tools=[gmail_tool, arxiv_tool],
         ...     system_prompt="논문을 검색하고 요약합니다."
         ... )
@@ -60,9 +63,8 @@ def create_tool_node_with_fallback(tools: list[BaseTool]) -> Callable:
         LangGraph 노드로 사용 가능한 tool_node 함수
     """
     from langchain_core.messages import ToolMessage
-    from langgraph.prebuilt import ToolNode
 
-    tool_node = ToolNode(tools)
+    tool_node = build_tool_node(tools)
 
     def tool_node_with_fallback(state: dict) -> dict:
         try:
