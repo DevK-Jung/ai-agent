@@ -1,27 +1,21 @@
-# nodes/classify.py
+"""질문 분류 노드"""
+
 from langchain_core.messages import HumanMessage
 from langchain_core.output_parsers import StrOutputParser
-from langchain_openai import ChatOpenAI
 
-from app.agents.prompts.classification import (
+from app.agents.prompts.chat import (
     CLASSIFICATION_PROMPT,
     VALID_QUESTION_TYPES,
-    DEFAULT_QUESTION_TYPE
+    DEFAULT_QUESTION_TYPE,
 )
-from app.agents.state import ChatState
+from app.agents.state import RouterState
 from app.core.config import settings
+from app.agents.core.llm_provider import gpt4o_mini
 
-_classifier_llm = ChatOpenAI(
-    model=settings.CLASSIFIER_MODEL,
-    temperature=settings.CLASSIFIER_TEMPERATURE,
-    api_key=settings.OPENAI_API_KEY
-)
-
-# StrOutputParser로 바로 문자열 반환
-_classify_chain = CLASSIFICATION_PROMPT | _classifier_llm | StrOutputParser()
+_classify_chain = CLASSIFICATION_PROMPT | gpt4o_mini | StrOutputParser()
 
 
-async def classify_question(state: ChatState) -> dict:
+async def classify_question(state: RouterState) -> dict:
     messages = state.get("messages", [])
     last_human_message = next(
         (msg.content for msg in reversed(messages) if isinstance(msg, HumanMessage)),
@@ -41,5 +35,5 @@ async def classify_question(state: ChatState) -> dict:
 
     return {
         "question_type": question_type,
-        "model_used": settings.CLASSIFIER_MODEL
+        "model_used": settings.GPT4O_MINI_MODEL
     }

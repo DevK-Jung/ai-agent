@@ -4,24 +4,28 @@ from typing_extensions import TypedDict
 from langgraph.graph import MessagesState
 
 
-class ChatState(MessagesState):
-    """LangGraph 상태 정의 - 메시지 히스토리 포함"""
+class RouterState(MessagesState):
+    """LangGraph 최상위 Router 상태 정의"""
     user_id: Optional[str]
     session_id: Optional[str]
     thread_id: Optional[str]
-    question_type: Optional[str]
+    agent_type: Optional[str]           # "chat" | "meeting" | ...
     answer: Optional[str]
     model_used: str
-    summary: Optional[str]  # 이전 대화 요약
-    context: Optional[str]
-    is_new_session: Optional[bool]
+    question_type: Optional[str]
+    rag_context: Optional[str]          # RAG 검색 결과
+    audio_file_path: Optional[str]      # Meeting Agent 오디오 파일 경로
+
+
+# 하위 호환성 유지
+ChatState = RouterState
 
 
 class MeetingState(TypedDict):
     """회의록 에이전트 상태 정의"""
     audio_file_path: str
-    transcript: List[Dict[str, Any]]  # WhisperX 결과 (타임스탬프 + 화자 포함)
-    merged_transcript: str            # 화자 태깅된 텍스트로 변환
-    minutes: str                      # 최종 회의록
+    transcript: List[Dict[str, Any]]
+    merged_transcript: str
+    minutes: str
     session_id: str
     user_id: str

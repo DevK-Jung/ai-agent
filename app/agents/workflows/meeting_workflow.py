@@ -3,10 +3,37 @@
 import uuid
 from typing import AsyncGenerator, Dict, Any
 
+from langchain_core.messages import AIMessage
 from langgraph.graph import StateGraph, END
 
 from app.agents.nodes.meeting import transcribe_audio, merge_transcript, generate_minutes
-from app.agents.state import MeetingState
+from app.agents.state import MeetingState, RouterState
+
+
+def create_meeting_subgraph() -> StateGraph:
+    """Router Workflow에 노드로 등록되는 Meeting Sub-Agent 서브그래프
+
+    RouterState에서 audio_file_path를 받아 create_meeting_workflow()를 호출하고
+    결과(minutes)를 answer로 반환.
+    """
+    async def _meeting_agent_node(state: RouterState) -> dict:
+        audio_file_path = state.get("audio_file_path", "")
+        session_id = state.get("session_id", "")
+        user_id = state.get("user_id", "")
+
+        result = await process_meeting(audio_file_path, user_id, session_id)
+        minutes = result.get("minutes", "회의록 생성에 실패했습니다.")
+
+        return {
+            "answer": minutes,
+            "messages": [AIMessage(content=minutes)],
+        }
+
+    workflow = StateGraph(RouterState)
+    workflow.add_node("meeting_agent", _meeting_agent_node)
+    workflow.set_entry_point("meeting_agent")
+    workflow.add_edge("meeting_agent", END)
+    return workflow.compile()
 
 
 async def create_meeting_workflow():

@@ -4,23 +4,21 @@ import logging
 from typing import Dict, Any
 
 from langchain_core.output_parsers import StrOutputParser
-from langchain_openai import ChatOpenAI
 
 from app.agents.prompts.meeting import MEETING_MINUTES_PROMPT
 from app.agents.state import MeetingState
 from app.core.config import settings
+from app.agents.core.llm_provider import gpt4o
 
 logger = logging.getLogger(__name__)
 
-_generator_llm = ChatOpenAI(
-    model=settings.GENERATOR_MODEL,
-    temperature=settings.MINUTES_TEMPERATURE,
-    api_key=settings.OPENAI_API_KEY,
-    tags=["MEETING_MINUTES", "STREAM_MEETING_GENERATOR"]
-)
+# 회의록 전용: 온도 오버라이드 + 스트리밍 태그
+_meeting_generator_llm = gpt4o.bind(
+    temperature=settings.MINUTES_TEMPERATURE
+).with_config(tags=["MEETING_MINUTES", "STREAM_MEETING_GENERATOR"])
 
 # LCEL 체인 구성
-minutes_chain = MEETING_MINUTES_PROMPT | _generator_llm | StrOutputParser()
+minutes_chain = MEETING_MINUTES_PROMPT | _meeting_generator_llm | StrOutputParser()
 
 
 async def generate_minutes(state: MeetingState) -> Dict[str, Any]:

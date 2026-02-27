@@ -70,15 +70,17 @@ This is an Agent-based Explainable RAG (Retrieval-Augmented Generation) system t
     |
 [ FastAPI + Exception Handlers + SSE Streaming ]
     |
-[ LangGraph Orchestrator with Real-time Progress Tracking ]
-    ├─ Router Agent (공통 처리: 대화 이력, 토큰 체크, 요약, DB 저장)
-    ├─ Chat Sub Agent (질문 분류 + 답변 생성)
-    │   ├─ Question Classifier Agent (gpt-4o-mini)
-    │   └─ Answer Generator Agent (gpt-4o)
-    ├─ Meeting Sub Agent (STT + 화자 분리 + 회의록 생성) ⭐ NEW
-    │   ├─ WhisperX Audio Transcription (긴 오디오 청킹 처리)
-    │   ├─ Speaker Diarization (pyannote)
-    │   └─ Meeting Minutes Generator (gpt-4o)
+[ LangGraph Router Workflow ]
+    ├─ token_router edge (tiktoken 로컬 계산 · 토큰 초과 시 summarize 분기)
+    ├─ summarize_node (gpt-4o-mini · messages 직접 교체 · RemoveMessage + SystemMessage)
+    ├─ detect_agent (gpt-4o-mini · 인텐트 감지 · chat / meeting 분기)
+    ├─ Chat Sub Agent
+    │   ├─ classifier (gpt-4o-mini · FACT/SUMMARY/COMPARE/EVIDENCE)
+    │   └─ generator (gpt-4o · RAG context · SSE streaming)
+    ├─ Meeting Sub Agent
+    │   ├─ transcribe_audio (WhisperX STT + 화자 분리)
+    │   ├─ merge_transcript (화자별 발언 그룹화)
+    │   └─ generate_minutes (gpt-4o · 구조화된 회의록)
     ├─ Vector Retriever (PostgreSQL + pgvector)
     └─ Document Processor (LlamaParser + 분리된 파서 시스템)
         ├─ PDF Parser (PyMuPDF + PyPDF2)
@@ -88,7 +90,7 @@ This is an Agent-based Explainable RAG (Retrieval-Augmented Generation) system t
         └─ DOC Parser (docx2txt/antiword)
     |
 [ AI Infrastructure ]
-    ├─ WhisperX Manager (스레드 안전 모델 캐싱) ⭐ NEW
+    ├─ WhisperX Manager (스레드 안전 모델 캐싱)
     ├─ BGE-M3 Embedding Service
     └─ OpenAI LLM Services
     |
@@ -98,11 +100,18 @@ This is an Agent-based Explainable RAG (Retrieval-Augmented Generation) system t
 ## Core Concepts
 
 ### Multi-Agent Architecture
-- **Router Agent**: Common processing logic (conversation history, token management, summarization, DB operations)
+- **Router Workflow**: token_router edge → summarize/skip → detect_agent → chat/meeting 분기
+- **Token Management**: `gpt4o.get_num_tokens_from_messages()` 로컬 계산 (API 비용 없음), 토큰 초과 시 messages 직접 교체 방식으로 요약
 - **Chat Sub Agent**: Document-based Q&A with intelligent question classification (FACT, SUMMARY, COMPARE, EVIDENCE)
-- **Meeting Sub Agent**: Audio-to-minutes pipeline with STT, speaker diarization, and AI summarization ⭐ NEW
+- **Meeting Sub Agent**: Audio-to-minutes pipeline with STT, speaker diarization, and AI summarization
 
-### Audio Processing (WhisperX Integration) ⭐ NEW
+### Token Management & Summarization
+- **token_router edge**: START에서 토큰 수 체크, 초과 시 summarize_node로 분기
+- **messages 직접 교체**: `RemoveMessage` + `SystemMessage(요약)` + kept messages를 한 번에 반환
+- **토큰 예산 30% 보존**: 최신 메시지를 SUMMARIZE_MAX_TOKENS의 30% 이내로 유지
+- **로컬 토큰 계산**: `gpt4o.get_num_tokens_from_messages()` 사용 (API 호출 없음)
+
+### Audio Processing (WhisperX Integration)
 - **Thread-safe Model Management**: FastAPI lifespan-based model caching with WhisperXManager
 - **Long Audio Support**: Chunked processing for files up to 2 hours (10-minute chunks)
 - **Dynamic Batch Sizing**: Automatic batch size adjustment based on audio length
@@ -130,18 +139,30 @@ This is an Agent-based Explainable RAG (Retrieval-Augmented Generation) system t
 
 ## Current Multi-Agent Architecture (Implemented) ✅
 
-다중 에이전트 아키텍처로 성공적으로 리팩토링 완료:
-- **Router Agent**: 공통 처리 (대화 이력, 토큰 체크, 요약, DB 저장)
-- **Chat Sub Agent**: 질문 분류 + 답변 생성
-- **Meeting Sub Agent**: WhisperX STT + pyannote 화자 분리 + AI 회의록 생성 ✅
-
-### Meeting Workflow (meeting_workflow.py) ⭐ NEW
+### Router Workflow (router_workflow.py)
 ```
-audio_upload
-    → transcribe_audio (WhisperX STT + 화자 분리)
-        ├─ 긴 오디오 감지 (30분+ → 10분 청킹)
-        ├─ 동적 배치 크기 조정
-        └─ 스레드 안전 모델 캐싱
+START
+  → [token_router edge] ─ tiktoken 로컬 계산 (API 호출 없음)
+      ├─ "summarize" → summarize_node → detect_agent
+      │     (gpt-4o-mini 요약 · RemoveMessage + SystemMessage · 토큰 예산 30% 보존)
+      └─ "skip"      → detect_agent
+                           ↓ [select_agent edge]
+                    ├─ "chat"    → Chat Sub Agent → END
+                    └─ "meeting" → Meeting Sub Agent → END
+```
+
+### Chat Sub Agent (chat_workflow.py)
+```
+classifier (gpt-4o-mini · FACT/SUMMARY/COMPARE/EVIDENCE)
+    → generator (gpt-4o · RAG context · SSE streaming)
+```
+
+### Meeting Sub Agent (meeting_workflow.py)
+```
+transcribe_audio (WhisperX STT + 화자 분리)
+    ├─ 긴 오디오 감지 (30분+ → 10분 청킹)
+    ├─ 동적 배치 크기 조정
+    └─ 스레드 안전 모델 캐싱
     → merge_transcript (화자별 발언 그룹화)
     → generate_minutes (구조화된 회의록 생성)
 ```
@@ -157,7 +178,7 @@ audio_upload
 
 ### AI & ML
 - **LLM**: OpenAI GPT-4o (답변/회의록), GPT-4o-mini (분류)
-- **STT**: WhisperX (transcription + speaker diarization) ⭐ NEW
+- **STT**: WhisperX (transcription + speaker diarization)
 - **Embedding**: BGE-M3 (HuggingFace local inference)
 - **Document Processing**: LlamaParser + custom parser factory
 
@@ -176,7 +197,7 @@ audio_upload
 - **LCEL 체인으로 구성**: `prompt | llm | parser` 패턴 사용
 - **단순 텍스트 반환은 StrOutputParser 사용**
 
-### WhisperX Model Management ⭐ NEW
+### WhisperX Model Management
 - **Thread-safe Singleton Pattern**: WhisperXManager 클래스로 모델 관리
 - **FastAPI Lifespan Integration**: 애플리케이션 시작 시 모델 사전 로드
 - **Dynamic Model Loading**: 언어별 alignment 모델 동적 로드
@@ -187,10 +208,16 @@ audio_upload
 - **노드 파일과 분리**: prompts/ 디렉토리에 별도 관리
 - **프롬프트 상수는 prompts 모듈에 정의**
 
+### Token Management
+- **토큰 계산**: `gpt4o.get_num_tokens_from_messages()` 사용 (tiktoken 직접 사용 금지, API 비용 없음)
+- **summarize_node**: `RemoveMessage` + `SystemMessage(요약)` + kept messages를 단일 dict로 반환
+- **토큰 예산**: `SUMMARIZE_MAX_TOKENS * 0.3` 이내로 최신 메시지 유지
+
 ### Message and State Handling
 - **isinstance로 메시지 타입 체크** (`type().__name__` 사용 금지)
 - **State 직접 변경 금지**: 반환값으로만 상태 전달
-- **RemoveMessage 사용 시**: `messages[-2:]`는 반환값에 포함하지 않음
+- **messages 직접 교체**: 요약 시 삭제 + 요약 SystemMessage + kept messages를 한 번에 반환
+- **RouterState**: `audio_file_path` 필드로 회의 에이전트에 오디오 파일 경로 전달
 
 ### Database Operations
 - **DB 세션 로직은 헬퍼 함수로 분리**
@@ -209,25 +236,31 @@ audio_upload
 
 ## Current Workflows
 
-### Chat Workflow (chat_workflow.py)
+### Router Workflow (router_workflow.py)
 ```
-need_prev_conversation (is_new_session 기반)
-    → load_history_from_db 또는 check_token
-    → summarize_conversation (8000토큰 초과시)
-    → classify_question (FACT, SUMMARY, COMPARE, EVIDENCE)
-    → generate_answer (카테고리별 맞춤 프롬프트)
-    → save_message_to_db
+START
+  → [token_router edge]
+      ├─ "summarize" → summarize_node → detect_agent
+      └─ "skip"      → detect_agent
+                           ↓ [select_agent edge]
+                    ├─ "chat"    → Chat Sub Agent → END
+                    └─ "meeting" → Meeting Sub Agent → END
 ```
 
-### Meeting Workflow (meeting_workflow.py) ⭐ NEW
+### Chat Sub Agent (chat_workflow.py)
 ```
-audio_upload
-    → transcribe_audio (WhisperX)
-        ├─ 오디오 길이 체크 (최대 2시간)
-        ├─ 긴 오디오 시 10분 단위 청킹
-        ├─ 동적 배치 크기 (8-16)
-        ├─ 언어 감지 및 정렬
-        └─ 화자 분리 (pyannote)
+classifier (gpt-4o-mini · FACT/SUMMARY/COMPARE/EVIDENCE)
+    → generator (gpt-4o · RAG context · SSE streaming)
+```
+
+### Meeting Sub Agent (meeting_workflow.py)
+```
+transcribe_audio (WhisperX)
+    ├─ 오디오 길이 체크 (최대 2시간)
+    ├─ 긴 오디오 시 10분 단위 청킹
+    ├─ 동적 배치 크기 (8-16)
+    ├─ 언어 감지 및 정렬
+    └─ 화자 분리 (pyannote)
     → merge_transcript (화자별 발언 그룹화)
     → generate_minutes (AI 기반 구조화된 회의록)
 ```
@@ -267,24 +300,39 @@ python main.py
 │   │       ├── chat.py              # Chat API endpoints (with SSE streaming)
 │   │       ├── documents.py         # Document upload/management API
 │   │       ├── search.py            # Search API endpoints
-│   │       ├── meeting.py           # Meeting API endpoints ⭐ NEW
+│   │       ├── meeting.py           # Meeting API endpoints
 │   │       └── users.py             # User API endpoints
 │   ├── agents/                      # LangGraph agents and workflows
-│   │   ├── constants.py             # Workflow steps and message constants
-│   │   ├── nodes/                   # Individual agent nodes
+│   │   ├── constants.py             # WorkflowSteps, AgentTypes, StreamMessages
+│   │   ├── state.py                 # RouterState, MeetingState
+│   │   ├── core/
+│   │   │   └── llm_provider.py      # gpt4o, gpt4o_mini 인스턴스
+│   │   ├── edges/
+│   │   │   └── router/
+│   │   │       ├── token_router.py  # 토큰 초과 여부 분기 (START → summarize/skip)
+│   │   │       └── agent_router.py  # agent_type 기반 서브 에이전트 선택
+│   │   ├── nodes/
+│   │   │   ├── router/
+│   │   │   │   ├── summarize.py     # 요약 노드 (messages 직접 교체)
+│   │   │   │   └── detect_agent.py  # 인텐트 감지 노드
 │   │   │   ├── chat/                # Chat agent nodes
-│   │   │   └── meeting/             # Meeting agent nodes ⭐ NEW
+│   │   │   │   ├── classifier.py    # 질문 분류 (gpt-4o-mini)
+│   │   │   │   ├── generator.py     # 답변 생성 (gpt-4o · SSE)
+│   │   │   │   └── router.py        # 질문 유형 라우터
+│   │   │   └── meeting/             # Meeting agent nodes
 │   │   │       ├── transcribe_audio.py   # WhisperX STT + diarization
 │   │   │       ├── merge_transcript.py    # Speaker grouping
 │   │   │       └── generate_minutes.py   # AI meeting minutes
 │   │   ├── prompts/                 # Prompt templates
 │   │   │   ├── chat.py              # Chat prompts
-│   │   │   └── meeting.py           # Meeting prompts ⭐ NEW
+│   │   │   ├── router.py            # 요약 · 에이전트 감지 프롬프트
+│   │   │   └── meeting.py           # Meeting prompts
 │   │   ├── workflows/               # Workflow definitions
-│   │   │   ├── chat_workflow.py     # Chat workflow with streaming
-│   │   │   └── meeting_workflow.py  # Meeting workflow ⭐ NEW
-│   │   ├── infra/                   # Agent infrastructure
-│   │   └── state.py                 # State management (ChatState, MeetingState)
+│   │   │   ├── router_workflow.py   # 최상위 Router Workflow
+│   │   │   ├── chat_workflow.py     # Chat Sub Agent 서브그래프
+│   │   │   └── meeting_workflow.py  # Meeting Sub Agent 서브그래프
+│   │   └── infra/                   # Agent infrastructure
+│   │       └── checkpointer.py      # PostgreSQL checkpointer
 │   ├── models/                      # SQLAlchemy ORM models
 │   │   ├── __init__.py
 │   │   └── document.py              # Document and DocumentChunk models
@@ -299,8 +347,8 @@ python main.py
 │   ├── infra/                       # Infrastructure services
 │   │   ├── ai/                      # AI services
 │   │   │   ├── embedding_service.py # BGE-M3 embeddings
-│   │   │   └── whisperx_manager.py  # WhisperX model manager ⭐ NEW
-│   │   ├── parsers/                 # Document parser system ⭐ NEW
+│   │   │   └── whisperx_manager.py  # WhisperX model manager
+│   │   ├── parsers/                 # Document parser system
 │   │   │   ├── __init__.py          # ParserFactory export
 │   │   │   ├── factory.py           # Parser factory with MIME type mapping
 │   │   │   ├── base.py              # BaseParser abstract class
@@ -324,15 +372,20 @@ python main.py
 ├── tests/                           # Test files
 │   ├── test_exception_handlers.py   # Comprehensive exception handler tests
 │   └── ...                         # Other test files
+├── notebook/
+│   ├── workflow/
+│   │   └── test_router_workflow.ipynb   # Router + Meeting 통합 테스트
+│   ├── embedding/                   # 임베딩 관련 노트북
+│   └── tools/                       # 툴 테스트 노트북
+├── architecture/
+│   └── route_architecture.html      # 아키텍처 시각화
 ├── docker/
 │   └── docker-compose.infra.yml     # PostgreSQL with pgvector
 ├── data/                            # Data storage
 │   ├── documents/                   # Original documents
 │   ├── models/                      # AI model cache
-│   └── processed/                   # Processed data
-├── scripts/                         # Utility scripts
-├── notebook/                        # Jupyter notebooks for development
-├── pytest.ini                      # pytest configuration
+│   └── test/                        # 테스트용 파일
+├── pytest.ini                       # pytest configuration
 ├── .env                             # Environment variables
 └── pyproject.toml                   # Project dependencies
 ```
@@ -375,19 +428,27 @@ python main.py
 3. Search API endpoints
 4. Health check and monitoring endpoints
 
-### Phase 6: Meeting Agent Implementation ✅ ⭐ NEW
+### Phase 6: Meeting Agent Implementation ✅
 1. **WhisperX Integration**: STT with speaker diarization
 2. **Thread-safe Model Management**: FastAPI lifespan-based caching
 3. **Long Audio Processing**: Chunked processing up to 2 hours
 4. **Dynamic Performance Optimization**: Batch size adjustment
 5. **AI Meeting Minutes**: Structured summary generation
-6. **Real-time Progress Tracking**: Workflow status monitoring
+6. **Meeting Sub Agent**: `create_meeting_subgraph()` via RouterState 통합
 
 ### Phase 7: Testing & Quality Assurance ✅
 1. **Exception handler test coverage (16 test cases)**
 2. **Mock-based testing for external services**
 3. **Integration tests for Chat API**
 4. **pytest configuration with proper Python path setup**
+
+### Phase 8: Token Management & Router Workflow ✅
+1. **token_router edge**: START에서 tiktoken 기반 토큰 수 체크 (API 비용 없음)
+2. **summarize_node**: messages 직접 교체 방식 (RemoveMessage + SystemMessage)
+3. **Router Workflow**: token_router → detect_agent → chat/meeting 분기 구조
+4. **SUMMARIZE_PROMPT**: ChatPromptTemplate으로 분리 (`prompts/router.py`)
+5. **Notebook Tests**: `notebook/workflow/test_router_workflow.ipynb`
+6. **Architecture HTML**: `architecture/route_architecture.html` (아키텍처 시각화)
 
 ## Configuration
 
@@ -411,8 +472,8 @@ python main.py
 - **langgraph**: Graph-based workflow orchestration  
 - **sentence-transformers**: BGE-M3 embedding model
 - **torch**: PyTorch for model inference
-- **whisperx**: STT with speaker diarization ⭐ NEW
-- **librosa**: Audio processing utilities ⭐ NEW
+- **whisperx**: STT with speaker diarization
+- **librosa**: Audio processing utilities
 - **llama-cloud**: LlamaParser for document processing
 
 ### Database & Storage
@@ -469,28 +530,26 @@ python -m pytest --cov=app tests/
 ## Current Features
 
 ### Completed ✅
-1. **Document Processing**: 
+1. **Document Processing**:
    - LlamaParser integration for high-quality conversion
    - Separated parser system with Factory pattern (PDF, DOC, DOCX, XLSX, CSV)
    - Multi-encoding support for international documents
-   - Repository pattern implementation with dependency injection
 2. **Vector Search**: PostgreSQL + pgvector with BGE-M3 embeddings
-3. **Multi-Agent Architecture**: Router + Chat + Meeting agents
-4. **Meeting Agent (WhisperX)**: ⭐ NEW
+3. **Router Workflow**: token_router edge → summarize/skip → detect_agent → chat/meeting
+4. **Token Management**: `gpt4o.get_num_tokens_from_messages()` 로컬 계산, messages 직접 교체 방식 요약
+5. **Meeting Agent (WhisperX)**:
    - Thread-safe model caching with FastAPI lifespan
    - Long audio processing (up to 2 hours, 10-minute chunks)
    - Dynamic batch sizing based on audio length
    - Speaker diarization and intelligent transcript merging
    - AI-powered meeting minutes generation
-5. **Streaming API**: Real-time SSE responses with progress tracking
-6. **Exception Handling**: Structured error responses with proper logging
-7. **Configuration Management**: Complete .env-based settings with validation
-8. **Testing Infrastructure**: Comprehensive test suite with proper configuration
+6. **Streaming API**: Real-time SSE responses with progress tracking
+7. **Exception Handling**: Structured error responses with proper logging
+8. **Configuration Management**: Complete .env-based settings with validation
+9. **Testing Infrastructure**: pytest suite + `notebook/workflow/test_router_workflow.ipynb`
 
 ### Next Implementation Priority
-1. **STT Progress Monitoring**: Real-time progress updates for long audio processing
-2. **Multi-language STT**: Extended language support for WhisperX
-3. **Meeting Template Customization**: Configurable meeting minutes formats
-4. **Search Result Re-ranking**: Improved relevance scoring
-5. **Redis Caching**: Performance optimization
-6. **User Feedback System**: Quality assessment and improvement
+1. **검색 결과 리랭킹**: 개선된 관련성 스코어링
+2. **다국어 STT**: WhisperX 언어 지원 확장
+3. **Redis 캐싱**: 성능 최적화
+4. **사용자 인증**: 권한 관리

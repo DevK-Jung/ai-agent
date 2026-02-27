@@ -14,17 +14,16 @@ class Settings(BaseSettings):
     # LlamaCloud
     LLAMA_CLOUD_API_KEY: str = ""
     
-    # Agent Node Models
-    CLASSIFIER_MODEL: str = "gpt-4o-mini"
-    CLASSIFIER_TEMPERATURE: float = 0.1
-    GENERATOR_MODEL: str = "gpt-4o"
-    GENERATOR_TEMPERATURE: float = 0.7
-    CONVERSATION_SUMMARY_MODEL: str = "gpt-4o-mini"
-    CONVERSATION_SUMMARY_TEMPERATURE: float = 0.1
-    
-    # Meeting Agent Models
-    MINUTES_MODEL: str = "gpt-4o"
+    # OpenAI Models
+    GPT4O_MINI_MODEL: str = "gpt-4o-mini"
+    GPT4O_MINI_TEMPERATURE: float = 0.1
+    GPT4O_MODEL: str = "gpt-4o"
+    GPT4O_TEMPERATURE: float = 0.7
     MINUTES_TEMPERATURE: float = 0.3
+
+    # Summarization (LangMem) - GPT-4o 128K의 70% 트리거
+    SUMMARIZE_MAX_TOKENS: int = 89_600
+    SUMMARIZE_MAX_SUMMARY_TOKENS: int = 512
     
     # WhisperX Configuration
     HF_TOKEN: str = ""  # HuggingFace token for speaker diarization

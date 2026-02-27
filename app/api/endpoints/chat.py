@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from sse_starlette.sse import EventSourceResponse
 from app.schemas.chat import ChatRequest, ChatResponse
-from app.agents.workflows.chat_workflow import process_chat, process_chat_stream
+from app.agents.workflows.router_workflow import process_chat, process_chat_stream
 from app.core.exceptions import WorkflowException, ValidationException
 import json
 
