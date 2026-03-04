@@ -1,12 +1,16 @@
-"""최상위 Router Workflow
+"""최상위 Router Workflow - Supervisor 패턴
 
 흐름:
-  START → summarize → detect_agent
-                          ↓ select_agent
-                          └─ chat_agent → END
+  START → supervisor
+  supervisor → Command(goto="summarize"|"chat_agent"|"meeting_agent"|END)
+  summarize     → Command(update={messages}, goto="supervisor")
+  chat_agent    → Command(update={messages+AIMessage}, goto="supervisor")
+  meeting_agent → Command(update={messages+AIMessage}, goto="supervisor")
+  supervisor (LLM이 모두 완료 판단) → Command(goto=END)
 
 - 대화 이력: LangGraph PostgreSQL checkpointer가 thread_id 단위로 자동 관리
-- 토큰 관리: 커스텀 summarize_node (70% 초과 시 요약 + 이전 메시지 삭제)
+- 토큰 관리: supervisor_node에서 토큰 초과 감지 → summarize_node 분기
+- 에이전트 추가: 노드 한 줄 + SupervisorRoute Literal + SUPERVISOR_SYSTEM_PROMPT 설명 추가
 """
 
 import uuid
@@ -14,16 +18,15 @@ from typing import AsyncGenerator, Dict, Any
 
 from langchain_core.messages import HumanMessage
 from langchain_core.runnables import RunnableConfig
-from langgraph.graph import StateGraph, END, START
+from langgraph.graph import StateGraph, END
 
 from app.agents.constants import WorkflowSteps, StreamEventTypes, StreamMessages
-from app.agents.nodes.router.detect_agent import detect_agent
+from app.agents.nodes.router.chat_agent import chat_agent_node
+from app.agents.nodes.router.final_response_agent import final_response_agent_node
+from app.agents.nodes.router.meeting_agent import meeting_agent_node
 from app.agents.nodes.router.summarize import summarize_node
-from app.agents.edges.router.agent_router import select_agent
-from app.agents.edges.router.token_router import route_check_token
+from app.agents.nodes.router.supervisor import supervisor_node
 from app.agents.state import RouterState
-from app.agents.workflows.chat_workflow import create_chat_subgraph
-from app.agents.workflows.meeting_workflow import create_meeting_subgraph
 from app.core.config import settings
 
 
@@ -35,37 +38,16 @@ async def create_router_workflow():
     workflow = StateGraph(RouterState)
 
     # --- 노드 등록 ---
+    workflow.add_node(WorkflowSteps.SUPERVISOR, supervisor_node)
     workflow.add_node(WorkflowSteps.SUMMARIZE_CONVERSATIONS, summarize_node)
-    workflow.add_node(WorkflowSteps.DETECT_AGENT, detect_agent)
-    workflow.add_node(WorkflowSteps.CHAT_AGENT, create_chat_subgraph())
-    workflow.add_node(WorkflowSteps.MEETING_AGENT, create_meeting_subgraph())
+    workflow.add_node(WorkflowSteps.CHAT_AGENT, chat_agent_node)
+    workflow.add_node(WorkflowSteps.MEETING_AGENT, meeting_agent_node)
+    workflow.add_node(WorkflowSteps.FINAL_RESPONSE_AGENT, final_response_agent_node)
+    # 새 에이전트 추가 시: workflow.add_node(WorkflowSteps.XXX_AGENT, xxx_agent_node)
 
     # --- 엣지 연결 ---
-
-    # START → [token check] → summarize or skip → detect_agent
-    workflow.add_conditional_edges(
-        START,
-        route_check_token,
-        {
-            "summarize": WorkflowSteps.SUMMARIZE_CONVERSATIONS,
-            "skip": WorkflowSteps.DETECT_AGENT,
-        }
-    )
-    workflow.add_edge(WorkflowSteps.SUMMARIZE_CONVERSATIONS, WorkflowSteps.DETECT_AGENT)
-
-    # detect_agent → 서브 에이전트 선택
-    workflow.add_conditional_edges(
-        WorkflowSteps.DETECT_AGENT,
-        select_agent,
-        {
-            "chat_agent": WorkflowSteps.CHAT_AGENT,
-            "meeting_agent": WorkflowSteps.MEETING_AGENT,
-        }
-    )
-
-    # 서브 에이전트 완료 → END
-    workflow.add_edge(WorkflowSteps.CHAT_AGENT, END)
-    workflow.add_edge(WorkflowSteps.MEETING_AGENT, END)
+    workflow.set_entry_point(WorkflowSteps.SUPERVISOR)
+    workflow.add_edge(WorkflowSteps.FINAL_RESPONSE_AGENT, END)
 
     checkpointer_context = await get_postgres_checkpointer()
     return workflow, checkpointer_context

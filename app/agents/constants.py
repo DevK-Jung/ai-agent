@@ -10,12 +10,14 @@ class AgentTypes:
 class WorkflowSteps:
     """워크플로우 단계 상수"""
     # Router Workflow 노드
+    SUPERVISOR = "supervisor"
     SUMMARIZE_CONVERSATIONS = "summarize_conversations"
     DETECT_AGENT = "detect_agent"
 
     # Sub-Agent 노드
     CHAT_AGENT = "chat_agent"
     MEETING_AGENT = "meeting_agent"
+    FINAL_RESPONSE_AGENT = "final_response_agent"
     CLASSIFIER = "classifier"
     ROUTER = "router"
     GENERATOR = "generator"

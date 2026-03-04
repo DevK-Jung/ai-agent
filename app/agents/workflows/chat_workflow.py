@@ -1,35 +1,19 @@
 """Chat Sub-Agent 서브그래프"""
 
-from langgraph.graph import StateGraph, END
-
-from app.agents.constants import WorkflowSteps
 from app.agents.nodes.chat.classifier import classify_question
 from app.agents.nodes.chat.generator import generate_answer
-from app.agents.nodes.chat.router import route_question
 from app.agents.state import RouterState
 
 
-def create_chat_subgraph() -> StateGraph:
-    """Chat Sub-Agent 서브그래프 생성 (Router Workflow에 노드로 등록)"""
+async def process_chat_agent(state: RouterState) -> dict:
+    """Chat Sub-Agent 실행 함수"""
+    classify_result = await classify_question(state)
 
-    workflow = StateGraph(RouterState)
+    merged_state = {**state, **classify_result}
+    generate_result = await generate_answer(merged_state)
 
-    workflow.add_node(WorkflowSteps.CLASSIFIER, classify_question)
-    workflow.add_node(WorkflowSteps.GENERATOR, generate_answer)
-
-    workflow.set_entry_point(WorkflowSteps.CLASSIFIER)
-
-    workflow.add_conditional_edges(
-        WorkflowSteps.CLASSIFIER,
-        route_question,
-        {
-            "generator": WorkflowSteps.GENERATOR,
-            "search_generator": WorkflowSteps.GENERATOR,
-            "summary_generator": WorkflowSteps.GENERATOR,
-            "compare_generator": WorkflowSteps.GENERATOR,
-        }
-    )
-
-    workflow.add_edge(WorkflowSteps.GENERATOR, END)
-
-    return workflow.compile()
+    return {
+        "answer": generate_result.get("answer", ""),
+        "question_type": classify_result.get("question_type"),
+        "model_used": generate_result.get("model_used"),
+    }
