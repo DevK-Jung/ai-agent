@@ -22,7 +22,7 @@ from app.agents.prompts.router import SUPERVISOR_SYSTEM_PROMPT
 from app.agents.state import RouterState
 from app.core.config import settings
 
-members = ["chat_agent", "meeting_agent"]
+members = ["chat_agent", "meeting_agent", "rag_agent"]
 options = members + ["FINISH"]
 
 

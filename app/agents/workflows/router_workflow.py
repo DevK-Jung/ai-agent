@@ -24,6 +24,7 @@ from app.agents.constants import WorkflowSteps, StreamEventTypes, StreamMessages
 from app.agents.nodes.router.chat_agent import chat_agent_node
 from app.agents.nodes.router.final_response_agent import final_response_agent_node
 from app.agents.nodes.router.meeting_agent import meeting_agent_node
+from app.agents.nodes.router.rag_agent import rag_agent_node
 from app.agents.nodes.router.summarize import summarize_node
 from app.agents.nodes.router.supervisor import supervisor_node
 from app.agents.state import RouterState
@@ -42,8 +43,8 @@ async def create_router_workflow():
     workflow.add_node(WorkflowSteps.SUMMARIZE_CONVERSATIONS, summarize_node)
     workflow.add_node(WorkflowSteps.CHAT_AGENT, chat_agent_node)
     workflow.add_node(WorkflowSteps.MEETING_AGENT, meeting_agent_node)
+    workflow.add_node(WorkflowSteps.RAG_AGENT, rag_agent_node)
     workflow.add_node(WorkflowSteps.FINAL_RESPONSE_AGENT, final_response_agent_node)
-    # 새 에이전트 추가 시: workflow.add_node(WorkflowSteps.XXX_AGENT, xxx_agent_node)
 
     # --- 엣지 연결 ---
     workflow.set_entry_point(WorkflowSteps.SUPERVISOR)

@@ -9,6 +9,7 @@ from app.utils.token_utils import count_tokens
 
 from app.core.config import settings
 from app.infra.parsers import ParserFactory
+from app.infra.parsers.llama_parser import LlamaParserService
 
 
 class DocumentProcessor:
@@ -16,6 +17,7 @@ class DocumentProcessor:
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
+        self.llama_parser = LlamaParserService()
 
         # 토큰 기반 텍스트 분할기 설정
         self.text_splitter = RecursiveCharacterTextSplitter(
@@ -40,17 +42,28 @@ class DocumentProcessor:
             # 텍스트 파일은 간단하게 직접 처리
             if file_type == "text/plain":
                 return self._extract_from_txt(file_path)
-            
+
             # 지원 여부 확인
             if not ParserFactory.is_supported_mime_type(file_type):
                 raise ValueError(f"지원하지 않는 파일 형식: {file_type}")
-            
-            # 적절한 파서를 사용하여 파싱
+
+            # 1순위: LlamaParser (클라우드 OCR — 한국어 폰트/인코딩 깨짐 방지)
+            if self.llama_parser.is_available() and self.llama_parser.is_supported_file_type(file_type):
+                try:
+                    result = await self.llama_parser.parse_to_markdown(file_path, file_type)
+                    if result.get("success") and result.get("markdown"):
+                        self.logger.info(f"LlamaParser 파싱 완료: {file_path}")
+                        return result["markdown"]
+                    self.logger.warning(f"LlamaParser 결과 없음, 로컬 파서로 fallback: {file_path}")
+                except Exception as e:
+                    self.logger.warning(f"LlamaParser 실패, 로컬 파서로 fallback: {e}")
+
+            # 2순위: 로컬 파서 (PyMuPDF / python-docx 등)
             parser = ParserFactory.get_parser(file_type)
             parsed_content = await parser.parse(file_path)
-            
-            self.logger.info(f"파일 파싱 완료: {file_path} (테이블: {len(parsed_content.tables)}개, 이미지: {len(parsed_content.images)}개)")
-            
+
+            self.logger.info(f"로컬 파서 파싱 완료: {file_path} (테이블: {len(parsed_content.tables)}개, 이미지: {len(parsed_content.images)}개)")
+
             return parsed_content.raw_text
 
         except Exception as e:

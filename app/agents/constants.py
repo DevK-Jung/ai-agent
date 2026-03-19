@@ -17,6 +17,7 @@ class WorkflowSteps:
     # Sub-Agent 노드
     CHAT_AGENT = "chat_agent"
     MEETING_AGENT = "meeting_agent"
+    RAG_AGENT = "rag_agent"
     FINAL_RESPONSE_AGENT = "final_response_agent"
     CLASSIFIER = "classifier"
     ROUTER = "router"

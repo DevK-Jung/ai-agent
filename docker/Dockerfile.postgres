@@ -1,0 +1,17 @@
+FROM pgvector/pgvector:pg17 AS builder
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    git \
+    postgresql-server-dev-17
+
+RUN git clone --depth 1 --branch v1.2-20240606 https://github.com/pgbigm/pg_bigm.git \
+    && cd pg_bigm \
+    && make USE_PGXS=1 \
+    && make USE_PGXS=1 install
+
+# 최종 이미지 — 빌드툴 전혀 없음
+FROM pgvector/pgvector:pg17
+
+COPY --from=builder /usr/lib/postgresql/17/lib/pg_bigm.so /usr/lib/postgresql/17/lib/
+COPY --from=builder /usr/share/postgresql/17/extension/pg_bigm* /usr/share/postgresql/17/extension/

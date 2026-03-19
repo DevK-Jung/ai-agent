@@ -110,6 +110,12 @@ class Settings(BaseSettings):
             processed.append(sep)
         return processed
     
+    # RAG (CRAG) Configuration
+    RAG_SEARCH_LIMIT: int = 10   # 각 검색 방식별 후보 수
+    RAG_TOP_K: int = 5            # RRF 후 최종 반환 수
+    RAG_RRF_K: int = 60           # RRF 상수
+    RAG_MAX_RETRIES: int = 3      # 내부 검색 최대 재시도 횟수
+
     # Checkpointer Configuration
     CHECKPOINTER_SCHEMA: str = "public"
     CHECKPOINTER_APP_NAME: str = "ai-agent-checkpointer"

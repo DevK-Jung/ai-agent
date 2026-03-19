@@ -112,4 +112,8 @@ class DocumentChunk(Base):
         # 임베딩이 있는 청크만 대상 (벡터 검색용)
         Index('ix_document_chunks_with_embedding', 'document_id', 'embedding_model',
               postgresql_where=text("embedding IS NOT NULL")),
+
+        # pg_bigm GIN 인덱스 — LIKE '%keyword%' 쿼리 가속
+        Index('ix_document_chunks_content_bigm', 'content',
+              postgresql_using='gin', postgresql_ops={'content': 'gin_bigm_ops'}),
     )

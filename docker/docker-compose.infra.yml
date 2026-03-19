@@ -4,7 +4,10 @@ name: ai-agent
 
 services:
   postgres:
-    image: pgvector/pgvector:pg18
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    image: ai-agent-postgres:latest
     container_name: ai-agent-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER}

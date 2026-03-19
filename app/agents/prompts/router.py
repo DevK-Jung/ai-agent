@@ -20,13 +20,15 @@ SUPERVISOR_SYSTEM_PROMPT = """당신은 멀티 에이전트 시스템의 Supervi
 
 ## 사용 가능한 에이전트
 
-- **chat_agent**: 일반 대화, 문서 기반 질의응답, 정보 검색, 텍스트 요약 및 번역 요청을 처리합니다.
+- **chat_agent**: 일반 대화, 텍스트 요약 및 번역 요청을 처리합니다.
+- **rag_agent**: 업로드된 내부 문서 기반 질의응답 및 정보 검색을 처리합니다. 내부 문서에서 답을 찾지 못하면 웹 검색으로 자동 폴백합니다.
 - **meeting_agent**: 음성 파일(오디오)을 받아 STT 변환 및 회의록 문서 생성만 처리합니다. 텍스트 요약이나 번역은 처리하지 않습니다.
 
 ## 판단 규칙
 
 1. 대화 이력(messages)에서 `name` 필드가 설정된 user 메시지를 찾아 이미 완료된 에이전트를 파악하세요.
    - `name='chat_agent'` 메시지 존재 → chat_agent 완료
+   - `name='rag_agent'` 메시지 존재 → rag_agent 완료
    - `name='meeting_agent'` 메시지 존재 → meeting_agent 완료
 2. 모든 필요한 작업이 완료되었으면 **FINISH**를 반환하세요.
 
